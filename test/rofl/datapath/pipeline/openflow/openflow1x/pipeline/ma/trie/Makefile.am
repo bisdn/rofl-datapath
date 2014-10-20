@@ -7,7 +7,6 @@ SHARED_SRC= $(top_srcdir)/src/rofl/datapath/pipeline/physical_switch.c \
 	$(top_srcdir)/src/rofl/datapath/pipeline/switch_port.c \
 	$(top_srcdir)/src/rofl/datapath/pipeline/port_queue.c \
 	$(top_srcdir)/src/rofl/datapath/pipeline/util/logging.c \
-	$(top_srcdir)/src/rofl/datapath/pipeline/common/alike_masks.c \
 	$(top_srcdir)/src/rofl/datapath/pipeline/common/ternary_fields.c \
 	$(top_srcdir)/src/rofl/datapath/pipeline/common/packet_matches.c \
 	$(top_srcdir)/src/rofl/datapath/pipeline/openflow/of_switch.c \
@@ -25,6 +24,7 @@ SHARED_SRC= $(top_srcdir)/src/rofl/datapath/pipeline/physical_switch.c \
 	$(top_srcdir)/src/rofl/datapath/pipeline/openflow/openflow1x/pipeline/matching_algorithms/l2hash/of1x_l2hash_ma.c \
 	$(top_srcdir)/src/rofl/datapath/pipeline/openflow/openflow1x/pipeline/matching_algorithms/trie/of1x_trie_ma.c \
 	$(top_srcdir)/src/rofl/datapath/pipeline/openflow/openflow1x/pipeline/matching_algorithms/available_ma.c \
+	$(top_srcdir)/src/rofl/datapath/pipeline/common/alike_masks.c \
 	../../memory.c \
 	../../empty_packet.c\
 	../../platform_empty_hooks_of12.cc\
@@ -32,11 +32,10 @@ SHARED_SRC= $(top_srcdir)/src/rofl/datapath/pipeline/physical_switch.c \
 	../../pthread_lock.c \
 	../../timing.c
 
-unit_test_SOURCES= $(SHARED_SRC)\
-			test_ipv6.c \
-		   	matching_test.c\
+
+unit_test_SOURCES = $(SHARED_SRC) \
+			trie.c \
 			unit_test.c
-		
 
 unit_test_LDADD=$(top_builddir)/src/rofl/librofl_datapath.la -lcunit -lpthread
 

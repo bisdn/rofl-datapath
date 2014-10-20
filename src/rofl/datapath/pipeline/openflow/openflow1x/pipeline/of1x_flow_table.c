@@ -623,8 +623,14 @@ rofl_result_t __of1x_remove_specific_flow_entry_table(of1x_pipeline_t *const pip
 void of1x_dump_table(of1x_flow_table_t* table, bool raw_nbo){
 	of1x_flow_entry_t* entry;
 	int i;	
-
 	__of1x_stats_table_tid_t c;
+
+	if(of1x_matching_algorithms[table->matching_algorithm].dump_hook){
+		//Take rd lock over the grouptable (avoid deletion of groups while flow entry insertion)
+		platform_rwlock_rdlock(table->rwlock);
+		of1x_matching_algorithms[table->matching_algorithm].dump_hook(table, raw_nbo);
+		goto DUMP_TABLE_END;
+	}
 
 	//Consolidate stats
 	__of1x_stats_table_consolidate(&table->stats, &c);

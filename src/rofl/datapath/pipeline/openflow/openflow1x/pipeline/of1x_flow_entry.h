@@ -143,6 +143,9 @@ rofl_result_t of1x_add_match_to_entry(of1x_flow_entry_t* entry, of1x_match_t* ma
 //Update entry
 rofl_result_t __of1x_update_flow_entry(of1x_flow_entry_t* entry_to_update, of1x_flow_entry_t* mod, bool reset_counts);
 
+//Print a nice trace
+void __of1x_remove_flow_entry_table_trace(const char* prefix, of1x_flow_entry_t *const entry, of1x_flow_entry_t *const it, of1x_flow_remove_reason_t reason);
+
 //Fast validation against OF version
 rofl_result_t __of1x_validate_flow_entry(of1x_flow_entry_t* entry, struct of1x_pipeline* pipeline, unsigned int table_id);
 	

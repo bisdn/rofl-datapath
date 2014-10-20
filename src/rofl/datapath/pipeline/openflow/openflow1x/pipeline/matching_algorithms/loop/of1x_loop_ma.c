@@ -31,26 +31,6 @@
 */
 
 
-//Nice trace
-void of1x_remove_flow_entry_table_trace( of1x_flow_entry_t *const entry, of1x_flow_entry_t *const it, of1x_flow_remove_reason_t reason){
-	switch(reason){	
-		case OF1X_FLOW_REMOVE_DELETE:
-			ROFL_PIPELINE_DEBUG("[flowmod-remove(%p)] Existing entry (%p) will be removed\n", entry, it);
-			break;
-		case OF1X_FLOW_REMOVE_IDLE_TIMEOUT:
-			ROFL_PIPELINE_DEBUG("[flowmod-remove] Removing entry(%p) due to IDLE timeout\n", it);
-			break;
-		case OF1X_FLOW_REMOVE_HARD_TIMEOUT:
-			ROFL_PIPELINE_DEBUG("[flowmod-remove] Removing entry(%p) due to HARD timeout\n", it);
-			break;
-		case OF1X_FLOW_REMOVE_GROUP_DELETE:
-			ROFL_PIPELINE_DEBUG("[flowmod-remove] Removing entry(%p) due to GROUP delete\n", it);
-			break;
-		default:
-			break;	
-	}
-
-}
 
 /**
 * Looks for an overlapping entry from the entry pointer by start_entry. This is an EXPENSIVE call
@@ -113,7 +93,7 @@ static rofl_result_t of1x_remove_flow_entry_table_specific_imp(of1x_flow_table_t
 	platform_rwlock_wrlock(table->rwlock);
 
 #ifdef DEBUG
-	of1x_remove_flow_entry_table_trace(NULL, specific_entry, reason);
+	__of1x_remove_flow_entry_table_trace("", NULL, specific_entry, reason);
 #endif
 	
 	if(!specific_entry->prev){
@@ -330,7 +310,7 @@ static rofl_result_t of1x_remove_flow_entry_table_non_specific_imp(of1x_flow_tab
 			//Strict make sure they are equal
 			if( __of1x_flow_entry_check_equal(it, entry, out_port, out_group, true && (ver != OF_VERSION_10)) ){
 #ifdef DEBUG
-				of1x_remove_flow_entry_table_trace(entry, it, reason);
+				__of1x_remove_flow_entry_table_trace("", entry, it, reason);
 #endif
 				if(of1x_remove_flow_entry_table_specific_imp(table, it, reason, ma_hook_ptr) != ROFL_SUCCESS){
 					assert(0); //This should never happen
@@ -342,7 +322,7 @@ static rofl_result_t of1x_remove_flow_entry_table_non_specific_imp(of1x_flow_tab
 		}else{
 			if( __of1x_flow_entry_check_contained(it, entry, strict, true && (ver != OF_VERSION_10), out_port, out_group,false) ){
 #ifdef DEBUG
-				of1x_remove_flow_entry_table_trace(entry, it, reason);
+				__of1x_remove_flow_entry_table_trace("", entry, it, reason);
 #endif
 				if(of1x_remove_flow_entry_table_specific_imp(table, it, reason, ma_hook_ptr) != ROFL_SUCCESS){
 					assert(0); //This should never happen

@@ -5,7 +5,7 @@ AC_SUBST([ROFL_PIPELINE_PRESENT], ["#define ROFL_PIPELINE_PRESENT 1"])
 ## Matching algorithms
 MATCHING_ALGORITHMS_DIR="src/rofl/datapath/pipeline/openflow/openflow1x/pipeline/matching_algorithms"
 AC_SUBST(MATCHING_ALGORITHMS_DIR)
-MATCHING_ALGORITHMS="loop l2hash"
+MATCHING_ALGORITHMS="loop l2hash trie"
 MATCHING_ALGORITHM_LIBS=""
 MATCHING_ALGORITHM_LIBADD=""
 

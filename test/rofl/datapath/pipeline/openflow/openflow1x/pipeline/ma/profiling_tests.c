@@ -11,7 +11,9 @@ static of1x_switch_t* sw=NULL;
 static datapacket_t pkt;
 static uint64_t accumulated_time;
 
-#define NUM_OF_ITERATONS 1000000
+static int setup=0;
+
+#define NUM_OF_ITERATONS 10000000
 //#define NUM_OF_ITERATONS 10000
 int set_up(){
 	
@@ -20,12 +22,20 @@ int set_up(){
 	
 	physical_switch_init();
 
-	enum of1x_matching_algorithm_available ma_list[4]={of1x_loop_matching_algorithm, of1x_loop_matching_algorithm,
-	of1x_loop_matching_algorithm, of1x_loop_matching_algorithm};
+	if(!setup){
+		enum of1x_matching_algorithm_available ma_list[4]={of1x_loop_matching_algorithm, of1x_loop_matching_algorithm,
+		of1x_loop_matching_algorithm, of1x_loop_matching_algorithm};
 
-	//Create instance	
-	sw = of1x_init_switch("Test switch", OF_VERSION_12, 0x0101,4,ma_list);
-	
+		//Create instance	
+		sw = of1x_init_switch("Test switch", OF_VERSION_12, 0x0101,4,ma_list);
+	}else{
+		enum of1x_matching_algorithm_available ma_list[4]={of1x_trie_matching_algorithm, of1x_trie_matching_algorithm,
+		of1x_trie_matching_algorithm, of1x_trie_matching_algorithm};
+
+		//Create instance	
+		sw = of1x_init_switch("Test switch", OF_VERSION_12, 0x0101,4,ma_list);
+	}
+
 	if(!sw)
 		return EXIT_FAILURE;
 
@@ -33,6 +43,8 @@ int set_up(){
 	entry = of1x_init_flow_entry(false); 
 	of1x_add_match_to_entry(entry,of1x_init_port_in_match(port_in));
 	of1x_add_flow_entry_table(&sw->pipeline, 0, &entry, false,false);
+
+	setup=1;
 
 	return EXIT_SUCCESS;
 }
@@ -47,6 +59,12 @@ int tear_down(){
 
 //tmp val
 extern uint128__t tmp_val;
+
+//Single flow_mod profiling
+void reset(){
+	tear_down();
+	set_up();
+}
 
 //Single flow_mod profiling
 void profile_basic_match(bool lock){
@@ -156,8 +174,13 @@ int main(int args, char** argv){
 	if ((NULL == CU_add_test(pSuite, "Basic profiling (single flow_mod); match match (lock)", profile_basic_match_lock)) ||
 	(NULL == CU_add_test(pSuite, "Basic profiling (single flow_mod); match no-match (lock)", profile_basic_no_match_lock)) || 
 	(NULL == CU_add_test(pSuite, "Basic profiling (single flow_mod); match match (no lock)", profile_basic_match_no_lock)) ||
-	(NULL == CU_add_test(pSuite, "Basic profiling (single flow_mod); match no-match (no lock)", profile_basic_no_match_no_lock)) 
-			
+	(NULL == CU_add_test(pSuite, "Basic profiling (single flow_mod); match no-match (no lock)", profile_basic_no_match_no_lock)) ||
+	(NULL == CU_add_test(pSuite, "Reset (use trie now)", reset)) ||
+	(NULL == CU_add_test(pSuite, "[trie] Basic profiling (single flow_mod); match match (lock)", profile_basic_match_lock)) ||
+	(NULL == CU_add_test(pSuite, "[trie] Basic profiling (single flow_mod); match no-match (lock)", profile_basic_no_match_lock)) || 
+	(NULL == CU_add_test(pSuite, "[trie] Basic profiling (single flow_mod); match match (no lock)", profile_basic_match_no_lock)) ||
+	(NULL == CU_add_test(pSuite, "[trie] Basic profiling (single flow_mod); match no-match (no lock)", profile_basic_no_match_no_lock)) 
+		
 		)
 	{
 		fprintf(stderr,"ERROR WHILE ADDING TEST\n");

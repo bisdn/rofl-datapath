@@ -271,14 +271,14 @@ void test_get_alike_32(){
 	//1,2
 	res = __utern_get_alike(&one, &two, &common);
 	CU_ASSERT(res == true);
-	CU_ASSERT(__utern_equals(&one, &common) == false);
+	CU_ASSERT(__utern_equals(&one, &common) == true);
 	CU_ASSERT(ntohl(common.value.u32) == 0xC0A80000);
 	CU_ASSERT(ntohl(common.mask.u32) == 0xFFFFFF00);
 
 	//2,1
 	res = __utern_get_alike(&two, &one, &common);
 	CU_ASSERT(res == true);
-	CU_ASSERT(__utern_equals(&one, &common) == false);
+	CU_ASSERT(__utern_equals(&one, &common) == true);
 	CU_ASSERT(ntohl(common.value.u32) == 0xC0A80000);
 	CU_ASSERT(ntohl(common.mask.u32) == 0xFFFFFF00);
 
@@ -286,7 +286,7 @@ void test_get_alike_32(){
 	//2,3
 	res = __utern_get_alike(&two, &three, &common);
 	CU_ASSERT(res == true);
-	CU_ASSERT(__utern_equals(&three, &common) == false);
+	CU_ASSERT(__utern_equals(&three, &common) == true);
 	CU_ASSERT(ntohl(common.value.u32) == 0xC0A80000);
 	CU_ASSERT(ntohl(common.mask.u32) == 0xFFFF0000);
 
