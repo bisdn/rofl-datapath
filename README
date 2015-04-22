@@ -4,6 +4,8 @@ What it is
 
 The Revised OpenFlow Library (ROFL) helps you adding OpenFlow support to your software to build control applications, controller frameworks and/or datapath elements.
 
+ROFL-datapath contains an OpenFlow pipeline (v1.0, 1.2 and 1.3) and a Hardware Abstraction Layer(HAL) libraries for building datapaths, written in C.
+
 Requirements
 ============
 
@@ -29,9 +31,13 @@ Optionally you can 'make check' for consistency checks.
 Optional ../configure parameters
 ================================
 
-	--enable-debug: Compile with debug symbols (-g) and debug output (warning, it may affect performance)  
-	--enable-verbose: Increase the level of debug (useless without --enable-debug)  
-	--disable-silent-rules: Enable verbose compilation mode (AM_SILENT_RULES disabled)
+	--enable-debug: compile with debug symbols (-g) and debug output (warning, it may affect performance)  
+	--enable-verbose: increase the level of debug (useless without --enable-debug)  
+	--disable-silent-rules: enable verbose compilation mode (AM_SILENT_RULES disabled)
+        
+	--with-pipeline-lockess: use lockless pipeline (packet processing API)
+	--with-pipeline-platform-funcs-inlined: inline platform functions (packet processing API)
+	
 
 Doxygen documentation
 ================================
@@ -52,8 +58,6 @@ More information, documentation and support
 
 You can have a look on: 
 
-* https://bisdn.github.io/rofl-core/rofl-common/index.html
-* https://bisdn.github.io/rofl-core/rofl-common/modules.html
 * https://bisdn.github.io/rofl-core/rofl-pipeline/index.html
 * https://bisdn.github.io/rofl-core/rofl-hal/index.html
 * http://www.roflibs.org/
@@ -68,11 +72,11 @@ Authorship
 
 (c) Copyright BISDN GmbH 2013
 
-Andreas Koepsel<andreas.koepsel (at) bisdn.de>  
 Marc Sune<marc.sune (at) bisdn.de>  
 Victor Alvarez<victor.alvarez (at) bisdn.de>  
+Andreas Koepsel<andreas.koepsel (at) bisdn.de>  
 Tobias Jungel<tobias.jungel (at) bisdn.de>
 
 And others.
 
-[![Build Status](https://travis-ci.org/bisdn/rofl-core.svg?branch=devel-0.6)](https://travis-ci.org/bisdn/rofl-core)
+[![Build Status](https://travis-ci.org/bisdn/rofl-datapath.svg?branch=stable)](https://travis-ci.org/bisdn/rofl-datapath)
