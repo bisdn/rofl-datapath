@@ -15,7 +15,7 @@
 #include <assert.h>
 #include <unistd.h>
 #include <stdbool.h>
-#include "rofl.h"
+#include "rofl_datapath.h"
 #include "platform/likely.h" 
 
 #if !defined(__GNUC__) && !defined(__INTEL_COMPILER)

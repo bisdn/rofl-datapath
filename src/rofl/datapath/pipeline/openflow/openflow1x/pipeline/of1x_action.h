@@ -9,7 +9,7 @@
 #include <string.h> 
 #include <stdbool.h>
 #include <assert.h>
-#include "rofl.h"
+#include "rofl_datapath.h"
 #include "of1x_utils.h"
 #include "../../../common/ternary_fields.h"
 

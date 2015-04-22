@@ -13,7 +13,7 @@
 #ifndef __MONITORING_H__
 #define __MONITORING_H__
 
-#include <rofl.h>
+#include <rofl_datapath.h>
 #include <stdbool.h>
 #include <inttypes.h>
 #include <time.h>

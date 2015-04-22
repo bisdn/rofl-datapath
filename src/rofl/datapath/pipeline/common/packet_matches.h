@@ -7,7 +7,7 @@
 
 #include <inttypes.h> 
 #include <string.h> 
-#include "rofl.h"
+#include "rofl_datapath.h"
 #include "ternary_fields.h"
 #include "../openflow/openflow1x/pipeline/of1x_utils.h"
 

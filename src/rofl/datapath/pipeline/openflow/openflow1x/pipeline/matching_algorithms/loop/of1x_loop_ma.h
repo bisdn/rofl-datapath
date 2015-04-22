@@ -1,7 +1,7 @@
 #ifndef __OF1X_LOOP_MATCH_H__
 #define __OF1X_LOOP_MATCH_H__
 
-#include "rofl.h"
+#include "rofl_datapath.h"
 #include "../matching_algorithms.h"
 #include "../../of1x_flow_table.h"
 

@@ -15,7 +15,7 @@
 #include <stdbool.h>
 #include <inttypes.h>
 
-#include "rofl.h"
+#include "rofl_datapath.h"
 #include "platform/lock.h"
 
 #define PORT_QUEUE_MAX_LEN_NAME 32

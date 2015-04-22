@@ -1,6 +1,6 @@
 #include "packet_matches.h"
 
-#include "rofl.h"
+#include "rofl_datapath.h"
 #include "endianness.h"
 #include "protocol_constants.h"
 #include "../platform/packet.h"

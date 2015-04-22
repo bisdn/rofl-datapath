@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 
-#include "rofl.h"
+#include "rofl_datapath.h"
 #include "../common/datapacket.h"
 #include "../common/ternary_fields.h"
 #include "../switch_port.h"

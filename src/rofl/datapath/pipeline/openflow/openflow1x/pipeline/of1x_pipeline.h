@@ -6,7 +6,7 @@
 #define __OF1X_PIPELINE_H__
 
 #include <stdlib.h>
-#include "rofl.h" 
+#include "rofl_datapath.h" 
 #include "of1x_flow_table.h"
 #include "of1x_group_table.h"
 #include "../../../common/bitmap.h"

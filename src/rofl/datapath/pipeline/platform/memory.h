@@ -7,7 +7,7 @@
 
 #include <stddef.h>
 #include <stdlib.h>
-#include "rofl.h"
+#include "rofl_datapath.h"
 
 /**
 * @file memory.h

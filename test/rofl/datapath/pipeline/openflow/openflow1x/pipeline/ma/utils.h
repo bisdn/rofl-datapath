@@ -1,7 +1,7 @@
 #ifndef PROFILING_UTILS
 #define PROFILING_UTILS
 
-#include <rofl.h>
+#include <rofl_datapath.h>
 
 //Extern C
 ROFL_BEGIN_DECLS

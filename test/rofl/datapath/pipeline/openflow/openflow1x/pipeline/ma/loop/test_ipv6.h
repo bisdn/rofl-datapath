@@ -1,7 +1,7 @@
 #ifndef __TEST_IPV6_H__
 #define __TEST_IPV6_H__
 
-#include "rofl.h"
+#include "rofl_datapath.h"
 #include "rofl/datapath/pipeline/physical_switch.h"
 #include "rofl/datapath/pipeline/openflow/openflow1x/of1x_switch.h"
 #include "rofl/datapath/pipeline/openflow/openflow1x/pipeline/of1x_pipeline.h"

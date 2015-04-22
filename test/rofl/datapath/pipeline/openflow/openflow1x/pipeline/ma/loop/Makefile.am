@@ -36,7 +36,7 @@ unit_test_SOURCES= $(SHARED_SRC)\
 			unit_test.c
 		
 
-unit_test_LDADD=$(top_builddir)/src/rofl/librofl.la -lcunit -lpthread
+unit_test_LDADD=$(top_builddir)/src/rofl/librofl_datapath.la -lcunit -lpthread
 
 check_PROGRAMS= unit_test
 TESTS = unit_test

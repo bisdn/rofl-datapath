@@ -1,7 +1,7 @@
 #ifndef __GROUP_TABLE_H__
 #define __GROUP_TABLE_H__
 
-#include "rofl.h"
+#include "rofl_datapath.h"
 //#include "rofl/common/openflow/openflow1x.h"
 #include "rofl/datapath/pipeline/openflow/openflow1x/pipeline/of1x_group_table.h"
 #include "rofl/datapath/pipeline/openflow/of_switch.h"

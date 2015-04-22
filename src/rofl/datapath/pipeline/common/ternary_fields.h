@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <inttypes.h>
 #include <stdbool.h>
-#include "rofl.h"
+#include "rofl_datapath.h"
 #include "wrap_types.h"
 
 /**

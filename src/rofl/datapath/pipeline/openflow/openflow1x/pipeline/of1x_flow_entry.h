@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "rofl.h"
+#include "rofl_datapath.h"
 #include "../../../common/ternary_fields.h"
 #include "of1x_match.h"
 #include "of1x_instruction.h"

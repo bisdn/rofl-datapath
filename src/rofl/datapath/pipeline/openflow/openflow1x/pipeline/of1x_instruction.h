@@ -7,7 +7,7 @@
 
 #include <inttypes.h> 
 #include <stdbool.h>
-#include "rofl.h"
+#include "rofl_datapath.h"
 #include "of1x_action.h"
 #include "../../../common/datapacket.h"
 

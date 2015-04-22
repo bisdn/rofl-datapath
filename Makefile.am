@@ -4,8 +4,8 @@ MAINTAINERCLEANFILES = \
 	$(top_srcdir)/Makefile.in
 
 export INCLUDES += -I$(abs_srcdir)/src/ -I$(abs_builddir)/src/
-SUBDIRS = src test examples tools doc 
-export LIBROFL=$(PWD)/src/rofl/librofl.la
+SUBDIRS = src test doc 
+export LIBROFL=$(PWD)/src/rofl/librofl_datapath.la
 
 #Could be improved.. 
 .PHONY: doc

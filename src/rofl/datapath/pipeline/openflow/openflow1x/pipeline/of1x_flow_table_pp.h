@@ -9,7 +9,7 @@
 #include <stdbool.h>
 #include <inttypes.h>
 #include <stdint.h>
-#include "rofl.h"
+#include "rofl_datapath.h"
 #include "../../../util/pp_guard.h" //Never forget to include the guard
 #include "../../../common/datapacket.h"
 #include "matching_algorithms/available_ma_pp.h"

@@ -8,7 +8,7 @@
 #include <inttypes.h>
 #include <sys/time.h>
 #include <string.h>
-#include "rofl.h"
+#include "rofl_datapath.h"
 #include "of1x_group_types.h"
 #include "../../../platform/lock.h"
 

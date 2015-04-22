@@ -1,7 +1,7 @@
 #ifndef __OF1X_L2HASH_MATCH_PP_H__
 #define __OF1X_L2HASH_MATCH_PP_H__
 
-#include "rofl.h"
+#include "rofl_datapath.h"
 #include "../../of1x_pipeline.h"
 #include "../../of1x_flow_table.h"
 #include "../../of1x_flow_entry.h"

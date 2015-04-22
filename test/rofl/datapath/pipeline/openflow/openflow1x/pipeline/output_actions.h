@@ -1,7 +1,7 @@
 #ifndef __OUTPUT_ACTIONS_H__
 #define __OUTPUT_ACTIONS_H__
 
-#include "rofl.h"
+#include "rofl_datapath.h"
 // #include "rofl/datapath/pipeline/openflow/openflow1x/openflow1x.h"
 #include "rofl/datapath/pipeline/physical_switch.h"
 #include "rofl/datapath/pipeline/openflow/openflow1x/of1x_switch.h"

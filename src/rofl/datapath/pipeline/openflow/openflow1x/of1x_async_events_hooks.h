@@ -5,7 +5,7 @@
 #ifndef ASYNC_EVENTS_HOOKS_OF1X_H_
 #define ASYNC_EVENTS_HOOKS_OF1X_H_
 
-#include "rofl.h"
+#include "rofl_datapath.h"
 #include "../of_switch.h"
 #include "of1x_switch.h"
 #include "pipeline/of1x_flow_entry.h"

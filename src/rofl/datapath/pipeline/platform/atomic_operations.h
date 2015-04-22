@@ -6,7 +6,7 @@
 #define __PLATFORM_ATOMIC_OPERATIONS_H__
 
 #include <inttypes.h>
-#include "rofl.h"
+#include "rofl_datapath.h"
 #include "lock.h"
 
 #if defined(__COMPILING_ROFL_PIPELINE__) || !defined(ROFL_PIPELINE_PP_PRESENT) || !defined(ROFL_PIPELINE_INLINE_PP_PLATFORM_FUNCS)

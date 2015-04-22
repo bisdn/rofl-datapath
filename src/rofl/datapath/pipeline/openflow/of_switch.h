@@ -6,7 +6,7 @@
 #define __OF_SWITCH_H__
 
 #include <inttypes.h> 
-#include "rofl.h"
+#include "rofl_datapath.h"
 #include "../switch_port.h"
 
 /**

@@ -9,7 +9,7 @@
 #include <string.h> 
 #include <stdbool.h>
 #include <assert.h>
-#include "rofl.h"
+#include "rofl_datapath.h"
 #include "../../../util/pp_guard.h" //Never forget to include the guard
 #include "of1x_statistics_pp.h"
 #include "of1x_action.h"

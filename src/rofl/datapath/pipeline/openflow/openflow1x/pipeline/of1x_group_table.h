@@ -5,7 +5,7 @@
 #ifndef __OF1X_GROUP_TABLE_H__
 #define __OF1X_GROUP_TABLE_H__
 
-#include "rofl.h"
+#include "rofl_datapath.h"
 #include "of1x_statistics.h"
 #include "of1x_action.h"
 #include "of1x_flow_entry.h"

@@ -5,7 +5,7 @@
 #include <inttypes.h>
 #include <string.h>
 #include <stdbool.h>
-#include "rofl.h"
+#include "rofl_datapath.h"
 #include "../../../util/pp_guard.h" //Never forget to include the guard
 #include "../../../common/packet_matches.h"
 #include "../../../common/protocol_constants.h"

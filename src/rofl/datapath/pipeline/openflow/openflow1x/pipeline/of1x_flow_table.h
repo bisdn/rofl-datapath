@@ -9,7 +9,7 @@
 #include <stdbool.h>
 #include <inttypes.h>
 #include <stdint.h>
-#include "rofl.h"
+#include "rofl_datapath.h"
 #include "../../../common/bitmap.h"
 #include "../../../threading.h"
 #include "of1x_flow_entry.h"

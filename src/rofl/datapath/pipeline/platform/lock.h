@@ -5,7 +5,7 @@
 #ifndef __PLATFORM_LOCK_H__
 #define __PLATFORM_LOCK_H__
 
-#include "rofl.h"
+#include "rofl_datapath.h"
 
 /**
 * @file lock.h

@@ -16,7 +16,7 @@
 #include <stdbool.h>
 #include <inttypes.h>
 
-#include "rofl.h"
+#include "rofl_datapath.h"
 #include "port_queue.h"
 #include "common/bitmap.h"
 #include "platform/lock.h"

@@ -7,7 +7,7 @@
 
 #include <stdlib.h> 
 #include <string.h> 
-#include "rofl.h"
+#include "rofl_datapath.h"
 #include "openflow/of_switch.h"
 #include "switch_port.h"
 #include "monitoring.h"

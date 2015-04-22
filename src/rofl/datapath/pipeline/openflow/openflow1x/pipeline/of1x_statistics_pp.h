@@ -6,7 +6,7 @@
 #define __OF1X_STATISTICS_PP_H__
 
 #include <assert.h>
-#include "rofl.h"
+#include "rofl_datapath.h"
 #include "../../../util/pp_guard.h" //Never forget to include the guard
 
 #include "of1x_statistics.h"

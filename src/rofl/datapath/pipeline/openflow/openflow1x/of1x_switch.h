@@ -7,7 +7,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "rofl.h"
+#include "rofl_datapath.h"
 #include "../of_switch.h"
 #include "pipeline/of1x_pipeline.h"
 
