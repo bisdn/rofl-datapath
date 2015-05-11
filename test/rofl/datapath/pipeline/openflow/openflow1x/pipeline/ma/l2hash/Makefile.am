@@ -2,8 +2,6 @@ MAINTAINERCLEANFILES = Makefile.in
 
 AUTOMAKE_OPTIONS = no-dependencies
 
-SUBDIRS=loop l2hash
-
 SHARED_SRC= $(top_srcdir)/src/rofl/datapath/pipeline/physical_switch.c \
 	$(top_srcdir)/src/rofl/datapath/pipeline/monitoring.c \
 	$(top_srcdir)/src/rofl/datapath/pipeline/switch_port.c \
@@ -25,29 +23,18 @@ SHARED_SRC= $(top_srcdir)/src/rofl/datapath/pipeline/physical_switch.c \
 	$(top_srcdir)/src/rofl/datapath/pipeline/openflow/openflow1x/pipeline/matching_algorithms/loop/of1x_loop_ma.c \
 	$(top_srcdir)/src/rofl/datapath/pipeline/openflow/openflow1x/pipeline/matching_algorithms/l2hash/of1x_l2hash_ma.c \
 	$(top_srcdir)/src/rofl/datapath/pipeline/openflow/openflow1x/pipeline/matching_algorithms/available_ma.c \
-	../memory.c \
-	../platform_empty_hooks_of12.cc\
-	../pthread_atomic_operations.c\
-	../pthread_lock.c \
-	../timing.c
+	../../memory.c \
+	../../empty_packet.c\
+	../../platform_empty_hooks_of12.cc\
+	../../pthread_atomic_operations.c\
+	../../pthread_lock.c \
+	../../timing.c
 
-pipe_profile_SOURCES= $(SHARED_SRC)\
-			../empty_packet.c\
-			profiling_tests.c
-pipe_profile_LDADD=$(top_builddir)/src/rofl/librofl_datapath.la -lcunit -lpthread
-pipe_profile_CFLAGS = -O3 -pg -fno-omit-frame-pointer
-pipe_profile_CXXFLAGS = -O3 -pg -fno-omit-frame-pointer
-pipe_profile_CPPFLAGS = -UDEBUG 
+unit_test_SOURCES= $(SHARED_SRC)\
+			l2hash.c \
+			unit_test.c
 
+unit_test_LDADD=$(top_builddir)/src/rofl/librofl_datapath.la -lcunit -lpthread
 
-lockless_SOURCES= $(SHARED_SRC)\
-			../empty_packet.c\
-			lockless_tests.c
-lockless_LDADD=$(top_builddir)/src/rofl/librofl_datapath.la -lcunit -lpthread
-lockless_CFLAGS = -O3 -pg -fno-omit-frame-pointer
-lockless_CXXFLAGS = -O3 -pg -fno-omit-frame-pointer
-lockless_CPPFLAGS = -UDEBUG 
-
-
-check_PROGRAMS = lockless pipe_profile
-TESTS = lockless pipe_profile 
+check_PROGRAMS= unit_test
+TESTS = unit_test

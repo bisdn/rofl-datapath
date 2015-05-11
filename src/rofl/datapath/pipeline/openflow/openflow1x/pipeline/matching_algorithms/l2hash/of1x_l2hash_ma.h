@@ -37,7 +37,7 @@ typedef struct l2hash_ht_entry{
 
 //Hash table
 
-#define L2HASH_MAX_ENTRIES 0xFFFF
+#define L2HASH_MAX_ENTRIES (0xFFFF+1)
 
 typedef struct l2hash_ht_table{
 	unsigned int num_of_entries;
