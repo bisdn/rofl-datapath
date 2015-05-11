@@ -263,7 +263,7 @@ rofl_of1x_fm_result_t of1x_add_flow_entry_l2hash(of1x_flow_table_t *const table,
 	//Check if the flowmod is not empty, and return
 	//Note that this cannot be checked by the fast validation bitmap
 	if(entry->matches.head == NULL)
-		return ROFL_FAILURE;
+		return ROFL_OF1X_FM_FAILURE;
 
 	//Call loop with the right hooks
 	return __of1x_add_flow_entry_loop(table, entry, check_overlap, reset_counts, of1x_add_hook_l2hash);
