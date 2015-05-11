@@ -62,31 +62,36 @@ static void l2hash_destroy_ht(l2hash_ht_table_t* ht){
 //Add&Remove routine
 void l2hash_ht_add_bucket(l2hash_ht_table_t* ht, uint16_t hash, l2hash_ht_bucket_t* bucket){
 	l2hash_ht_entry_t* ht_e = &ht->table[hash];
-	l2hash_ht_bucket_t* it;
+	l2hash_ht_bucket_t* it, *it_prev;
 
 	//Insertion priority
 	uint32_t priority = bucket->entry->priority;
- 
+
 	//Assign HT entry to the buck
 	bucket->ht_entry = ht_e;
 
 	if(ht_e->bucket_list){
 		it = ht_e->bucket_list;
+		it_prev = NULL;
+
 		//Find the postion
 		while(it){
 			if(it->entry->priority <= priority)
 				break;
+			it_prev = it;
 			it = it->next;
 		}
 
 		//Assign first the next and previous on our node
 		bucket->next = it;
-		bucket->prev = it->prev;	
-		it->prev = bucket;
+		bucket->prev = it_prev;
+
+		if(it)
+			it->prev = bucket;
 
 		//Add before it
-		if(it->prev)
-			it->prev->next = bucket;
+		if(it_prev)
+			it_prev->next = bucket;
 		else
 			ht_e->bucket_list = bucket;
 	}else{
@@ -94,7 +99,7 @@ void l2hash_ht_add_bucket(l2hash_ht_table_t* ht, uint16_t hash, l2hash_ht_bucket
 		ht_e->bucket_list = bucket;
 		bucket->next = bucket->prev = NULL;
 	}
-	
+
 	ht_e->num_of_buckets++;
 }
 
@@ -254,6 +259,12 @@ void of1x_remove_hook_l2hash(of1x_flow_entry_t *const entry){
 
 /* Conveniently wraps call with mutex.  */
 rofl_of1x_fm_result_t of1x_add_flow_entry_l2hash(of1x_flow_table_t *const table, of1x_flow_entry_t *const entry, bool check_overlap, bool reset_counts){
+
+	//Check if the flowmod is not empty, and return
+	//Note that this cannot be checked by the fast validation bitmap
+	if(entry->matches.head == NULL)
+		return ROFL_FAILURE;
+
 	//Call loop with the right hooks
 	return __of1x_add_flow_entry_loop(table, entry, check_overlap, reset_counts, of1x_add_hook_l2hash);
 }
