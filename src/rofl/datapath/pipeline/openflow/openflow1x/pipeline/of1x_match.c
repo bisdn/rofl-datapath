@@ -1557,8 +1557,70 @@ void __of1x_destroy_match_group(of1x_match_group_t* group){
 
 
 
-void __of1x_match_group_push_back(of1x_match_group_t* group, of1x_match_t* match){
+rofl_result_t __of1x_match_group_insert(of1x_match_group_t* group, of1x_match_t* match){
+	of1x_match_t* iter = NULL;
 
+ 	if ( unlikely(group==NULL) || unlikely(match==NULL) )
+		return ROFL_FAILURE;
+
+	match->next = match->prev = NULL; 
+
+	//Insert in array
+	if ( group->m_array[match->type] != NULL ){
+		//TODO Type already there!
+		return ROFL_FAILURE;
+	} else {
+		group->m_array[match->type] = match;
+	}
+
+	if(!group->head){
+		//Group empty, insert match as head & tail
+		group->head = match;
+		group->tail = match;
+	}else{
+		//Insert the match in the list following the match type order
+		for( iter=group->head; iter != NULL; iter=iter->next ){
+			if (iter->type > match->type){
+				//Insert before iter
+				match->prev = iter->prev;
+				match->next = iter;
+				iter->prev->next = match;
+				iter->prev = match;
+				break;
+			}else if (iter->type == match->type){
+				//TODO Type already there! Should not happen cause we checked the array already.
+				assert(0);
+				return ROFL_FAILURE;
+			}
+		}
+		if (iter == NULL){
+			//Insert as tail
+			match->prev = group->tail;
+			group->tail->next = match;
+			group->tail = match;
+		}
+	}
+
+	group->num_elements++;
+
+	//Deduce new tail and update validation flags and num of elements
+	//Update fast validation flags (required versions)
+	if(group->ver_req.min_ver < match->ver_req.min_ver)
+		group->ver_req.min_ver = match->ver_req.min_ver;
+	if(group->ver_req.max_ver > match->ver_req.max_ver)
+		group->ver_req.max_ver = match->ver_req.max_ver;
+
+	//Update matches
+	bitmap128_set(&group->match_bm, match->type);
+
+	if(!match->has_wildcard)
+		bitmap128_unset(&group->of10_wildcard_bm, match->type);
+	else	
+		bitmap128_set(&group->wildcard_bm, match->type);
+
+	return ROFL_SUCCESS;
+
+#if 0
 	if ( unlikely(group==NULL) || unlikely(match==NULL) )
 		return;
 
@@ -1597,7 +1659,7 @@ void __of1x_match_group_push_back(of1x_match_group_t* group, of1x_match_t* match
 	
 	//Add new tail
 	group->tail = match;
-	
+#endif	
 }
 
 /*

@@ -192,6 +192,10 @@ typedef struct of1x_match_group{
 	bitmap128_t match_bm;
 	bitmap128_t wildcard_bm; 
 	bitmap128_t of10_wildcard_bm; //OF1.0 only
+
+	// Array for direct access to matches
+	of1x_match_t *m_array[OF1X_MATCH_MAX];
+
 }of1x_match_group_t;
 
 
@@ -959,7 +963,7 @@ uint128__t of1x_get_match_mask128(const of1x_match_t* match){
 /* match group */
 void __of1x_init_match_group(of1x_match_group_t* group);
 void __of1x_destroy_match_group(of1x_match_group_t* group);
-void __of1x_match_group_push_back(of1x_match_group_t* group, of1x_match_t* match);
+rofl_result_t __of1x_match_group_insert(of1x_match_group_t* group, of1x_match_t* match);
 
 /* Push match at the end of the match */
 rofl_result_t __of1x_add_match(of1x_match_t* root_match, of1x_match_t* add_match);
