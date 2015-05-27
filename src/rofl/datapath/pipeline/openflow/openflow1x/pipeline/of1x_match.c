@@ -1584,7 +1584,10 @@ rofl_result_t __of1x_match_group_insert(of1x_match_group_t* group, of1x_match_t*
 				//Insert before iter
 				match->prev = iter->prev;
 				match->next = iter;
-				iter->prev->next = match;
+				if( iter->prev )
+					iter->prev->next = match;
+				else
+					group->head = match;
 				iter->prev = match;
 				break;
 			}else if (iter->type == match->type){
