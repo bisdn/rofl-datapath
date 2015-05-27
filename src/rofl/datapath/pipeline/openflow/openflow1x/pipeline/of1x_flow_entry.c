@@ -105,9 +105,9 @@ rofl_result_t of1x_destroy_flow_entry(of1x_flow_entry_t* entry){
 //Adds one or more to the entry
 rofl_result_t of1x_add_match_to_entry(of1x_flow_entry_t* entry, of1x_match_t* match){
 
-	__of1x_match_group_push_back(&entry->matches, match);
+	int result = __of1x_match_group_insert(&entry->matches, match);
 	
-	return ROFL_SUCCESS;
+	return result;
 }
 
 rofl_result_t __of1x_update_flow_entry(of1x_flow_entry_t* entry_to_update, of1x_flow_entry_t* mod, bool reset_counts){
