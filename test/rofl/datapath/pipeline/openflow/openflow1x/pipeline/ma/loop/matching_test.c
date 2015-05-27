@@ -180,7 +180,7 @@ void test_uninstall_wildcard(){
 	CU_ASSERT(deleting_entry != NULL);
 	CU_ASSERT(of1x_add_match_to_entry(deleting_entry,of1x_init_port_in_match(1)) == ROFL_SUCCESS);
 	CU_ASSERT(of1x_add_match_to_entry(deleting_entry,of1x_init_eth_src_match(0x999999999999, 0x000000000000)) == ROFL_SUCCESS);
-	CU_ASSERT(of1x_add_match_to_entry(deleting_entry,of1x_init_ip4_dst_match(rand()%0x11111111, 0x0000000)) == ROFL_SUCCESS);
+	CU_ASSERT(of1x_add_match_to_entry(deleting_entry,of1x_init_ip4_src_match(rand()%0x11111111, 0x0000000)) == ROFL_SUCCESS);
 	CU_ASSERT(of1x_add_match_to_entry(deleting_entry,of1x_init_ip4_dst_match(rand()%0x22222222, 0x0000000)) == ROFL_SUCCESS);
 
 	CU_ASSERT(of1x_remove_flow_entry_table(&sw->pipeline, 0, deleting_entry, NOT_STRICT, OF1X_PORT_ANY, OF1X_GROUP_ANY) == ROFL_SUCCESS);
