@@ -1622,47 +1622,6 @@ rofl_result_t __of1x_match_group_insert(of1x_match_group_t* group, of1x_match_t*
 		bitmap128_set(&group->wildcard_bm, match->type);
 
 	return ROFL_SUCCESS;
-
-#if 0
-	if ( unlikely(group==NULL) || unlikely(match==NULL) )
-		return;
-
-	match->next = match->prev = NULL; 
-
-	if(!group->head){
-		group->head = match;
-	}else{
-		match->prev = group->tail;
-		group->tail->next = match;
-	}
-
-	//Deduce new tail and update validation flags and num of elements
-	do{
-		//Update fast validation flags (required versions)
-		if(group->ver_req.min_ver < match->ver_req.min_ver)
-			group->ver_req.min_ver = match->ver_req.min_ver;
-		if(group->ver_req.max_ver > match->ver_req.max_ver)
-			group->ver_req.max_ver = match->ver_req.max_ver;
-
-		//Update matches
-		bitmap128_set(&group->match_bm, match->type);
-
-		if(!match->has_wildcard)
-			bitmap128_unset(&group->of10_wildcard_bm, match->type);
-		else	
-			bitmap128_set(&group->wildcard_bm, match->type);
-
-		group->num_elements++;
-
-		if(match->next == NULL)
-			break;
-		else	
-			match = match->next;
-	}while(1);
-	
-	//Add new tail
-	group->tail = match;
-#endif	
 }
 
 /*
