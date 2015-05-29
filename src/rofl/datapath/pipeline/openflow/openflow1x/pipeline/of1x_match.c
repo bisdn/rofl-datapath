@@ -1563,11 +1563,14 @@ rofl_result_t __of1x_match_group_insert(of1x_match_group_t* group, of1x_match_t*
  	if ( unlikely(group==NULL) || unlikely(match==NULL) )
 		return ROFL_FAILURE;
 
+	if ( unlikely(match->type) >= OF1X_MATCH_MAX)
+		return ROFL_FAILURE;
+
 	match->next = match->prev = NULL; 
 
 	//Insert in array
 	if ( group->m_array[match->type] != NULL ){
-		//TODO Type already there!
+		ROFL_PIPELINE_ERR("%s: Match type %u is already defined in match group\n",__func__,match->type);
 		return ROFL_FAILURE;
 	} else {
 		group->m_array[match->type] = match;
@@ -1591,7 +1594,8 @@ rofl_result_t __of1x_match_group_insert(of1x_match_group_t* group, of1x_match_t*
 				iter->prev = match;
 				break;
 			}else if (iter->type == match->type){
-				//TODO Type already there! Should not happen cause we checked the array already.
+				//Type already there! Should not happen cause we checked the array already.
+				ROFL_PIPELINE_ERR("%s: Match type %u is already defined in match group\n",__func__,match->type);
 				assert(0);
 				return ROFL_FAILURE;
 			}
