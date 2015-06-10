@@ -32,6 +32,7 @@ monitoring_unit_test_SOURCES= monitoring_test.c \
 	$(top_srcdir)/src/rofl/datapath/pipeline/openflow/openflow1x/pipeline/of1x_statistics.c \
 	$(top_srcdir)/src/rofl/datapath/pipeline/openflow/openflow1x/pipeline/of1x_timers.c \
 	$(top_srcdir)/src/rofl/datapath/pipeline/common/packet_matches.c \
+	$(top_srcdir)/src/rofl/datapath/pipeline/common/alike_masks.c \
 	$(top_srcdir)/src/rofl/datapath/pipeline/common/ternary_fields.c
 
 monitoring_unit_test_LDADD= -lcunit -lpthread 

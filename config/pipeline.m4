@@ -29,6 +29,7 @@ AM_COND_IF([PIPELINE_SUPPORT],[
 	src/rofl/datapath/pipeline/openflow/openflow1x/pipeline/matching_algorithms/Makefile
 	src/rofl/datapath/pipeline/util/Makefile
 
+	test/rofl/datapath/pipeline/Makefile
 	test/rofl/datapath/pipeline/openflow/openflow1x/pipeline/Makefile
 	test/rofl/datapath/pipeline/monitoring/Makefile
 	test/rofl/datapath/pipeline/openflow/openflow1x/pipeline/bufs/Makefile

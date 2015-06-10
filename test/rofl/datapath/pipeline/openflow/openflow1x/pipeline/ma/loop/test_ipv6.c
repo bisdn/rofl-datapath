@@ -90,7 +90,7 @@ void ipv6_alike_test_low(void){
 	
 	tern1 = __init_utern128(value1,mask);
 	tern2 = __init_utern128(value2,mask);
-	res = __utern_get_alike(*tern1,*tern2);
+	res = __utern_get_alike(tern1,tern2);
 	
 	CU_ASSERT(res!=NULL);
 	if(res){
@@ -112,7 +112,7 @@ void ipv6_alike_test_high(void){
 	
 	tern1 = __init_utern128(value1,mask);
 	tern2 = __init_utern128(value2,mask);
-	res = __utern_get_alike(*tern1,*tern2);
+	res = __utern_get_alike(tern1,tern2);
 	CU_ASSERT(res!=NULL);
 	if(res){
 		printf("2- masks 0x%"PRIx64" 0x%"PRIx64"\n",UINT128__T_HI(res->mask.u128),UINT128__T_LO(res->mask.u128));
@@ -134,7 +134,7 @@ void ipv6_alike_test_wrong(void){
 	
 	tern1 = __init_utern128(value1,mask1);
 	tern2 = __init_utern128(value2,mask2);
-	res = __utern_get_alike(*tern1,*tern2);
+	res = __utern_get_alike(tern1,tern2);
 	CU_ASSERT(res==NULL);
 	
 	__destroy_utern((utern_t*)tern1);
@@ -149,7 +149,7 @@ void ipv6_alike_test_wrong(void){
 	
 	tern1 = __init_utern128(value1,mask1);
 	tern2 = __init_utern128(value2,mask2);
-	res = __utern_get_alike(*tern1,*tern2);
+	res = __utern_get_alike(tern1,tern2);
 	CU_ASSERT(res==NULL);
 	
 	__destroy_utern((utern_t*)tern1);

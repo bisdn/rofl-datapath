@@ -3,7 +3,9 @@
 #include <assert.h>
 
 #include "../platform/memory.h"
-#include <rofl/datapath/pipeline/common/ternary_fields.h>
+#include "ternary_fields.h"
+#include "large_types.h"
+#include "alike_masks.h"
 
 /*
 * Initializers
@@ -105,20 +107,8 @@ inline bool __utern_is_contained(const utern_t* extensive_tern, const utern_t* t
 			return (extensive_tern->value.u64 & extensive_tern->mask.u64) == (tern->value.u64 & extensive_tern->mask.u64);
 			break;
 		case UTERN128_T:
-#if 0
-			if((((extensive_tern->mask.low ^ tern->mask.low) & extensive_tern->mask.low) > 0 ) || 
-				(((extensive_tern->mask.high ^ tern->mask.high) & extensive_tern->mask.high) > 0 ) )
-				return false;
-			return ( (extensive_tern->value.low & extensive_tern->mask.low) == (tern->value.low & extensive_tern->mask.low) &&
-				(extensive_tern->value.high & extensive_tern->mask.high) == (tern->value.high & extensive_tern->mask.high)	);
-#endif
-			
-			//if( (( (UINT128__T_LO(extensive_tern->mask.u128) ^ UINT128__T_LO(tern->mask.u128)) & UINT128__T_LO(extensive_tern->mask.u128) ) > 0 ) || 
-			//	(( (UINT128__T_HI(extensive_tern->mask.u128) ^ UINT128__T_HI(tern->mask.u128)) & UINT128__T_HI(extensive_tern->mask.u128) ) > 0 ) )
-			//	return false;
 			return ( (UINT128__T_LO(extensive_tern->value.u128) & UINT128__T_LO(extensive_tern->mask.u128)) == (UINT128__T_LO(tern->value.u128) & UINT128__T_LO(extensive_tern->mask.u128)) ) &&
 				((UINT128__T_HI(extensive_tern->value.u128) & UINT128__T_HI(extensive_tern->mask.u128)) == (UINT128__T_HI(tern->value.u128) & UINT128__T_HI(extensive_tern->mask.u128))	);
-			
 			break;
 		default:
 			assert(0); //we should never reach this point
@@ -154,136 +144,166 @@ inline bool __utern_equals(const utern_t* tern1, const utern_t* tern2){
 	}
 }
 
-//Ternary alike functions. Tern2 MUST always have more restrictive mask
-inline utern_t* __utern_get_alike(const utern_t tern1, const utern_t tern2){
-	//TODO: there might be more efficient impl. maybe erasing 1s in diff... but dunno
-	
-	wrap_uint_t diff, new_mask;
-	
-	switch(tern1.type){
+//This function shall find the common and contiguous shared ternary portion of two ternary values
+//Masks go from left to right in memory
+inline utern_t* __utern_get_alike(const utern_t* tern1, const utern_t* tern2){
+
+	int i;
+	utern_t* common;
+	wrap_uint_t value;
+	wrap_uint_t mask;
+	uint8_t max_pos;
+
+	//Diferent type of ternary matches cannot share anything
+	if(tern1->type != tern2->type)
+		return NULL;
+
+	switch(tern1->type) {
 		case UTERN8_T:
+				max_pos = (sizeof(uint8_t)*8)-1;
+				for(i=max_pos; i>=0; i--){
 
-			diff.u8 = ~( 
-					(tern1.value.u8 & tern1.mask.u8)	
-					^
-					(tern2.value.u8 & tern2.mask.u8)
-					);
-			//erase right 1.
-			for(new_mask.u8=0xFF;new_mask.u8;new_mask.u8=new_mask.u8<<1)
-				if((diff.u8&new_mask.u8) == new_mask.u8) break; 
+					//Check that masks match
+					if( (tern1->mask.u8 & __u8_alike_masks[i])  != (tern2->mask.u8 & __u8_alike_masks[i]) )
+						continue;
 
-			if(tern1.mask.u8 < new_mask.u8 || tern2.mask.u8 < new_mask.u8 )
+					//Check
+					if( (tern1->value.u8 & tern1->mask.u8 & __u8_alike_masks[i]) ==
+						(tern2->value.u8 & tern2->mask.u8 & __u8_alike_masks[i] ) ){
+						value.u8 = tern1->value.u8 & __u8_alike_masks[i];
+						mask.u8 = tern1->mask.u8 & __u8_alike_masks[i];
+						goto MATCH_TERN_ALIKE;
+					}
+				}
 				return NULL;
-			
-			if(new_mask.u8)
-				return __init_utern8(tern1.value.u8,new_mask.u8);
-
-			return NULL;
-			
-			break;
-			
 		case UTERN16_T:
-	
-			diff.u16 = ~( 
-					(tern1.value.u16 & tern1.mask.u16)	
-					^
-					(tern2.value.u16 & tern2.mask.u16)
-					);
-			//erase right 1.
-			for(new_mask.u16=0xFFFF;new_mask.u16;new_mask.u16=new_mask.u16<<1)
-				if((diff.u16&new_mask.u16) == new_mask.u16) break; 
-			
-			if(tern1.mask.u16 < new_mask.u16 || tern2.mask.u16 < new_mask.u16 )
+				max_pos = (sizeof(uint16_t)*8)-1;
+				for(i=max_pos; i>=0; i--){
+
+					//Check that masks match
+					if( (tern1->mask.u16 & __u16_alike_masks[i])  != (tern2->mask.u16 & __u16_alike_masks[i]) )
+						continue;
+
+					if( (tern1->value.u16 & tern1->mask.u16 & __u16_alike_masks[i]) ==
+						(tern2->value.u16 & tern2->mask.u16 & __u16_alike_masks[i] ) ){
+						value.u16 = tern1->value.u16 & __u16_alike_masks[i];
+						mask.u16 = tern1->mask.u16 & __u16_alike_masks[i];
+						goto MATCH_TERN_ALIKE;
+					}
+				}
 				return NULL;
-			
-			if(new_mask.u16)
-				return __init_utern16(tern1.value.u16,new_mask.u16);
-			
-			return NULL;
-			
-			break;
-			
 		case UTERN32_T:
+				max_pos = (sizeof(uint32_t)*8)-1;
+				for(i=max_pos; i>=0; i--){
 
-			diff.u32 = ~( 
-					(tern1.value.u32 & tern1.mask.u32)	
-					^
-					(tern2.value.u32 & tern2.mask.u32)
-					);
-			//erase right 1.
-			for(new_mask.u32=0xFFFFFFFF;new_mask.u32;new_mask.u32=new_mask.u32<<1)
-				if((diff.u32&new_mask.u32) == new_mask.u32) break; 
-			
-			if(tern1.mask.u32 < new_mask.u32 || tern2.mask.u32 < new_mask.u32 )
+					//Check that masks match
+					if( (tern1->mask.u32 & __u32_alike_masks[i])  != (tern2->mask.u32 & __u32_alike_masks[i]) )
+						continue;
+
+					if( (tern1->value.u32 & tern1->mask.u32 & __u32_alike_masks[i]) ==
+						(tern2->value.u32 & tern2->mask.u32 & __u32_alike_masks[i] ) ){
+						value.u32 = tern1->value.u32 & __u32_alike_masks[i];
+						mask.u32 = tern1->mask.u32 & __u32_alike_masks[i];
+						goto MATCH_TERN_ALIKE;
+					}
+				}
 				return NULL;
-			
-			if(new_mask.u32)
-				return __init_utern32(tern1.value.u32,new_mask.u32);
-			
-			return NULL;
-			
-			break;
-		
 		case UTERN64_T:
+				max_pos = (sizeof(uint64_t)*8)-1;
+				for(i=max_pos; i>=0; i--){
 
-			diff.u64 = ~( 
-					(tern1.value.u64 & tern1.mask.u64)	
-					^
-					(tern2.value.u64 & tern2.mask.u64)
-					);
-			//erase right 1.
-			for(new_mask.u64=0xFFFFFFFFFFFFFFFFULL;new_mask.u64;new_mask.u64=new_mask.u64<<1)
-				if((diff.u64&new_mask.u64) == new_mask.u64) break; 
-			
-			//FIXME assert unlikely
-			//FIXME this condition happens also when two values are different in the non masked part.
-				//in this case we sould return the utern as it is now.
-			if(tern1.mask.u64 < new_mask.u64 || tern2.mask.u64 < new_mask.u64 )
+					//Check that masks match
+					if( (tern1->mask.u64 & __u64_alike_masks[i])  != (tern2->mask.u64 & __u64_alike_masks[i]) )
+						continue;
+
+					if( (tern1->value.u64 & tern1->mask.u64 & __u64_alike_masks[i]) ==
+						(tern2->value.u64 & tern2->mask.u64 & __u64_alike_masks[i] ) ){
+						value.u64 = tern1->value.u64 & __u64_alike_masks[i];
+						mask.u64 = tern1->mask.u64 & __u64_alike_masks[i];
+						goto MATCH_TERN_ALIKE;
+					}
+				}
 				return NULL;
-			
-			if(new_mask.u64)
-				return __init_utern64(tern1.value.u64,new_mask.u64);
-			
-			return NULL;
-			
-			break;
-			
 		case UTERN128_T:
+				{
+				max_pos = (sizeof(uint64_t)*8)-1;
+				uint64_t *value1_h, *value1_l, *mask1_h, *mask1_l;
+				uint64_t *value2_h, *value2_l, *mask2_h, *mask2_l;
 
-			UINT128__T_LO(diff.u128) = ~(	(UINT128__T_LO(tern1.value.u128) & UINT128__T_LO(tern1.mask.u128))	^	(UINT128__T_LO(tern2.value.u128) & UINT128__T_LO(tern2.mask.u128))	);
-			UINT128__T_HI(diff.u128) = ~(	(UINT128__T_HI(tern1.value.u128) & UINT128__T_HI(tern1.mask.u128))	^	(UINT128__T_HI(tern2.value.u128) & UINT128__T_HI(tern2.mask.u128))	);
-			
-			//We first look for the common mask in the lower part
-			for(UINT128__T_LO(new_mask.u128)=0xFFFFFFFFFFFFFFFFULL;UINT128__T_LO(new_mask.u128);UINT128__T_LO(new_mask.u128)=UINT128__T_LO(new_mask.u128)<<1)
-				if((UINT128__T_LO(diff.u128)&UINT128__T_LO(new_mask.u128)) == UINT128__T_LO(new_mask.u128)) break; 
-			
-			if( (UINT128__T_LO(tern1.mask.u128) < UINT128__T_LO(new_mask.u128) || UINT128__T_LO(tern2.mask.u128) < UINT128__T_LO(new_mask.u128)) && UINT128__T_HI(diff.u128) == 0xffffffffffffffffULL )
+				//Make code more readable
+				value1_h = &UINT128__T_HI(tern1->value.u128);
+				value2_h = &UINT128__T_HI(tern2->value.u128);
+				mask1_h = &UINT128__T_HI(tern1->mask.u128);
+				mask2_h = &UINT128__T_HI(tern2->mask.u128);
+
+				value1_l = &UINT128__T_LO(tern1->value.u128);
+				value2_l = &UINT128__T_LO(tern2->value.u128);
+				mask1_l = &UINT128__T_LO(tern1->mask.u128);
+				mask2_l = &UINT128__T_LO(tern2->mask.u128);
+
+				//Check right 64 bits first(LOW)
+				for(i=max_pos; i>=0; i--){
+
+					//Check that masks match (HIGH)
+					if ( (*mask1_h  & __u64_alike_masks[max_pos]) !=
+						(*mask2_h  & __u64_alike_masks[max_pos]) )
+						break;
+
+					//We want contiguos masks, so if HIGH does not match skip LOG checks
+					if ( (*value1_h & *mask1_h  & __u64_alike_masks[max_pos]) !=
+						(*value2_h & *mask2_h  & __u64_alike_masks[max_pos]) )
+						break;
+
+					//Check that masks match (LOW)
+					if ( (*mask1_l  & __u64_alike_masks[i]) !=
+						(*mask2_l  & __u64_alike_masks[i]) )
+						continue;
+
+					if ( (*value1_l & *mask1_l  & __u64_alike_masks[i]) ==
+						(*value2_l & *mask2_l  & __u64_alike_masks[i]) ){
+						//Set LOW
+						UINT128__T_LO(value.u128) = *value1_l & __u64_alike_masks[i];
+						UINT128__T_LO(mask.u128) = *mask1_l & __u64_alike_masks[i];
+						//Set HIGH
+						UINT128__T_HI(value.u128) = *value1_h;
+						UINT128__T_HI(mask.u128) = *mask1_h;
+						goto MATCH_TERN_ALIKE;
+					}
+				}
+
+				//Check left 64bit chunk (HIGH)
+				for(i=max_pos; i>=0; i--){
+
+					//Check that masks match (HIGH)
+					if ( (*mask1_h  & __u64_alike_masks[max_pos]) !=
+						(*mask2_h  & __u64_alike_masks[max_pos]) )
+						break;
+
+					if ( (*value1_h & *mask1_h  & __u64_alike_masks[i]) ==
+						(*value2_h & *mask2_h  & __u64_alike_masks[i]) ){
+						//Set LOW
+						UINT128__T_LO(value.u128) = UINT128__T_LO(mask.u128) = 0x0ULL;
+						//Set HIGH
+						UINT128__T_HI(value.u128) = *value1_h & __u64_alike_masks[i];
+						UINT128__T_HI(mask.u128) = *mask1_h & __u64_alike_masks[i];
+						goto MATCH_TERN_ALIKE;
+					}
+				} //for
+
+				} //case scope
 				return NULL;
-				
-			if( UINT128__T_LO(new_mask.u128) && UINT128__T_HI(diff.u128) == 0xffffffffffffffffULL ){
-				UINT128__T_HI(new_mask.u128) = 0xffffffffffffffffULL;
-				return __init_utern128(tern1.value.u128,new_mask.u128);
-			}
-			
-			//Now we look for it in the higher part
-			for(UINT128__T_HI(new_mask.u128)=0xFFFFFFFFFFFFFFFFULL;UINT128__T_HI(new_mask.u128);UINT128__T_HI(new_mask.u128)=UINT128__T_HI(new_mask.u128)<<1)
-				if((UINT128__T_HI(diff.u128)&UINT128__T_HI(new_mask.u128)) == UINT128__T_HI(new_mask.u128)) break;
-				
-			if(UINT128__T_HI(tern1.mask.u128)<UINT128__T_HI(new_mask.u128) || UINT128__T_HI(tern2.mask.u128) < UINT128__T_HI(new_mask.u128) )
-				return NULL;
-			
-			if(UINT128__T_HI(new_mask.u128)){
-				UINT128__T_LO(new_mask.u128)=0x0000000000000000;
-				return __init_utern128(tern1.value.u128,new_mask.u128);
-			}
-			
-			return NULL;
-			
-			break;
-		
-		default:
-			assert(0); // we should never reach this point
-			return NULL;
 	}
-	return NULL;
+
+MATCH_TERN_ALIKE:
+
+	//Allocate space
+	common  = (utern_t*)platform_malloc_shared(sizeof(utern_t));
+	if(!common)
+		return NULL;
+
+	common->type = tern1->type;
+	common->value = value;
+	common->mask = mask;
+
+	return common;
 }
