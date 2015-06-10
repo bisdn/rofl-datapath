@@ -86,7 +86,7 @@ bool __utern_equals(const utern_t* tern1, const utern_t* tern2);
 bool __utern_is_contained(const utern_t* extensive_tern, const utern_t* tern);
 
 //Ternary alike functions
-utern_t* __utern_get_alike(const utern_t tern1, const utern_t tern2);
+utern_t* __utern_get_alike(const utern_t* tern1, const utern_t* tern2);
 
 //C++ extern C
 ROFL_END_DECLS

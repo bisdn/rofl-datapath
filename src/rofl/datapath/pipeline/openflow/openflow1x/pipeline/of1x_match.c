@@ -1699,7 +1699,7 @@ of1x_match_t* __of1x_get_alike_match(of1x_match_t* match1, of1x_match_t* match2)
 	if( match1->type != match2->type )
 		return NULL;	
 
-	common_tern = __utern_get_alike(*match1->__tern,*match2->__tern);
+	common_tern = __utern_get_alike(match1->__tern,match2->__tern);
 
 	if(common_tern){
 		of1x_match_t* match = (of1x_match_t*)platform_malloc_shared(sizeof(of1x_match_t));
