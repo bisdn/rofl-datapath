@@ -172,6 +172,10 @@ inline utern_t* __utern_get_alike(const utern_t* tern1, const utern_t* tern2){
 						(tern2->value.u8 & tern2->mask.u8 & __u8_alike_masks[i] ) ){
 						value.u8 = tern1->value.u8 & __u8_alike_masks[i];
 						mask.u8 = tern1->mask.u8 & __u8_alike_masks[i];
+
+						if(mask.u8 == 0x0)
+							return NULL;
+
 						goto MATCH_TERN_ALIKE;
 					}
 				}
@@ -188,6 +192,10 @@ inline utern_t* __utern_get_alike(const utern_t* tern1, const utern_t* tern2){
 						(tern2->value.u16 & tern2->mask.u16 & __u16_alike_masks[i] ) ){
 						value.u16 = tern1->value.u16 & __u16_alike_masks[i];
 						mask.u16 = tern1->mask.u16 & __u16_alike_masks[i];
+
+						if(mask.u16 == 0x0)
+							return NULL;
+
 						goto MATCH_TERN_ALIKE;
 					}
 				}
@@ -204,6 +212,10 @@ inline utern_t* __utern_get_alike(const utern_t* tern1, const utern_t* tern2){
 						(tern2->value.u32 & tern2->mask.u32 & __u32_alike_masks[i] ) ){
 						value.u32 = tern1->value.u32 & __u32_alike_masks[i];
 						mask.u32 = tern1->mask.u32 & __u32_alike_masks[i];
+
+						if(mask.u32 == 0x0)
+							return NULL;
+
 						goto MATCH_TERN_ALIKE;
 					}
 				}
@@ -267,6 +279,7 @@ inline utern_t* __utern_get_alike(const utern_t* tern1, const utern_t* tern2){
 						//Set HIGH
 						UINT128__T_HI(value.u128) = *value1_h;
 						UINT128__T_HI(mask.u128) = *mask1_h;
+
 						goto MATCH_TERN_ALIKE;
 					}
 				}
@@ -286,6 +299,10 @@ inline utern_t* __utern_get_alike(const utern_t* tern1, const utern_t* tern2){
 						//Set HIGH
 						UINT128__T_HI(value.u128) = *value1_h & __u64_alike_masks[i];
 						UINT128__T_HI(mask.u128) = *mask1_h & __u64_alike_masks[i];
+
+						if(UINT128__T_HI(mask.u128) == 0x0ULL)
+							return NULL;
+
 						goto MATCH_TERN_ALIKE;
 					}
 				} //for
@@ -295,6 +312,7 @@ inline utern_t* __utern_get_alike(const utern_t* tern1, const utern_t* tern2){
 	}
 
 MATCH_TERN_ALIKE:
+
 
 	//Allocate space
 	common  = (utern_t*)platform_malloc_shared(sizeof(utern_t));
