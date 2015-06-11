@@ -103,54 +103,57 @@ void test_get_alike_16(){
 	utern_t *one, *two, *three, *four, *five, *six, *seven;
 	utern_t* res;
 
+	uint16_t* tmp_u16 = (uint16_t*)tmp;
+	uint16_t* tmp_mask_u16 = (uint16_t*)tmp_mask;
+
 	//One
 	tmp[0] = 0xF0;
 	tmp[1] = 0x00;
 	tmp_mask[0] = 0xFF;
 	tmp_mask[1] = 0xFF;
-	one = __init_utern16(*((uint16_t*)tmp), *((uint16_t*)tmp_mask));
+	one = __init_utern16(*tmp_u16, *tmp_mask_u16);
 	CU_ASSERT(one != NULL);
 
 	tmp[0] = 0xF8;
 	tmp[1] = 0x00;
 	tmp_mask[0] = 0xFF;
 	tmp_mask[1] = 0xFF;
-	two = __init_utern16(*((uint16_t*)tmp), *((uint16_t*)tmp_mask));
+	two = __init_utern16(*tmp_u16, *tmp_mask_u16);
 	CU_ASSERT(two != NULL);
 
 	tmp[0] = 0xF0;
 	tmp[1] = 0x0F;
 	tmp_mask[0] = 0xFF;
 	tmp_mask[1] = 0xFF;
-	three = __init_utern16(*((uint16_t*)tmp), *((uint16_t*)tmp_mask));
+	three = __init_utern16(*tmp_u16, *tmp_mask_u16);
 	CU_ASSERT(three != NULL);
 
 	tmp[0] = 0xFF;
 	tmp[1] = 0x0B;
 	tmp_mask[0] = 0xFF;
 	tmp_mask[1] = 0xFF;
-	four = __init_utern16(*((uint16_t*)tmp), *((uint16_t*)tmp_mask));
+	four = __init_utern16(*tmp_u16, *tmp_mask_u16);
 	CU_ASSERT(four != NULL);
 
 	tmp[0] = 0x1F;
 	tmp[1] = 0xFB;
 	tmp_mask[0] = 0x1F;
 	tmp_mask[1] = 0xFF;
-	five = __init_utern16(*((uint16_t*)tmp), *((uint16_t*)tmp_mask));
+	five = __init_utern16(*tmp_u16, *tmp_mask_u16);
 	CU_ASSERT(five != NULL);
 
 	tmp[0] = 0x0F;
 	tmp[1] = 0xF0;
 	tmp_mask[0] = 0x0F;
 	tmp_mask[1] = 0xF0;
-	six = __init_utern16(*((uint16_t*)tmp), *((uint16_t*)tmp_mask));
+	six = __init_utern16(*tmp_u16, *tmp_mask_u16);
 	CU_ASSERT(six != NULL);
 
 	tmp[0] = 0x0F;
 	tmp[1] = 0xFF;
 	tmp_mask[0] = 0x0F;
 	tmp_mask[1] = 0xFC;
-	seven = __init_utern16(*((uint16_t*)tmp), *((uint16_t*)tmp_mask));
+	seven = __init_utern16(*tmp_u16, *tmp_mask_u16);
 	CU_ASSERT(seven != NULL);
 
 
@@ -323,6 +326,9 @@ void test_get_alike_64(){
 	utern_t *one, *two, *three, *four;
 	utern_t* res;
 
+	uint64_t* tmp_u64;
+	uint64_t* tmp_mask_u64;
+
 	/* Assign values and masks */
 
 	//01:23:45:67:89:AB
@@ -336,7 +342,9 @@ void test_get_alike_64(){
 	val1[7] = 0x00;
 	mask1[0] = mask1[1] = mask1[2] = mask1[3] = mask1[4] =  mask1[5] = 0xFF;
 	mask1[6] = mask1[7] = 0x00;
-	one = __init_utern64(*((uint64_t*)val1), *((uint64_t*)mask1));
+	tmp_u64 = (uint64_t*)val1;
+	tmp_mask_u64 = (uint64_t*)mask1;
+	one = __init_utern64(*tmp_u64, *tmp_mask_u64);
 	CU_ASSERT(one != NULL);
 
 	//01:23:45:67:89:1B
@@ -350,7 +358,9 @@ void test_get_alike_64(){
 	val2[7] = 0x00;
 	mask2[0] = mask2[1] = mask2[2] = mask2[3] = mask2[4] =  mask2[5] = 0xFF;
 	mask2[6] = mask2[7] = 0x00;
-	two = __init_utern64(*((uint64_t*)val2), *((uint64_t*)mask2));
+	tmp_u64 = (uint64_t*)val2;
+	tmp_mask_u64 = (uint64_t*)mask2;
+	two = __init_utern64(*tmp_u64, *tmp_mask_u64);
 	CU_ASSERT(two != NULL);
 
 	//81:23:45:67:89:1B
@@ -364,7 +374,9 @@ void test_get_alike_64(){
 	val3[7] = 0x00;
 	mask3[0] = mask3[1] = mask3[2] = mask3[3] = mask3[4] = mask3[5] = 0xFF;
 	mask3[6] = mask3[7] = 0x00;
-	three = __init_utern64(*((uint64_t*)val3), *((uint64_t*)mask3));
+	tmp_u64 = (uint64_t*)val3;
+	tmp_mask_u64 = (uint64_t*)mask3;
+	three = __init_utern64(*tmp_u64, *tmp_mask_u64);
 	CU_ASSERT(three != NULL);
 
 	//01:23:45:76:89:1B
@@ -378,7 +390,9 @@ void test_get_alike_64(){
 	val4[7] = 0x00;
 	mask4[0] = mask4[1] = mask4[2] = mask4[3] = mask4[4] = mask4[5] = 0xFF;
 	mask4[6] = mask4[7] = 0x00;
-	four = __init_utern64(*((uint64_t*)val4), *((uint64_t*)mask4));
+	tmp_u64 = (uint64_t*)val4;
+	tmp_mask_u64 = (uint64_t*)mask4;
+	four = __init_utern64(*tmp_u64, *tmp_mask_u64);
 	CU_ASSERT(four != NULL);
 
 
@@ -459,6 +473,9 @@ void test_get_alike_128(){
 	utern_t *one, *two, *three; //, *four;
 	utern_t* res;
 
+	uint128__t* tmp_u128;
+	uint128__t* tmp_mask_u128;
+
 	/* Assign values and masks */
 	val1[0] = 0x01;
 	val1[1] = 0x23;
@@ -479,7 +496,9 @@ void test_get_alike_128(){
 
 	memset(mask1, 0xFF, 16);
 	mask1[14] = mask1[15] = 0x00;
-	one = __init_utern128(*((uint128__t*)val1), *((uint128__t*)mask1));
+	tmp_u128 = (uint128__t*)val1;
+	tmp_mask_u128 = (uint128__t*)mask1;
+	one = __init_utern128(*tmp_u128, *tmp_mask_u128);
 	CU_ASSERT(one != NULL);
 
 	/* Assign values and masks */
@@ -502,7 +521,9 @@ void test_get_alike_128(){
 
 	memset(mask2, 0xFF, 16);
 	mask3[14] = mask2[15] = 0x00;
-	two = __init_utern128(*((uint128__t*)val2), *((uint128__t*)mask2));
+	tmp_u128 = (uint128__t*)val2;
+	tmp_mask_u128 = (uint128__t*)mask2;
+	two = __init_utern128(*tmp_u128, *tmp_mask_u128);
 	CU_ASSERT(two != NULL);
 
 
@@ -526,7 +547,9 @@ void test_get_alike_128(){
 
 	memset(mask3, 0xFF, 16);
 	mask3[14] = mask3[15] = 0x00;
-	three = __init_utern128(*((uint128__t*)val3), *((uint128__t*)mask3));
+	tmp_u128 = (uint128__t*)val3;
+	tmp_mask_u128 = (uint128__t*)mask3;
+	three = __init_utern128(*tmp_u128, *tmp_mask_u128);
 	CU_ASSERT(three != NULL);
 
 	//Check itself(s)
