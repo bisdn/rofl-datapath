@@ -23,6 +23,7 @@ SHARED_SRC= $(top_srcdir)/src/rofl/datapath/pipeline/physical_switch.c \
 	$(top_srcdir)/src/rofl/datapath/pipeline/openflow/openflow1x/pipeline/matching_algorithms/loop/of1x_loop_ma.c \
 	$(top_srcdir)/src/rofl/datapath/pipeline/openflow/openflow1x/pipeline/matching_algorithms/l2hash/of1x_l2hash_ma.c \
 	$(top_srcdir)/src/rofl/datapath/pipeline/openflow/openflow1x/pipeline/matching_algorithms/available_ma.c \
+	$(top_srcdir)/src/rofl/datapath/pipeline/common/alike_masks.c \
 	../../memory.c \
 	../../empty_packet.c\
 	../../platform_empty_hooks_of12.cc\
