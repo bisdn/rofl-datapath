@@ -977,7 +977,7 @@ of1x_match_t* __of1x_copy_matches(of1x_match_t* matches);
 /* 
 * Get alike match 
 */ 
-of1x_match_t* __of1x_get_alike_match(of1x_match_t* match1, of1x_match_t* match2);
+bool __of1x_get_alike_match(of1x_match_t* match1, of1x_match_t* match2, of1x_match_t* res);
 
 /*
 * Matching 
