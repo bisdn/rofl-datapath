@@ -1693,23 +1693,20 @@ of1x_match_t* __of1x_copy_matches(of1x_match_t* matches){
 /*
 * Try to find the largest common value among match1 and match2, being ALWAYS match2 with a more strict mask 
 */
-of1x_match_t* __of1x_get_alike_match(of1x_match_t* match1, of1x_match_t* match2){
-	utern_t* common_tern = NULL;	
+bool __of1x_get_alike_match(of1x_match_t* match1, of1x_match_t* match2, of1x_match_t* common){
 
-	if( match1->type != match2->type )
-		return NULL;	
+	if(match1->type != match2->type)
+		return false;
 
-	common_tern = __utern_get_alike(match1->__tern,match2->__tern);
-
-	if(common_tern){
-		of1x_match_t* match = (of1x_match_t*)platform_malloc_shared(sizeof(of1x_match_t));
-		match->__tern = common_tern;
-		match->type = match1->type;
-		match->next = NULL;
-		match->prev = NULL;
-		return match;
+	if(common){
+		if(!__utern_get_alike(match1->__tern, match2->__tern, common->__tern))
+			return false;
+		common->type = match1->type;
+		common->next = common->prev = NULL;
+		return true;
 	}
-	return NULL;
+
+	return __utern_get_alike(match1->__tern, match2->__tern, NULL);
 }
 /*
 * Common destructor

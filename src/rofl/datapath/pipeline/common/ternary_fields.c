@@ -146,17 +146,16 @@ inline bool __utern_equals(const utern_t* tern1, const utern_t* tern2){
 
 //This function shall find the common and contiguous shared ternary portion of two ternary values
 //Masks go from left to right in memory
-inline utern_t* __utern_get_alike(const utern_t* tern1, const utern_t* tern2){
+bool __utern_get_alike(const utern_t* tern1, const utern_t* tern2, utern_t* common){
 
 	int i;
-	utern_t* common;
 	wrap_uint_t value;
 	wrap_uint_t mask;
 	uint8_t max_pos;
 
 	//Diferent type of ternary matches cannot share anything
 	if(tern1->type != tern2->type)
-		return NULL;
+		return false;
 
 	switch(tern1->type) {
 		case UTERN8_T:
@@ -174,12 +173,12 @@ inline utern_t* __utern_get_alike(const utern_t* tern1, const utern_t* tern2){
 						mask.u8 = tern1->mask.u8 & __u8_alike_masks[i];
 
 						if(mask.u8 == 0x0)
-							return NULL;
+							return false;
 
 						goto MATCH_TERN_ALIKE;
 					}
 				}
-				return NULL;
+				return false;
 		case UTERN16_T:
 				max_pos = (sizeof(uint16_t)*8)-1;
 				for(i=max_pos; i>=0; i--){
@@ -194,12 +193,12 @@ inline utern_t* __utern_get_alike(const utern_t* tern1, const utern_t* tern2){
 						mask.u16 = tern1->mask.u16 & __u16_alike_masks[i];
 
 						if(mask.u16 == 0x0)
-							return NULL;
+							return false;
 
 						goto MATCH_TERN_ALIKE;
 					}
 				}
-				return NULL;
+				return false;
 		case UTERN32_T:
 				max_pos = (sizeof(uint32_t)*8)-1;
 				for(i=max_pos; i>=0; i--){
@@ -214,12 +213,12 @@ inline utern_t* __utern_get_alike(const utern_t* tern1, const utern_t* tern2){
 						mask.u32 = tern1->mask.u32 & __u32_alike_masks[i];
 
 						if(mask.u32 == 0x0)
-							return NULL;
+							return false;
 
 						goto MATCH_TERN_ALIKE;
 					}
 				}
-				return NULL;
+				return false;
 		case UTERN64_T:
 				max_pos = (sizeof(uint64_t)*8)-1;
 				for(i=max_pos; i>=0; i--){
@@ -235,7 +234,7 @@ inline utern_t* __utern_get_alike(const utern_t* tern1, const utern_t* tern2){
 						goto MATCH_TERN_ALIKE;
 					}
 				}
-				return NULL;
+				return false;
 		case UTERN128_T:
 				{
 				max_pos = (sizeof(uint64_t)*8)-1;
@@ -301,27 +300,23 @@ inline utern_t* __utern_get_alike(const utern_t* tern1, const utern_t* tern2){
 						UINT128__T_HI(mask.u128) = *mask1_h & __u64_alike_masks[i];
 
 						if(UINT128__T_HI(mask.u128) == 0x0ULL)
-							return NULL;
+							return false;
 
 						goto MATCH_TERN_ALIKE;
 					}
 				} //for
 
 				} //case scope
-				return NULL;
+				return false;
 	}
 
 MATCH_TERN_ALIKE:
 
+	if(common){
+		common->type = tern1->type;
+		common->value = value;
+		common->mask = mask;
+	}
 
-	//Allocate space
-	common  = (utern_t*)platform_malloc_shared(sizeof(utern_t));
-	if(!common)
-		return NULL;
-
-	common->type = tern1->type;
-	common->value = value;
-	common->mask = mask;
-
-	return common;
+	return true;
 }
