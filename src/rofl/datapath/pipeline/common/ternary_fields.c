@@ -10,79 +10,52 @@
 /*
 * Initializers
 */
-inline utern_t* __init_utern8(uint8_t value, uint8_t mask){
-	utern_t* tern = (utern_t*)platform_malloc_shared(sizeof(utern_t));
-
+void __init_utern8(utern_t* tern, uint8_t value, uint8_t mask){
 	if(!tern)
-		return NULL;
+		return;
 
 	tern->type = UTERN8_T;
 	tern->value.u8 = value;
 	tern->mask.u8 = mask;
-	return (utern_t*)tern;
 }
-inline utern_t* __init_utern16(uint16_t value, uint16_t mask){
-	utern_t* tern = (utern_t*)platform_malloc_shared(sizeof(utern_t));
-
+void __init_utern16(utern_t* tern, uint16_t value, uint16_t mask){
 	if(!tern)
-		return NULL;
+		return;
 
 	tern->type = UTERN16_T;
 	tern->value.u16 = value;
 	tern->mask.u16 = mask;
-	return (utern_t*)tern;
 }
-inline utern_t* __init_utern32(uint32_t value, uint32_t mask){
-	utern_t* tern = (utern_t*)platform_malloc_shared(sizeof(utern_t));
-
+void __init_utern32(utern_t* tern, uint32_t value, uint32_t mask){
 	if(!tern)
-		return NULL;
-	
+		return;
+
 	tern->type = UTERN32_T;
 	tern->value.u32 = value;
 	tern->mask.u32 = mask;
-	return (utern_t*)tern;
 }
-inline utern_t* __init_utern64(uint64_t value, uint64_t mask){
-	utern_t* tern = (utern_t*)platform_malloc_shared(sizeof(utern_t));
-
+void __init_utern64(utern_t* tern, uint64_t value, uint64_t mask){
 	if(!tern)
-		return NULL;
-	
+		return;
+
 	tern->type = UTERN64_T;
 	tern->value.u64 = value;
 	tern->mask.u64 = mask;
-	return (utern_t*)tern;
 }
-inline utern_t* __init_utern128(uint128__t value, uint128__t mask){ //uint128_t funny!
-	utern_t* tern = (utern_t*)platform_malloc_shared(sizeof(utern_t));
-	
+void __init_utern128(utern_t* tern, uint128__t value, uint128__t mask){ //uint128_t funny!
 	if(!tern)
-		return NULL;
-	
+		return;
+
 	tern->type = UTERN128_T;
 	tern->value.u128 = value;
 	tern->mask.u128 = mask;
-	return (utern_t*)tern;
 }
-
-/*
-* Single destructor
-*/
-rofl_result_t __destroy_utern(utern_t* utern){
-	platform_free_shared(utern);
-	//FIXME: maybe check returning value
-	return ROFL_SUCCESS; 
-}	
-
-
-
 
 /*
 * Contained 
 */
 //Extensive tern is a more generic (with a less restrictive mask or equal) to tern
-inline bool __utern_is_contained(const utern_t* extensive_tern, const utern_t* tern){
+bool __utern_is_contained(const utern_t* extensive_tern, const utern_t* tern){
 	
 	switch(extensive_tern->type){
 		
@@ -119,7 +92,7 @@ inline bool __utern_is_contained(const utern_t* extensive_tern, const utern_t* t
 /*
 * Check if two ternary values are equal
 */
-inline bool __utern_equals(const utern_t* tern1, const utern_t* tern2){
+bool __utern_equals(const utern_t* tern1, const utern_t* tern2){
 	switch(tern1->type)	{
 		
 		case UTERN8_T:
