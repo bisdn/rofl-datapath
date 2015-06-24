@@ -22,73 +22,71 @@ void test_get_alike_8(){
 	uint8_t u8_5 = 0x7F;
 	uint8_t u8_6 = 0x7D;
 
-	utern_t *one, *two, *three, *four, *five, *six;
-	utern_t *null_tern_full_mask, *null_tern_half_mask;
-	utern_t common;
+	utern_t one, two, three, four, five, six;
+	utern_t null_tern_full_mask, null_tern_half_mask;
+	utern_t common, disc;
 	bool res;
 
 	//Create basic values + mask
-	one = __init_utern8(u8_1, 0xFF);
-	two = __init_utern8(u8_2, 0xFF);
-	three = __init_utern8(u8_3, 0xFF);
-	four = __init_utern8(u8_4, 0xFF);
-	five = __init_utern8(u8_5, 0x7F);
-	six = __init_utern8(u8_6, 0x7D);
+	__init_utern8(&one, u8_1, 0xFF);
+	__init_utern8(&two, u8_2, 0xFF);
+	__init_utern8(&three, u8_3, 0xFF);
+	__init_utern8(&four, u8_4, 0xFF);
+	__init_utern8(&five, u8_5, 0x7F);
+	__init_utern8(&six, u8_6, 0x7D);
 
 	//Nulls
-	null_tern_full_mask = __init_utern8(0x00,0xFF);
-	CU_ASSERT(one != NULL);
-	CU_ASSERT(two != NULL);
+	__init_utern8(&null_tern_full_mask, 0x00,0xFF);
 
 	//Check itself8s)
-	res = __utern_get_alike(one, one, &common);
+	res = __utern_get_alike(&one, &one, &common);
 	CU_ASSERT(res == true);
 	CU_ASSERT(common.value.u8 == u8_1);
 	CU_ASSERT(common.mask.u8 == 0xFF);
-	res = __utern_get_alike(two, two, &common);
+	res = __utern_get_alike(&two, &two, &common);
 	CU_ASSERT(res == true);
 	CU_ASSERT(common.value.u8 == u8_2);
 	CU_ASSERT(common.mask.u8 == 0xFF);
-	res = __utern_get_alike(five, five, &common);
+	res = __utern_get_alike(&five, &five, &common);
 	CU_ASSERT(res == true);
-	CU_ASSERT(__utern_equals(five,&common) == true);
+	CU_ASSERT(__utern_equals(&five,&common) == true);
 
 	//Check disjoint
-	res = __utern_get_alike(one, null_tern_full_mask, &common);
+	res = __utern_get_alike(&one, &null_tern_full_mask, &common);
 	CU_ASSERT(res == false);
 
 	//Check masked sharing first 4 bits
-	null_tern_half_mask = __init_utern8(0x00,0xF0);
-	res = __utern_get_alike(null_tern_full_mask, null_tern_half_mask, &common);
+	__init_utern8(&null_tern_half_mask, 0x00,0xF0);
+	res = __utern_get_alike(&null_tern_full_mask, &null_tern_half_mask, &common);
 	CU_ASSERT(res == true);
-	CU_ASSERT(common.mask.u8 == null_tern_half_mask->mask.u8);
+	CU_ASSERT(common.mask.u8 == null_tern_half_mask.mask.u8);
 	CU_ASSERT(common.value.u8 == 0x00);
 
 	//Check matches that share value
-	res = __utern_get_alike(one, two, &common);
+	res = __utern_get_alike(&one, &two, &common);
 	CU_ASSERT(res == true);
 	CU_ASSERT(common.mask.u8 == 0x80)
 	CU_ASSERT(common.value.u8 == 0x80);
 
-	res = __utern_get_alike(one, three, &common);
+	res = __utern_get_alike(&one, &three, &common);
 	CU_ASSERT(res == true);
 	CU_ASSERT(common.mask.u8 == 0xC0)
 	CU_ASSERT(common.value.u8 == 0xC0);
 
-	res = __utern_get_alike(one, four, &common);
+	res = __utern_get_alike(&one, &four, &common);
 	CU_ASSERT(res == true);
 	CU_ASSERT(common.mask.u8 == 0xF8)
 	CU_ASSERT(common.value.u8 == 0xF8);
 
 	//Discontinuous masks
-	utern_t* disc = __init_utern8(0xFF,0xBF);
-	res = __utern_get_alike(one, disc, &common);
+	__init_utern8(&disc, 0xFF,0xBF);
+	res = __utern_get_alike(&one, &disc, &common);
 	CU_ASSERT(res == true);
 	CU_ASSERT(common.mask.u8 == 0x80)
 	CU_ASSERT(common.value.u8 == 0x80);
 
 	//Leave 0s in the very beginning
-	res = __utern_get_alike(five, six, &common);
+	res = __utern_get_alike(&five, &six, &common);
 	CU_ASSERT(res == true);
 	CU_ASSERT(common.mask.u8 == 0x7C)
 	CU_ASSERT(common.value.u8 == 0x7C);
@@ -101,7 +99,7 @@ void test_get_alike_16(){
 	uint8_t* aux;
 	uint8_t tmp[2], tmp_mask[2];
 
-	utern_t *one, *two, *three, *four, *five, *six, *seven;
+	utern_t one, two, three, four, five, six, seven;
 	utern_t common;
 	bool res;
 
@@ -113,83 +111,76 @@ void test_get_alike_16(){
 	tmp[1] = 0x00;
 	tmp_mask[0] = 0xFF;
 	tmp_mask[1] = 0xFF;
-	one = __init_utern16(*tmp_u16, *tmp_mask_u16);
-	CU_ASSERT(one != NULL);
+	__init_utern16(&one, *tmp_u16, *tmp_mask_u16);
 
 	tmp[0] = 0xF8;
 	tmp[1] = 0x00;
 	tmp_mask[0] = 0xFF;
 	tmp_mask[1] = 0xFF;
-	two = __init_utern16(*tmp_u16, *tmp_mask_u16);
-	CU_ASSERT(two != NULL);
+	__init_utern16(&two, *tmp_u16, *tmp_mask_u16);
 
 	tmp[0] = 0xF0;
 	tmp[1] = 0x0F;
 	tmp_mask[0] = 0xFF;
 	tmp_mask[1] = 0xFF;
-	three = __init_utern16(*tmp_u16, *tmp_mask_u16);
-	CU_ASSERT(three != NULL);
+	__init_utern16(&three, *tmp_u16, *tmp_mask_u16);
 
 	tmp[0] = 0xFF;
 	tmp[1] = 0x0B;
 	tmp_mask[0] = 0xFF;
 	tmp_mask[1] = 0xFF;
-	four = __init_utern16(*tmp_u16, *tmp_mask_u16);
-	CU_ASSERT(four != NULL);
+	__init_utern16(&four, *tmp_u16, *tmp_mask_u16);
 
 	tmp[0] = 0x1F;
 	tmp[1] = 0xFB;
 	tmp_mask[0] = 0x1F;
 	tmp_mask[1] = 0xFF;
-	five = __init_utern16(*tmp_u16, *tmp_mask_u16);
-	CU_ASSERT(five != NULL);
+	__init_utern16(&five, *tmp_u16, *tmp_mask_u16);
 
 	tmp[0] = 0x0F;
 	tmp[1] = 0xF0;
 	tmp_mask[0] = 0x0F;
 	tmp_mask[1] = 0xF0;
-	six = __init_utern16(*tmp_u16, *tmp_mask_u16);
-	CU_ASSERT(six != NULL);
+	__init_utern16(&six, *tmp_u16, *tmp_mask_u16);
 
 	tmp[0] = 0x0F;
 	tmp[1] = 0xFF;
 	tmp_mask[0] = 0x0F;
 	tmp_mask[1] = 0xFC;
-	seven = __init_utern16(*tmp_u16, *tmp_mask_u16);
-	CU_ASSERT(seven != NULL);
+	__init_utern16(&seven, *tmp_u16, *tmp_mask_u16);
 
 
 	//Check itself(s)
-	res = __utern_get_alike(one, one, &common);
+	res = __utern_get_alike(&one, &one, &common);
 	CU_ASSERT(res == true);
-	CU_ASSERT(__utern_equals(one,&common) == true);
+	CU_ASSERT(__utern_equals(&one,&common) == true);
 
-	res = __utern_get_alike(two, two, &common);
+	res = __utern_get_alike(&two, &two, &common);
 	CU_ASSERT(res == true);
-	CU_ASSERT(__utern_equals(two,&common) == true);
+	CU_ASSERT(__utern_equals(&two,&common) == true);
 
-	res = __utern_get_alike(three, three, &common);
+	res = __utern_get_alike(&three, &three, &common);
 	CU_ASSERT(res == true);
-	CU_ASSERT(__utern_equals(three, &common) == true);
+	CU_ASSERT(__utern_equals(&three, &common) == true);
 
-	res = __utern_get_alike(four, four, &common);
+	res = __utern_get_alike(&four, &four, &common);
 	CU_ASSERT(res == true);
-	CU_ASSERT(__utern_equals(four, &common) == true);
+	CU_ASSERT(__utern_equals(&four, &common) == true);
 
-	res = __utern_get_alike(five, five, &common);
+	res = __utern_get_alike(&five, &five, &common);
 	CU_ASSERT(res == true);
-	CU_ASSERT(__utern_equals(five, &common) == true);
+	CU_ASSERT(__utern_equals(&five, &common) == true);
 
-	res = __utern_get_alike(six, six, &common);
+	res = __utern_get_alike(&six, &six, &common);
 	CU_ASSERT(res == true);
-	CU_ASSERT(__utern_equals(six, &common) == true);
-	res = __utern_get_alike(seven, seven, &common);
+	CU_ASSERT(__utern_equals(&six, &common) == true);
+	res = __utern_get_alike(&seven, &seven, &common);
 	CU_ASSERT(res == true);
-	CU_ASSERT(__utern_equals(seven, &common) == true);
+	CU_ASSERT(__utern_equals(&seven, &common) == true);
 
 
 	//Check 1 against two
-	res = __utern_get_alike(one, two, &common);
+	res = __utern_get_alike(&one, &two, &common);
 	CU_ASSERT(res == true);
 	aux = (uint8_t*)&common.value.u16;
 	CU_ASSERT(aux[0] == 0xF0 && aux[1] == 0x00);
@@ -197,7 +188,7 @@ void test_get_alike_16(){
 	CU_ASSERT(aux[0] == 0xF0 && aux[1] == 0x00);
 
 	//1, 3
-	res = __utern_get_alike(one, three, &common);
+	res = __utern_get_alike(&one, &three, &common);
 	CU_ASSERT(res == true);
 	aux = (uint8_t*)&common.value.u16;
 	CU_ASSERT(aux[0] == 0xF0 && aux[1] == 0x00);
@@ -205,7 +196,7 @@ void test_get_alike_16(){
 	CU_ASSERT(aux[0] == 0xFF && aux[1] == 0xF0);
 
 	//2, 4
-	res = __utern_get_alike(two, four, &common);
+	res = __utern_get_alike(&two, &four, &common);
 	CU_ASSERT(res == true);
 	aux = (uint8_t*)&common.value.u16;
 	CU_ASSERT(aux[0] == 0xF8 && aux[1] == 0x00);
@@ -213,15 +204,15 @@ void test_get_alike_16(){
 	CU_ASSERT(aux[0] == 0xF8 && aux[1] == 0x00);
 
 	//4,5
-	res = __utern_get_alike(four, five, &common);
+	res = __utern_get_alike(&four, &five, &common);
 	CU_ASSERT(res == false);
 
 	//5,6
-	res = __utern_get_alike(five, six, &common);
+	res = __utern_get_alike(&five, &six, &common);
 	CU_ASSERT(res == false);
 
 	//6,7
-	res = __utern_get_alike(six, seven, &common);
+	res = __utern_get_alike(&six, &seven, &common);
 	CU_ASSERT(res == true);
 	aux = (uint8_t*)&common.value.u16;
 	CU_ASSERT(aux[0] == 0x0F && aux[1] == 0xF0);
@@ -233,91 +224,85 @@ void test_get_alike_32(){
 
 	uint32_t ip1, ip2, ip3, ip4, ip5;
 	uint32_t mask1, mask2, mask3, mask4, mask5;
-	utern_t *one, *two, *three, *four, *five;
+	utern_t one, two, three, four, five;
 
 	utern_t common;
 	bool res;
 
-
 	//Assign values and masks
 	ip1 = htonl(0xC0A80001);//192.168.0.1/24
 	mask1 = htonl(0xFFFFFF00);
-	one = __init_utern32(ip1, mask1);
-	CU_ASSERT(one != NULL);
+	__init_utern32(&one, ip1, mask1);
 
 	ip2 = htonl(0xC0A80001);//192.168.0.1/32
 	mask2 = htonl(0xFFFFFFFF);
-	two = __init_utern32(ip2, mask2);
-	CU_ASSERT(two != NULL);
+	__init_utern32(&two, ip2, mask2);
 
 	ip3 = htonl(0xC0A80001);//192.168.0.1/16
 	mask3 = htonl(0xFFFF0000);
-	three = __init_utern32(ip3, mask3);
-	CU_ASSERT(three != NULL);
+	__init_utern32(&three, ip3, mask3);
 
 	ip4 = htonl(0xC0E00001);//192.224.0.0/32
 	mask4 = htonl(0xFFFFFFFF);
-	four = __init_utern32(ip4, mask4);
-	CU_ASSERT(four != NULL);
+	__init_utern32(&four, ip4, mask4);
 
 	ip5 = htonl(0xC0A80001);//192.168.0.1
 	mask5 = htonl(0xFFFFF8FF); //non-contiguous mask
-	five = __init_utern32(ip5, mask5);
-	CU_ASSERT(five != NULL);
+	__init_utern32(&five, ip5, mask5);
 
 
 	//Check itself(s)
-	res = __utern_get_alike(one, one, &common);
+	res = __utern_get_alike(&one, &one, &common);
 	CU_ASSERT(res == true);
-	CU_ASSERT(__utern_equals(one, &common) == true);
+	CU_ASSERT(__utern_equals(&one, &common) == true);
 
-	res = __utern_get_alike(two, two, &common);
+	res = __utern_get_alike(&two, &two, &common);
 	CU_ASSERT(res == true);
-	CU_ASSERT(__utern_equals(two, &common) == true);
+	CU_ASSERT(__utern_equals(&two, &common) == true);
 
-	res = __utern_get_alike(three, three, &common);
+	res = __utern_get_alike(&three, &three, &common);
 	CU_ASSERT(res == true);
-	CU_ASSERT(__utern_equals(three, &common) == true);
+	CU_ASSERT(__utern_equals(&three, &common) == true);
 
-	res = __utern_get_alike(four, four, &common);
+	res = __utern_get_alike(&four, &four, &common);
 	CU_ASSERT(res == true);
-	CU_ASSERT(__utern_equals(four, &common) == true);
+	CU_ASSERT(__utern_equals(&four, &common) == true);
 
 	//1,2
-	res = __utern_get_alike(one, two, &common);
+	res = __utern_get_alike(&one, &two, &common);
 	CU_ASSERT(res == true);
-	CU_ASSERT(__utern_equals(one, &common) == false);
+	CU_ASSERT(__utern_equals(&one, &common) == false);
 	CU_ASSERT(ntohl(common.value.u32) == 0xC0A80000);
 	CU_ASSERT(ntohl(common.mask.u32) == 0xFFFFFF00);
 
 	//2,1
-	res = __utern_get_alike(two, one, &common);
+	res = __utern_get_alike(&two, &one, &common);
 	CU_ASSERT(res == true);
-	CU_ASSERT(__utern_equals(one, &common) == false);
+	CU_ASSERT(__utern_equals(&one, &common) == false);
 	CU_ASSERT(ntohl(common.value.u32) == 0xC0A80000);
 	CU_ASSERT(ntohl(common.mask.u32) == 0xFFFFFF00);
 
 
 	//2,3
-	res = __utern_get_alike(two, three, &common);
+	res = __utern_get_alike(&two, &three, &common);
 	CU_ASSERT(res == true);
-	CU_ASSERT(__utern_equals(three, &common) == false);
+	CU_ASSERT(__utern_equals(&three, &common) == false);
 	CU_ASSERT(ntohl(common.value.u32) == 0xC0A80000);
 	CU_ASSERT(ntohl(common.mask.u32) == 0xFFFF0000);
 
 
 	//3,4
-	res = __utern_get_alike(four, three, &common);
+	res = __utern_get_alike(&four, &three, &common);
 	CU_ASSERT(res == true);
-	CU_ASSERT(__utern_equals(four, &common) == false);
+	CU_ASSERT(__utern_equals(&four, &common) == false);
 	CU_ASSERT(ntohl(common.value.u32) == 0xC0800000);
 	CU_ASSERT(ntohl(common.mask.u32) == 0xFF800000);
 
 	//1,5
-	res = __utern_get_alike(one, five, &common);
+	res = __utern_get_alike(&one, &five, &common);
 	CU_ASSERT(res == true);
-	CU_ASSERT(__utern_equals(one, &common) == false);
-	CU_ASSERT(__utern_equals(five, &common) == false);
+	CU_ASSERT(__utern_equals(&one, &common) == false);
+	CU_ASSERT(__utern_equals(&five, &common) == false);
 	CU_ASSERT(ntohl(common.value.u32) == 0xC0A80000);
 	CU_ASSERT(ntohl(common.mask.u32) == 0xFFFFF800);
 }
@@ -328,7 +313,7 @@ void test_get_alike_64(){
 	uint8_t val1[8], val2[8], val3[8], val4[8];
 	uint8_t mask1[8], mask2[8], mask3[8], mask4[8];
 
-	utern_t *one, *two, *three, *four;
+	utern_t one, two, three, four;
 
 	utern_t common;
 	bool res;
@@ -351,8 +336,7 @@ void test_get_alike_64(){
 	mask1[6] = mask1[7] = 0x00;
 	tmp_u64 = (uint64_t*)val1;
 	tmp_mask_u64 = (uint64_t*)mask1;
-	one = __init_utern64(*tmp_u64, *tmp_mask_u64);
-	CU_ASSERT(one != NULL);
+	__init_utern64(&one, *tmp_u64, *tmp_mask_u64);
 
 	//01:23:45:67:89:1B
 	val2[0] = 0x01;
@@ -367,8 +351,7 @@ void test_get_alike_64(){
 	mask2[6] = mask2[7] = 0x00;
 	tmp_u64 = (uint64_t*)val2;
 	tmp_mask_u64 = (uint64_t*)mask2;
-	two = __init_utern64(*tmp_u64, *tmp_mask_u64);
-	CU_ASSERT(two != NULL);
+	__init_utern64(&two, *tmp_u64, *tmp_mask_u64);
 
 	//81:23:45:67:89:1B
 	val3[0] = 0x81;
@@ -383,8 +366,7 @@ void test_get_alike_64(){
 	mask3[6] = mask3[7] = 0x00;
 	tmp_u64 = (uint64_t*)val3;
 	tmp_mask_u64 = (uint64_t*)mask3;
-	three = __init_utern64(*tmp_u64, *tmp_mask_u64);
-	CU_ASSERT(three != NULL);
+	__init_utern64(&three, *tmp_u64, *tmp_mask_u64);
 
 	//01:23:45:76:89:1B
 	val4[0] = 0x01;
@@ -399,31 +381,30 @@ void test_get_alike_64(){
 	mask4[6] = mask4[7] = 0x00;
 	tmp_u64 = (uint64_t*)val4;
 	tmp_mask_u64 = (uint64_t*)mask4;
-	four = __init_utern64(*tmp_u64, *tmp_mask_u64);
-	CU_ASSERT(four != NULL);
+	__init_utern64(&four, *tmp_u64, *tmp_mask_u64);
 
 
 	//Check itself(s)
-	res = __utern_get_alike(one, one, &common);
+	res = __utern_get_alike(&one, &one, &common);
 	CU_ASSERT(res == true);
-	CU_ASSERT(__utern_equals(one, &common) == true);
+	CU_ASSERT(__utern_equals(&one, &common) == true);
 
-	res = __utern_get_alike(two, two, &common);
+	res = __utern_get_alike(&two, &two, &common);
 	CU_ASSERT(res == true);
-	CU_ASSERT(__utern_equals(two, &common) == true);
+	CU_ASSERT(__utern_equals(&two, &common) == true);
 
-	res = __utern_get_alike(three, three, &common);
+	res = __utern_get_alike(&three, &three, &common);
 	CU_ASSERT(res == true);
-	CU_ASSERT(__utern_equals(three, &common) == true);
+	CU_ASSERT(__utern_equals(&three, &common) == true);
 
-	res = __utern_get_alike(four, four, &common);
+	res = __utern_get_alike(&four, &four, &common);
 	CU_ASSERT(res == true);
-	CU_ASSERT(__utern_equals(four, &common) == true);
+	CU_ASSERT(__utern_equals(&four, &common) == true);
 
 	//1,2
-	res = __utern_get_alike(one, two, &common);
+	res = __utern_get_alike(&one, &two, &common);
 	CU_ASSERT(res == true);
-	CU_ASSERT(__utern_equals(one, &common) == false);
+	CU_ASSERT(__utern_equals(&one, &common) == false);
 	tmp = (uint8_t*)&common.value.u64;
 	CU_ASSERT(tmp[0] == 0x01);
 	CU_ASSERT(tmp[1] == 0x23);
@@ -444,13 +425,13 @@ void test_get_alike_64(){
 	CU_ASSERT(tmp[7] == 0x00);
 
 	//1,3
-	res = __utern_get_alike(one, three, &common);
+	res = __utern_get_alike(&one, &three, &common);
 	CU_ASSERT(res == false);
 
 	//1,4
-	res = __utern_get_alike(one, four, &common);
+	res = __utern_get_alike(&one, &four, &common);
 	CU_ASSERT(res == true);
-	CU_ASSERT(__utern_equals(one, &common) == false);
+	CU_ASSERT(__utern_equals(&one, &common) == false);
 	tmp = (uint8_t*)&common.value.u64;
 	CU_ASSERT(tmp[0] == 0x01);
 	CU_ASSERT(tmp[1] == 0x23);
@@ -477,7 +458,7 @@ void test_get_alike_128(){
 	uint8_t val1[16], val2[16], val3[16]; //, val4[16];
 	uint8_t mask1[16], mask2[16], mask3[16]; //, mask4[16];
 
-	utern_t *one, *two, *three; //, *four;
+	utern_t one, two, three; //, four;
 	utern_t common;
 	bool res;
 
@@ -507,8 +488,7 @@ void test_get_alike_128(){
 	mask1[14] = mask1[15] = 0x00;
 	tmp_u128 = (uint128__t*)val1;
 	tmp_mask_u128 = (uint128__t*)mask1;
-	one = __init_utern128(*tmp_u128, *tmp_mask_u128);
-	CU_ASSERT(one != NULL);
+	__init_utern128(&one, *tmp_u128, *tmp_mask_u128);
 
 	/* Assign values and masks */
 	val2[0] = 0x01;
@@ -532,8 +512,7 @@ void test_get_alike_128(){
 	mask3[14] = mask2[15] = 0x00;
 	tmp_u128 = (uint128__t*)val2;
 	tmp_mask_u128 = (uint128__t*)mask2;
-	two = __init_utern128(*tmp_u128, *tmp_mask_u128);
-	CU_ASSERT(two != NULL);
+	__init_utern128(&two, *tmp_u128, *tmp_mask_u128);
 
 
 	/* Assign values and masks */
@@ -558,27 +537,26 @@ void test_get_alike_128(){
 	mask3[14] = mask3[15] = 0x00;
 	tmp_u128 = (uint128__t*)val3;
 	tmp_mask_u128 = (uint128__t*)mask3;
-	three = __init_utern128(*tmp_u128, *tmp_mask_u128);
-	CU_ASSERT(three != NULL);
+	__init_utern128(&three, *tmp_u128, *tmp_mask_u128);
 
 	//Check itself(s)
-	res = __utern_get_alike(one, one, &common);
+	res = __utern_get_alike(&one, &one, &common);
 	CU_ASSERT(res == true);
-	CU_ASSERT(__utern_equals(one, &common) == true);
+	CU_ASSERT(__utern_equals(&one, &common) == true);
 
-	res = __utern_get_alike(two, two, &common);
+	res = __utern_get_alike(&two, &two, &common);
 	CU_ASSERT(res == true);
-	CU_ASSERT(__utern_equals(two, &common) == true);
+	CU_ASSERT(__utern_equals(&two, &common) == true);
 
-	res = __utern_get_alike(three, three, &common);
+	res = __utern_get_alike(&three, &three, &common);
 	CU_ASSERT(res == true);
-	CU_ASSERT(__utern_equals(three, &common) == true);
+	CU_ASSERT(__utern_equals(&three, &common) == true);
 
 
 	//1,2
-	res = __utern_get_alike(one, two, &common);
+	res = __utern_get_alike(&one, &two, &common);
 	CU_ASSERT(res == true);
-	CU_ASSERT(__utern_equals(one, &common) == false);
+	CU_ASSERT(__utern_equals(&one, &common) == false);
 	tmp = (uint8_t*)&common.value.u128;
 	CU_ASSERT(tmp[0] == 0x01);
 	CU_ASSERT(tmp[1] == 0x23);
@@ -616,9 +594,9 @@ void test_get_alike_128(){
 	CU_ASSERT(tmp[15] == 0x00);
 
 	//1,3
-	res = __utern_get_alike(one, three, &common);
+	res = __utern_get_alike(&one, &three, &common);
 	CU_ASSERT(res == true);
-	CU_ASSERT(__utern_equals(one, &common) == false);
+	CU_ASSERT(__utern_equals(&one, &common) == false);
 	tmp = (uint8_t*)&common.value.u128;
 	CU_ASSERT(tmp[0] == 0x01);
 	CU_ASSERT(tmp[1] == 0x23);

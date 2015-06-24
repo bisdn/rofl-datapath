@@ -43,7 +43,7 @@ void ipv6_basic_test(void){
 
 void ipv6_utern_test(void){
 	bool res;
-	utern_t *tern, *ex_tern, *ex_tern_fail;
+	utern_t tern, ex_tern, ex_tern_fail;
 	uint128__t value = 				{{0x12,0x34,0x56,0x78,0xff,0xff,0xff,0xff,0x12,0x34,0x56,0x78,0xff,0xff,0x12,0x34}};
 	uint128__t mask = 				{{0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0x00,0x00}};
 	uint128__t ex_value = 			{{0x12,0x34,0x56,0x78,0xff,0xff,0xff,0xff,0x12,0x34,0x56,0x78,0xff,0xf0,0x12,0x34}};
@@ -53,32 +53,28 @@ void ipv6_utern_test(void){
 	uint128__t ex_value_fail = 		{{0x12,0x34,0x56,0x78,0xff,0xff,0xff,0xfc,0x12,0x34,0x56,0x78,0xff,0xff,0x12,0x34}};
 	uint128__t ex_mask_fail = 		{{0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xfe,0xff,0xff,0xff,0xff,0x00,0x00,0x00,0x00}};
 	
-	tern = __init_utern128(value,mask);
-	CU_ASSERT(tern != NULL);
+	__init_utern128(&tern,value,mask);
 	
-	res = __utern_compare128(tern,&value);
+	res = __utern_compare128(&tern,&value);
 	CU_ASSERT(res==true);
 	
-	res = __utern_compare128(tern,&ex_value);
+	res = __utern_compare128(&tern,&ex_value);
 	CU_ASSERT(res==false);
 	
-	res = __utern_compare128(tern,&ex_value_2);
+	res = __utern_compare128(&tern,&ex_value_2);
 	CU_ASSERT(res==false);
 	
-	res = __utern_compare128(tern,&ex_value_3);
+	res = __utern_compare128(&tern,&ex_value_3);
 	CU_ASSERT(res==true);
 	
-	ex_tern = __init_utern128(ex_value,ex_mask);
-	res = __utern_is_contained(ex_tern,tern);
+	__init_utern128(&ex_tern,ex_value,ex_mask);
+	res = __utern_is_contained(&ex_tern,&tern);
 	CU_ASSERT(res==true);
 	
-	ex_tern_fail = __init_utern128(ex_value_fail,ex_mask_fail);
-	res = __utern_is_contained(ex_tern_fail,tern);
+	__init_utern128(&ex_tern_fail,ex_value_fail,ex_mask_fail);
+	res = __utern_is_contained(&ex_tern_fail,&tern);
 	CU_ASSERT(res==false);
 	
-	__destroy_utern((utern_t*)tern);
-	__destroy_utern((utern_t*)ex_tern);
-	__destroy_utern((utern_t*)ex_tern_fail);
 }
 
 

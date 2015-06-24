@@ -155,7 +155,7 @@ typedef struct of1x_match{
 	of1x_match_type_t type;
 
 	//Ternary value
-	utern_t* __tern;
+	utern_t __tern;
 	
 	//Previous entry
 	struct of1x_match* prev;
@@ -657,12 +657,12 @@ void of1x_destroy_match(of1x_match_t* match);
 static inline 
 uint8_t __of1x_get_match_val8(const of1x_match_t* match, bool get_mask, bool raw_nbo){
 
-	wrap_uint_t* wrap;
+	const wrap_uint_t* wrap;
 	
 	if(get_mask)
-		wrap = &match->__tern->mask; 
+		wrap = &match->__tern.mask; 
 	else
-		wrap = &match->__tern->value; 
+		wrap = &match->__tern.value; 
 
 	if(raw_nbo)
 		return wrap->u8;
@@ -710,12 +710,12 @@ uint8_t of1x_get_match_value8(const of1x_match_t* match){
 static inline 
 uint16_t __of1x_get_match_val16(const of1x_match_t* match, bool get_mask, bool raw_nbo){
 
-	wrap_uint_t* wrap;
+	const wrap_uint_t* wrap;
 	
 	if(get_mask)
-		wrap = &match->__tern->mask; 
+		wrap = &match->__tern.mask; 
 	else
-		wrap = &match->__tern->value; 
+		wrap = &match->__tern.value; 
 
 
 	if(raw_nbo)
@@ -761,12 +761,12 @@ uint16_t of1x_get_match_value16(const of1x_match_t* match){
 static inline 
 uint32_t __of1x_get_match_val32(const of1x_match_t* match, bool get_mask, bool raw_nbo){
 	
-	wrap_uint_t* wrap;
+	const wrap_uint_t* wrap;
 	
 	if(get_mask)
-		wrap = &match->__tern->mask; 
+		wrap = &match->__tern.mask; 
 	else
-		wrap = &match->__tern->value; 
+		wrap = &match->__tern.value; 
 
 
 	if(raw_nbo)
@@ -815,12 +815,12 @@ uint32_t of1x_get_match_value32(const of1x_match_t* match){
 static inline 
 uint64_t __of1x_get_match_val64(const of1x_match_t* match, bool get_mask, bool raw_nbo){
 	
-	wrap_uint_t* wrap;
+	const wrap_uint_t* wrap;
 	
 	if(get_mask)
-		wrap = &match->__tern->mask; 
+		wrap = &match->__tern.mask; 
 	else
-		wrap = &match->__tern->value; 
+		wrap = &match->__tern.value; 
 
 
 	if(raw_nbo)
@@ -861,12 +861,12 @@ uint64_t of1x_get_match_value64(const of1x_match_t* match){
 static inline 
 uint128__t __of1x_get_match_val128(const of1x_match_t* match, bool get_mask, bool raw_nbo){
 	uint128__t tmp;
-	wrap_uint_t* wrap;
+	const wrap_uint_t* wrap;
 	
 	if(get_mask)
-		wrap = &match->__tern->mask; 
+		wrap = &match->__tern.mask; 
 	else
-		wrap = &match->__tern->value; 
+		wrap = &match->__tern.value; 
 
 	if(raw_nbo)
 		return wrap->u128;

@@ -43,14 +43,11 @@ typedef struct utern{
 ROFL_BEGIN_DECLS
 
 //Initializers
-utern_t* __init_utern8(uint8_t value, uint8_t mask);
-utern_t* __init_utern16(uint16_t value, uint16_t mask);
-utern_t* __init_utern32(uint32_t value, uint32_t mask);
-utern_t* __init_utern64(uint64_t value, uint64_t mask);
-utern_t* __init_utern128(uint128__t value, uint128__t mask);
-
-//Destructor
-rofl_result_t __destroy_utern(utern_t* utern );
+void __init_utern8(utern_t* tern, uint8_t value, uint8_t mask);
+void __init_utern16(utern_t* tern, uint16_t value, uint16_t mask);
+void __init_utern32(utern_t* tern, uint32_t value, uint32_t mask);
+void __init_utern64(utern_t* tern, uint64_t value, uint64_t mask);
+void __init_utern128(utern_t* tern, uint128__t value, uint128__t mask);
 
 //Comparison
 static inline bool __utern_compare8(const utern_t* tern, const uint8_t* value){
