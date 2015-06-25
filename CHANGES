@@ -8,6 +8,10 @@ Legend:
 Change log
 ==========
 
+v0.6.3
+
+[B] Fixed bug in certain masks which could lead to abnormal match behaviour
+
 v0.6.2
 
 [B] Fixed critical bugs in l2hash insertion #1
