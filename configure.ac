@@ -64,6 +64,25 @@ AC_CONFIG_FILES([
 	src/rofl/datapath/hal/openflow/openflow1x/Makefile
 	src/rofl/datapath/hal/extensions/Makefile
 
+	src/rofl/datapath/pipeline/Makefile
+	src/rofl/datapath/pipeline/common/Makefile
+	src/rofl/datapath/pipeline/platform/Makefile
+	src/rofl/datapath/pipeline/openflow/Makefile
+	src/rofl/datapath/pipeline/openflow/openflow1x/Makefile
+	src/rofl/datapath/pipeline/openflow/openflow1x/pipeline/Makefile
+	src/rofl/datapath/pipeline/openflow/openflow1x/pipeline/matching_algorithms/Makefile
+	src/rofl/datapath/pipeline/util/Makefile
+
+	test/rofl/datapath/pipeline/Makefile
+	test/rofl/datapath/pipeline/openflow/openflow1x/pipeline/Makefile
+	test/rofl/datapath/pipeline/monitoring/Makefile
+	test/rofl/datapath/pipeline/openflow/openflow1x/pipeline/bufs/Makefile
+	test/rofl/datapath/pipeline/openflow/openflow1x/pipeline/ma/Makefile
+	test/rofl/datapath/pipeline/openflow/openflow1x/pipeline/ma/loop/Makefile
+	test/rofl/datapath/pipeline/openflow/openflow1x/pipeline/ma/l2hash/Makefile
+	test/rofl/datapath/pipeline/openflow/openflow1x/pipeline/static/Makefile
+	test/rofl/datapath/pipeline/openflow/openflow1x/pipeline/reset_pipeline/Makefile
+
 	test/Makefile
 
 	src/rofl_datapath_conf.h

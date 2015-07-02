@@ -1,47 +1,8 @@
-AC_MSG_CHECKING(whether to build pipeline library)
-AC_ARG_WITH([pipeline],
-	AS_HELP_STRING([--without-pipeline], [Disable pipeline library compilation [default=no]]),
-without_pipeline="yes", [])
+#ROFL pipeline
 
-if test "$without_pipeline" = "yes"; then
-	if test "$without_cplusplus" = "yes"; then
-		#Compile nothing???
-		AC_MSG_ERROR(Invalid combination of flags --without-cplusplus and --without-pipeline)
-	fi
-	PIPELINE_SUPPORT="no"
-else
-	PIPELINE_SUPPORT="yes"
-fi
+AC_SUBST([ROFL_PIPELINE_PRESENT], ["#define ROFL_PIPELINE_PRESENT 1"])
 
-#Fancy message
-AC_MSG_RESULT($PIPELINE_SUPPORT)
-
-AM_CONDITIONAL(PIPELINE_SUPPORT, test $PIPELINE_SUPPORT = yes)
-AM_COND_IF([PIPELINE_SUPPORT],[
-	AC_SUBST([ROFL_PIPELINE_PRESENT], ["#define ROFL_PIPELINE_PRESENT 1"])
-	AC_CONFIG_FILES([
-	src/rofl/datapath/pipeline/Makefile
-	src/rofl/datapath/pipeline/common/Makefile
-	src/rofl/datapath/pipeline/platform/Makefile
-	src/rofl/datapath/pipeline/openflow/Makefile
-	src/rofl/datapath/pipeline/openflow/openflow1x/Makefile
-	src/rofl/datapath/pipeline/openflow/openflow1x/pipeline/Makefile
-	src/rofl/datapath/pipeline/openflow/openflow1x/pipeline/matching_algorithms/Makefile
-	src/rofl/datapath/pipeline/util/Makefile
-
-	test/rofl/datapath/pipeline/Makefile
-	test/rofl/datapath/pipeline/openflow/openflow1x/pipeline/Makefile
-	test/rofl/datapath/pipeline/monitoring/Makefile
-	test/rofl/datapath/pipeline/openflow/openflow1x/pipeline/bufs/Makefile
-	test/rofl/datapath/pipeline/openflow/openflow1x/pipeline/ma/Makefile
-	test/rofl/datapath/pipeline/openflow/openflow1x/pipeline/ma/loop/Makefile
-	test/rofl/datapath/pipeline/openflow/openflow1x/pipeline/ma/l2hash/Makefile
-	test/rofl/datapath/pipeline/openflow/openflow1x/pipeline/static/Makefile
-	test/rofl/datapath/pipeline/openflow/openflow1x/pipeline/reset_pipeline/Makefile
-])])
-#	test/rofl/datapath/pipeline/openflow/openflow1x/pipeline/dynamic/Makefile
-
-## pipeline
+## Matching algorithms
 MATCHING_ALGORITHMS_DIR="src/rofl/datapath/pipeline/openflow/openflow1x/pipeline/matching_algorithms"
 AC_SUBST(MATCHING_ALGORITHMS_DIR)
 MATCHING_ALGORITHMS="loop l2hash"
