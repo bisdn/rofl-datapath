@@ -10,7 +10,9 @@ Change log
 
 v0.6.3
 
-[B] Fixed bug in certain masks which could lead to abnormal match behaviour
+[B] Fixed support for explicit --without-<feature> configure options
+
+[B][pipeline] Fixed bug in certain masks which could lead to abnormal match behaviour
 
 v0.6.2
 
