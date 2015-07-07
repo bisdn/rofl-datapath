@@ -13,8 +13,8 @@ static uint64_t accumulated_time;
 
 static int setup=0;
 
-#define NUM_OF_ITERATONS 10000000
-//#define NUM_OF_ITERATONS 10000
+#define NUM_OF_ITERATONS 100000
+
 int set_up(){
 	
 	of1x_flow_entry_t* entry;
@@ -151,6 +151,99 @@ void profile_basic_no_match_no_lock(void){
 	profile_basic_no_match(false);
 }
 
+
+//Profile N numbe rof entries
+void __profile_match_n_entries(int num_entries){
+
+	int i;
+	of1x_flow_entry_t* entry;
+
+	//Check real size of the table
+	CU_ASSERT(sw->pipeline.tables[0].num_of_entries == 0);
+
+	//PKT
+	*((uint32_t*)&tmp_val) = 1;
+
+	//First fill in all the entries
+	for(i=0;i<num_entries; i++){
+		entry = of1x_init_flow_entry(false); 
+		of1x_add_match_to_entry(entry,of1x_init_port_in_match(i));
+		CU_ASSERT(of1x_add_flow_entry_table(&sw->pipeline, 0, &entry, false,false) == ROFL_OF1X_FM_SUCCESS);
+	}
+
+#ifdef EXTENDED_PROFILE_TESTS
+	uint32_t average_tics;
+	uint64_t tics;
+	unsigned int tid = 2;
+
+	//Execute
+	for(i=0, accumulated_time=0;i<NUM_OF_ITERATONS;i++){
+		//Measure time
+		tics = rdtsc();
+
+		//Process
+		of_process_packet_pipeline(tid, (const struct of_switch *)sw, &pkt);
+		
+		//Accumulate
+		accumulated_time += rdtsc() - tics;
+	}
+
+	//Calculate average
+	average_tics = accumulated_time / NUM_OF_ITERATONS; 
+
+	//Print
+	fprintf(stderr,"\n%s MATCH %d pkts, with number of inst. entries: %u. Average cycles/pkt: %u\n",  __func__, NUM_OF_ITERATONS, num_entries, average_tics); 
+	//TODO output results 
+#endif
+}
+
+void clean_pipeline(){
+	
+	of1x_flow_entry_t* deleting_entry = of1x_init_flow_entry(false); 
+
+	CU_ASSERT(deleting_entry != NULL);
+
+	CU_ASSERT(of1x_remove_flow_entry_table(&sw->pipeline, 0, deleting_entry, NOT_STRICT, OF1X_PORT_ANY, OF1X_GROUP_ANY) == ROFL_SUCCESS);
+	
+	//Check real size of the table
+	CU_ASSERT(sw->pipeline.tables[0].num_of_entries == 0);
+
+
+}
+
+void profile_match_n_entries(){
+
+	clean_pipeline();
+
+	//10
+	__profile_match_n_entries(10);
+	clean_pipeline();
+
+	//100
+	__profile_match_n_entries(100);
+	clean_pipeline();
+
+	//1000
+	__profile_match_n_entries(1000);
+	clean_pipeline();
+
+	//2000
+	__profile_match_n_entries(2000);
+	clean_pipeline();
+
+	//5000
+	__profile_match_n_entries(5000);
+	clean_pipeline();
+
+	//10000
+	__profile_match_n_entries(10000);
+	clean_pipeline();
+
+	//20000
+	__profile_match_n_entries(20000);
+	clean_pipeline();
+}
+
 int main(int args, char** argv){
 
 	int return_code;
@@ -170,17 +263,17 @@ int main(int args, char** argv){
 	}
 
 	/* add the tests to the suite */
-	/* NOTE - ORDER IS IMPORTANT - MUST TEST fread() AFTER fprintf() */
 	if ((NULL == CU_add_test(pSuite, "Basic profiling (single flow_mod); match match (lock)", profile_basic_match_lock)) ||
-	(NULL == CU_add_test(pSuite, "Basic profiling (single flow_mod); match no-match (lock)", profile_basic_no_match_lock)) || 
+	(NULL == CU_add_test(pSuite, "Basic profiling (single flow_mod); match no-match (lock)", profile_basic_no_match_lock)) ||
 	(NULL == CU_add_test(pSuite, "Basic profiling (single flow_mod); match match (no lock)", profile_basic_match_no_lock)) ||
 	(NULL == CU_add_test(pSuite, "Basic profiling (single flow_mod); match no-match (no lock)", profile_basic_no_match_no_lock)) ||
+	(NULL == CU_add_test(pSuite, "Profile 10/100/1000/10000 entries (no lock)", profile_match_n_entries)) ||
 	(NULL == CU_add_test(pSuite, "Reset (use trie now)", reset)) ||
 	(NULL == CU_add_test(pSuite, "[trie] Basic profiling (single flow_mod); match match (lock)", profile_basic_match_lock)) ||
-	(NULL == CU_add_test(pSuite, "[trie] Basic profiling (single flow_mod); match no-match (lock)", profile_basic_no_match_lock)) || 
+	(NULL == CU_add_test(pSuite, "[trie] Basic profiling (single flow_mod); match no-match (lock)", profile_basic_no_match_lock)) ||
 	(NULL == CU_add_test(pSuite, "[trie] Basic profiling (single flow_mod); match match (no lock)", profile_basic_match_no_lock)) ||
-	(NULL == CU_add_test(pSuite, "[trie] Basic profiling (single flow_mod); match no-match (no lock)", profile_basic_no_match_no_lock)) 
-		
+	(NULL == CU_add_test(pSuite, "[trie] Basic profiling (single flow_mod); match no-match (no lock)", profile_basic_no_match_no_lock)) ||
+	(NULL == CU_add_test(pSuite, "[trie] Profile 10/100/1000/10000 entries (no lock)", profile_match_n_entries))
 		)
 	{
 		fprintf(stderr,"ERROR WHILE ADDING TEST\n");
