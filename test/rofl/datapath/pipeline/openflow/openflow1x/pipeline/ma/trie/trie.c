@@ -859,3 +859,30 @@ void test_remove_flowmods(){
 
 	of1x_full_dump_switch(sw, false);
 }
+
+#define NUM_ENTRIES 260
+void test_many_entries(){
+
+	int i;
+	of1x_flow_entry_t* entry;
+
+	clean_all();
+
+	//Check real size of the table
+	CU_ASSERT(sw->pipeline.tables[0].num_of_entries == 0);
+
+	//First fill in all the entries
+	for(i=0;i<NUM_ENTRIES; i++){
+		entry = of1x_init_flow_entry(false); 
+		of1x_add_match_to_entry(entry,of1x_init_port_in_match(i));
+		CU_ASSERT(of1x_add_flow_entry_table(&sw->pipeline, 0, &entry, false,false) == ROFL_OF1X_FM_SUCCESS);
+	}
+	of1x_full_dump_switch(sw, false);
+	CU_ASSERT(table->num_of_entries == NUM_ENTRIES);
+
+	fprintf(stderr, "Starting deletion...\n");
+
+	clean_all();
+	CU_ASSERT(table->num_of_entries == 0);
+}
+
