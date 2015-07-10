@@ -805,7 +805,7 @@ rofl_of1x_fm_result_t of1x_add_flow_entry_trie(of1x_flow_table_t *const table,
 			//but there can be multiple ones chained under "next" pointer (different priorities)
 			curr_entry = of1x_find_reen_trie(&entry->matches, &prev,
 									&next,
-									true,
+									false,
 									true,
 									false);
 			//If no more entries are found, we are done
