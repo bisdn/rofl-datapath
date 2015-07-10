@@ -157,7 +157,6 @@ void __profile_match_n_entries(int num_entries){
 
 	int i;
 	of1x_flow_entry_t* entry;
-	uint32_t average_tics;
 	uint64_t tics;
 
 	//Check real size of the table
@@ -183,6 +182,7 @@ void __profile_match_n_entries(int num_entries){
 
 #ifdef EXTENDED_PROFILE_TESTS
 	unsigned int tid = 2;
+	uint32_t average_tics;
 
 	//Execute
 	for(i=0, accumulated_time=0;i<NUM_OF_ITERATONS;i++){
@@ -247,6 +247,7 @@ void profile_match_n_entries(){
 	__profile_match_n_entries(10000);
 	clean_pipeline();
 
+#ifdef EXTENDED_PROFILE_TESTS
 	//20000
 	__profile_match_n_entries(20000);
 	clean_pipeline();
@@ -254,6 +255,7 @@ void profile_match_n_entries(){
 	//100000
 	__profile_match_n_entries(100000);
 	clean_pipeline();
+#endif
 }
 
 int main(int args, char** argv){
