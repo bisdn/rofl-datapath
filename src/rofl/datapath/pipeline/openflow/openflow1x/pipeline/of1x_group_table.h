@@ -91,7 +91,7 @@ typedef struct of1x_group_table{
 }of1x_group_table_t;
 
 typedef enum{
-	ROFL_OF1X_GM_OK 		= 0,	/* No error  */
+	ROFL_OF1X_GM_SUCCESS 		= 0,	/* No error  */
 	ROFL_OF1X_GM_EXISTS 		= 1,   	/* Group already exists */
 	ROFL_OF1X_GM_INVAL	 	= 2, 	/* Invalid group -wrong properties- */
 	ROFL_OF1X_GM_WEIGHT	 	= 3,	/* Weights not supported */

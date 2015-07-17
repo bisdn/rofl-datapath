@@ -134,7 +134,7 @@ rofl_result_t __of1x_purge_pipeline_entries(of1x_pipeline_t* pipeline){
 
 	//Purge group mods
 	if(result == ROFL_SUCCESS){
-		if(of1x_group_delete(pipeline, group_entry, OF1X_GROUP_ANY) != ROFL_OF1X_GM_OK)
+		if(of1x_group_delete(pipeline, group_entry, OF1X_GROUP_ANY) != ROFL_OF1X_GM_SUCCESS)
 			result = ROFL_FAILURE;
 	}
 	

@@ -467,7 +467,7 @@ inline rofl_of1x_fm_result_t of1x_add_flow_entry_table(of1x_pipeline_t *const pi
 		//Release rdlock
 		platform_rwlock_rdunlock(pipeline->groups->rwlock);
 		ROFL_PIPELINE_INFO("[flowmod-add(%p)] FAILED validation. Ignoring...\n", *entry);
-		return ROFL_OF1X_FM_FAILURE;
+		return ROFL_OF1X_FM_VALIDATION;
 	}
 
 
