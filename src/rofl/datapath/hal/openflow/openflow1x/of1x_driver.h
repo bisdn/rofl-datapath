@@ -74,6 +74,7 @@ hal_fm_result_t hal_fm_map_pipeline_retcode(rofl_of1x_fm_result_t code){
 		case ROFL_OF1X_FM_FAILURE: return HAL_FM_FAILURE;
 		case ROFL_OF1X_FM_TABLE_FULL: return HAL_FM_TABLE_FULL_FAILURE;
 		case ROFL_OF1X_FM_VALIDATION: return HAL_FM_VALIDATION_FAILURE;
+		case ROFL_OF1X_FM_INVALID_TABLE_ID: return HAL_FM_INVALID_TABLE_ID_FAILURE;
 		case ROFL_OF1X_FM_OVERLAP: return HAL_FM_OVERLAP_FAILURE;
 		/*Do NOT add a default case*/
 	}
@@ -244,7 +245,7 @@ hal_fm_result_t hal_driver_of1x_process_flow_mod_add(uint64_t dpid, uint8_t tabl
  * @param strictness 	Strictness (STRICT NON-STRICT)
  * @param check_counts	Check RESET_COUNTS flag
  */
-hal_result_t hal_driver_of1x_process_flow_mod_modify(uint64_t dpid, uint8_t table_id, of1x_flow_entry_t** flow_entry, uint32_t buffer_id, of1x_flow_removal_strictness_t strictness, bool reset_counts);
+hal_fm_result_t hal_driver_of1x_process_flow_mod_modify(uint64_t dpid, uint8_t table_id, of1x_flow_entry_t** flow_entry, uint32_t buffer_id, of1x_flow_removal_strictness_t strictness, bool reset_counts);
 
 
 /**
@@ -267,7 +268,7 @@ hal_result_t hal_driver_of1x_process_flow_mod_modify(uint64_t dpid, uint8_t tabl
  * @param out_group 	Out group that entry must include
  * @param strictness 	Strictness (STRICT NON-STRICT)
  */
-hal_result_t hal_driver_of1x_process_flow_mod_delete(uint64_t dpid, uint8_t table_id, of1x_flow_entry_t* flow_entry, uint32_t out_port, uint32_t out_group, of1x_flow_removal_strictness_t strictness);
+hal_fm_result_t hal_driver_of1x_process_flow_mod_delete(uint64_t dpid, uint8_t table_id, of1x_flow_entry_t* flow_entry, uint32_t out_port, uint32_t out_group, of1x_flow_removal_strictness_t strictness);
 
 /**
  * @brief   Recovers the flow stats given a set of matches
