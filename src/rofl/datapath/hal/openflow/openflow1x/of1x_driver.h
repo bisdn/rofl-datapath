@@ -30,6 +30,7 @@ typedef enum hal_fm_result {
 	//Extra codes
 	HAL_FM_TABLE_FULL_FAILURE,
 	HAL_FM_VALIDATION_FAILURE,
+	HAL_FM_INVALID_TABLE_ID_FAILURE,
 	HAL_FM_OVERLAP_FAILURE
 }hal_fm_result_t;
 
