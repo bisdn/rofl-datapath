@@ -8,6 +8,10 @@ Legend:
 Change log
 ==========
 
+v0.6.4
+
+[B] Fix return codes of pipeline/hal #9 (bisdn/xdpd#76)
+
 v0.6.3
 
 [B] Fixed support for explicit --without-<feature> configure options
