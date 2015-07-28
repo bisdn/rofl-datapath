@@ -219,20 +219,23 @@ rofl_result_t __of1x_validate_instructions(of1x_instruction_group_t* inst_grp, o
 	of1x_group_table_t *gt = pipeline->groups;
 	of_version_t version = pipeline->sw->of_ver;
 	of1x_flow_table_t* table = &pipeline->tables[table_id];
-	
+	of1x_instruction_t* inst;
+
 	//if there is a group action we should check that the group exists
 	for(i=0;i<OF1X_IT_MAX;i++){
-		switch(inst_grp->instructions[i].type){
+		inst = &inst_grp->instructions[i];
+
+		switch(inst->type){
 			case OF1X_IT_NO_INSTRUCTION:
 				continue;
 				break;
 				
 			case OF1X_IT_APPLY_ACTIONS:
-				if(__of1x_validate_action_group(&table->config.apply_actions, inst_grp->instructions[i].apply_actions, gt, false) != ROFL_SUCCESS)
+				if(__of1x_validate_action_group(&table->config.apply_actions, inst->apply_actions, gt, false) != ROFL_SUCCESS)
 					return ROFL_FAILURE;
-				num_of_output_actions+=inst_grp->instructions[i].apply_actions->num_of_output_actions;
-				if( (version < inst_grp->instructions[i].apply_actions->ver_req.min_ver) ||
-			        	(version > inst_grp->instructions[i].apply_actions->ver_req.max_ver) )
+				num_of_output_actions+=inst->apply_actions->num_of_output_actions;
+				if( (version < inst->apply_actions->ver_req.min_ver) ||
+			        	(version > inst->apply_actions->ver_req.max_ver) )
 					return ROFL_FAILURE;
 	
 				break;
@@ -242,29 +245,31 @@ rofl_result_t __of1x_validate_instructions(of1x_instruction_group_t* inst_grp, o
 				if( (version < OF_VERSION_12))	
 					return ROFL_FAILURE;
 
-				if(__of1x_validate_write_actions(&table->config.write_actions, inst_grp->instructions[i].write_actions, gt) != ROFL_SUCCESS)
+				if(__of1x_validate_write_actions(&table->config.write_actions, inst->write_actions, gt) != ROFL_SUCCESS)
 					return ROFL_FAILURE;
 		
-				num_of_output_actions+=inst_grp->instructions[i].write_actions->num_of_output_actions;
-				if( (version < inst_grp->instructions[i].write_actions->ver_req.min_ver) ||
-			        	(version > inst_grp->instructions[i].write_actions->ver_req.max_ver) )
+				num_of_output_actions+=inst->write_actions->num_of_output_actions;
+				if( (version < inst->write_actions->ver_req.min_ver) ||
+			        	(version > inst->write_actions->ver_req.max_ver) )
 					return ROFL_FAILURE;
 	
 				break;
 			
 			case OF1X_IT_GOTO_TABLE:
+				if(inst->go_to_table >= pipeline->num_of_tables)
+					return ROFL_FAILURE;
 				break;
 			case OF1X_IT_WRITE_METADATA:
 			case OF1X_IT_CLEAR_ACTIONS:
 			case OF1X_IT_EXPERIMENTER:
 				//Fast check WRITE actions supported from 1.2
-				if( (version < OF_VERSION_12))	
+				if( (version < OF_VERSION_12))
 					return ROFL_FAILURE;
 
 				break;
 			case OF1X_IT_METER:
 				//Fast check WRITE actions supported from 1.3
-				if( (version < OF_VERSION_13))	
+				if( (version < OF_VERSION_13))
 					return ROFL_FAILURE;
 
 				break;
