@@ -269,12 +269,12 @@ rofl_of1x_fm_result_t of1x_add_flow_entry_l2hash(of1x_flow_table_t *const table,
 	return __of1x_add_flow_entry_loop(table, entry, check_overlap, reset_counts, of1x_add_hook_l2hash);
 }
 
-rofl_result_t of1x_modify_flow_entry_l2hash(of1x_flow_table_t *const table, of1x_flow_entry_t *const entry, const enum of1x_flow_removal_strictness strict, bool reset_counts){
+rofl_of1x_fm_result_t of1x_modify_flow_entry_l2hash(of1x_flow_table_t *const table, of1x_flow_entry_t *const entry, const enum of1x_flow_removal_strictness strict, bool reset_counts){
 	//Call loop with the right hooks
 	return __of1x_modify_flow_entry_loop(table, entry, strict, reset_counts, of1x_add_hook_l2hash, of1x_modify_hook_l2hash);
 }
 
-rofl_result_t of1x_remove_flow_entry_l2hash(of1x_flow_table_t *const table , of1x_flow_entry_t *const entry, of1x_flow_entry_t *const specific_entry, const enum of1x_flow_removal_strictness strict, uint32_t out_port, uint32_t out_group, of1x_flow_remove_reason_t reason, of1x_mutex_acquisition_required_t mutex_acquired){
+rofl_of1x_fm_result_t of1x_remove_flow_entry_l2hash(of1x_flow_table_t *const table , of1x_flow_entry_t *const entry, of1x_flow_entry_t *const specific_entry, const enum of1x_flow_removal_strictness strict, uint32_t out_port, uint32_t out_group, of1x_flow_remove_reason_t reason, of1x_mutex_acquisition_required_t mutex_acquired){
 	//Call loop with the right hooks
 	return __of1x_remove_flow_entry_loop(table, entry, specific_entry, strict, out_port, out_group, reason, mutex_acquired, of1x_remove_hook_l2hash);
 }

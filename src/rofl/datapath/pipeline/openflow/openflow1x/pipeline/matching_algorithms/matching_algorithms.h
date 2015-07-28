@@ -124,7 +124,7 @@ typedef struct of1x_matching_algorithm_functions{
 	* The modify operation MUST comply with the behaviour defined in the OpenFlow specifications for versions 1.0, 1.2 and 1.3.2
 	* 
 	*/
-	rofl_result_t
+	rofl_of1x_fm_result_t
 	(*modify_flow_entry_hook)(struct of1x_flow_table *const table,
 			of1x_flow_entry_t *const entry,
 			const enum of1x_flow_removal_strictness strict,
@@ -151,7 +151,7 @@ typedef struct of1x_matching_algorithm_functions{
 	* The remove operation MUST comply with the behaviour defined in the OpenFlow specifications for versions 1.0, 1.2 and 1.3.2.
 	* 
 	*/
-	rofl_result_t
+	rofl_of1x_fm_result_t
 	(*remove_flow_entry_hook)(struct of1x_flow_table *const table,
 			of1x_flow_entry_t *const entry, 
 			of1x_flow_entry_t *const specific_entry,

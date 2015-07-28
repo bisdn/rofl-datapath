@@ -179,7 +179,7 @@ rofl_of1x_gm_result_t __of1x_validate_group(of1x_group_table_t* gt, of1x_action_
 	if(__of1x_validate_action_group(&gt->config.supported_actions, actions, gt, false) != ROFL_SUCCESS)
 		return ROFL_OF1X_GM_INVAL;
 	
-	return ROFL_OF1X_GM_OK;
+	return ROFL_OF1X_GM_SUCCESS;
 }
 
 
@@ -214,7 +214,7 @@ rofl_of1x_gm_result_t __of1x_check_group_parameters(of1x_group_table_t *gt, of1x
     
 	//Validate action set
 	for(bu_it=buckets->head;bu_it!=NULL;bu_it=bu_it->next){
-		if((ret_val=__of1x_validate_group(gt, bu_it->actions))!=ROFL_OF1X_GM_OK)
+		if((ret_val=__of1x_validate_group(gt, bu_it->actions))!=ROFL_OF1X_GM_SUCCESS)
 			return ret_val;
 	}
 	
@@ -232,7 +232,7 @@ rofl_of1x_gm_result_t __of1x_check_group_parameters(of1x_group_table_t *gt, of1x
 	if (type == OF1X_GROUP_TYPE_SELECT && __of1x_bucket_list_has_weights(buckets) == false)
 		return ROFL_OF1X_GM_INVAL;
 	
-	return ROFL_OF1X_GM_OK;
+	return ROFL_OF1X_GM_SUCCESS;
 }
 
 static
@@ -246,7 +246,7 @@ rofl_of1x_gm_result_t __of1x_init_group(of1x_group_table_t *gt, of1x_group_type_
 		return ROFL_OF1X_GM_OGRUPS;
 	}
 	
-	if((ret_val=__of1x_check_group_parameters(gt,type,id,buckets))!=ROFL_OF1X_GM_OK){
+	if((ret_val=__of1x_check_group_parameters(gt,type,id,buckets))!=ROFL_OF1X_GM_SUCCESS){
 		platform_free_shared(ge);		
 	        return ret_val;
 	}
@@ -282,7 +282,7 @@ rofl_of1x_gm_result_t __of1x_init_group(of1x_group_table_t *gt, of1x_group_type_
 	
 	platform_rwlock_wrunlock(gt->rwlock);
 	
-	return ROFL_OF1X_GM_OK;
+	return ROFL_OF1X_GM_SUCCESS;
 }
 
 rofl_of1x_gm_result_t of1x_group_add(of1x_group_table_t *gt, of1x_group_type_t type, uint32_t id, of1x_bucket_list_t **buckets){
@@ -300,7 +300,7 @@ rofl_of1x_gm_result_t of1x_group_add(of1x_group_table_t *gt, of1x_group_type_t t
 	}
 	
 	ret_val = __of1x_init_group(gt,type,id,*buckets);
-	if (ret_val!=ROFL_OF1X_GM_OK){
+	if (ret_val!=ROFL_OF1X_GM_SUCCESS){
 		platform_mutex_unlock(gt->mutex);
 		ROFL_PIPELINE_INFO("[groupmod-add(%p)] FAILED, reason %u\n", *buckets, ret_val);
 		return ret_val;
@@ -314,7 +314,7 @@ rofl_of1x_gm_result_t of1x_group_add(of1x_group_table_t *gt, of1x_group_type_t t
 	//so that is not further used outside the pipeline
 	*buckets = NULL;	
 
-	return ROFL_OF1X_GM_OK;
+	return ROFL_OF1X_GM_SUCCESS;
 }
 
 static
@@ -377,7 +377,7 @@ rofl_of1x_gm_result_t of1x_group_delete(of1x_pipeline_t *pipeline, of1x_group_ta
 			//extract the group without destroying it (only the first thread that comes gets it)
 			if(__of1x_extract_group(gt, ge)==ROFL_FAILURE){
 				platform_mutex_unlock(gt->mutex);
-				return ROFL_OF1X_GM_OK; //if it is not found no need to throw an error
+				return ROFL_OF1X_GM_SUCCESS; //if it is not found no need to throw an error
 			}
 			
 			//loop for all the tables and erase entries that point to the group
@@ -390,19 +390,19 @@ rofl_of1x_gm_result_t of1x_group_delete(of1x_pipeline_t *pipeline, of1x_group_ta
 			__of1x_destroy_group(gt,ge);
 		}
 		platform_mutex_unlock(gt->mutex);
-		return ROFL_OF1X_GM_OK;
+		return ROFL_OF1X_GM_SUCCESS;
 	}
 	
 	//search the table for the group
 	if((ge=__of1x_group_search(gt,id))==NULL){
 		platform_mutex_unlock(gt->mutex);
-		return ROFL_OF1X_GM_OK; //if it is not found no need to throw an error
+		return ROFL_OF1X_GM_SUCCESS; //if it is not found no need to throw an error
 	}
 	
 	//extract the group without destroying it (only the first thread that comes gets it)
 	if(__of1x_extract_group(gt, ge)==ROFL_FAILURE){
 		platform_mutex_unlock(gt->mutex);
-		return ROFL_OF1X_GM_OK; //if it is not found no need to throw an error
+		return ROFL_OF1X_GM_SUCCESS; //if it is not found no need to throw an error
 	}
 	
 	//loop for all the tables and erase entries that point to the group
@@ -417,7 +417,7 @@ rofl_of1x_gm_result_t of1x_group_delete(of1x_pipeline_t *pipeline, of1x_group_ta
 	
 	platform_mutex_unlock(gt->mutex);
 	
-	return ROFL_OF1X_GM_OK;
+	return ROFL_OF1X_GM_SUCCESS;
 }
 
 /**
@@ -428,7 +428,7 @@ rofl_of1x_gm_result_t of1x_group_delete(of1x_pipeline_t *pipeline, of1x_group_ta
 rofl_of1x_gm_result_t of1x_group_modify(of1x_group_table_t *gt, of1x_group_type_t type, uint32_t id, of1x_bucket_list_t **buckets){
 	rofl_of1x_gm_result_t ret_val;
 	
-	if((ret_val=__of1x_check_group_parameters(gt,type,id,*buckets))!=ROFL_OF1X_GM_OK)
+	if((ret_val=__of1x_check_group_parameters(gt,type,id,*buckets))!=ROFL_OF1X_GM_SUCCESS)
 		return ret_val;
 	
 	of1x_group_t *ge = __of1x_group_search(gt,id);
@@ -450,7 +450,7 @@ rofl_of1x_gm_result_t of1x_group_modify(of1x_group_table_t *gt, of1x_group_type_
 	//so that is not further used outside the pipeline
 	*buckets = NULL;	
 
-	return ROFL_OF1X_GM_OK;
+	return ROFL_OF1X_GM_SUCCESS;
 }
 
 of1x_bucket_list_t* of1x_init_bucket_list(void){

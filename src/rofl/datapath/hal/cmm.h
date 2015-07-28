@@ -8,6 +8,7 @@
 #include "hal.h"
 #include "hal_utils.h"
 #include <rofl/datapath/pipeline/monitoring.h>
+#include <rofl/datapath/pipeline/switch_port.h>
 
 
 /**
