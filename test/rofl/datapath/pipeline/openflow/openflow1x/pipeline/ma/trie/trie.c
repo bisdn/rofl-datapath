@@ -698,7 +698,7 @@ static void clean_all(){
 	of1x_flow_entry_t *entry = of1x_init_flow_entry(false);
 	CU_ASSERT(entry != NULL);
 
-	CU_ASSERT(of1x_remove_flow_entry_table(&sw->pipeline, 0, entry, false, OF1X_PORT_ANY, OF1X_GROUP_ANY) == ROFL_SUCCESS);
+	CU_ASSERT(of1x_remove_flow_entry_table(&sw->pipeline, 0, entry, false, OF1X_PORT_ANY, OF1X_GROUP_ANY) == ROFL_OF1X_FM_SUCCESS);
 }
 
 void test_remove_flowmods(){
@@ -751,28 +751,28 @@ void test_remove_flowmods(){
 
 	//First try with an invalid priority
 	entry->priority = 1;
-	CU_ASSERT(of1x_remove_flow_entry_table(&sw->pipeline, 0, entry, true, OF1X_PORT_ANY, OF1X_GROUP_ANY) == ROFL_SUCCESS);
+	CU_ASSERT(of1x_remove_flow_entry_table(&sw->pipeline, 0, entry, true, OF1X_PORT_ANY, OF1X_GROUP_ANY) == ROFL_OF1X_FM_SUCCESS);
 	CU_ASSERT(table->num_of_entries == 11);
 
 	of1x_full_dump_switch(sw, false);
 	entry->priority = 107;
-	CU_ASSERT(of1x_remove_flow_entry_table(&sw->pipeline, 0, entry, true, OF1X_PORT_ANY, OF1X_GROUP_ANY) == ROFL_SUCCESS);
+	CU_ASSERT(of1x_remove_flow_entry_table(&sw->pipeline, 0, entry, true, OF1X_PORT_ANY, OF1X_GROUP_ANY) == ROFL_OF1X_FM_SUCCESS);
 	CU_ASSERT(table->num_of_entries == 10);
 
 	of1x_full_dump_switch(sw, false);
 
 	entry->priority = 99;
-	CU_ASSERT(of1x_remove_flow_entry_table(&sw->pipeline, 0, entry, true, OF1X_PORT_ANY, OF1X_GROUP_ANY) == ROFL_SUCCESS);
+	CU_ASSERT(of1x_remove_flow_entry_table(&sw->pipeline, 0, entry, true, OF1X_PORT_ANY, OF1X_GROUP_ANY) == ROFL_OF1X_FM_SUCCESS);
 	CU_ASSERT(table->num_of_entries == 9);
 
 	of1x_full_dump_switch(sw, false);
 	entry->priority = 110;
-	CU_ASSERT(of1x_remove_flow_entry_table(&sw->pipeline, 0, entry, true, OF1X_PORT_ANY, OF1X_GROUP_ANY) == ROFL_SUCCESS);
+	CU_ASSERT(of1x_remove_flow_entry_table(&sw->pipeline, 0, entry, true, OF1X_PORT_ANY, OF1X_GROUP_ANY) == ROFL_OF1X_FM_SUCCESS);
 	CU_ASSERT(table->num_of_entries == 8);
 
 	of1x_full_dump_switch(sw, false);
 	entry->priority = 100;
-	CU_ASSERT(of1x_remove_flow_entry_table(&sw->pipeline, 0, entry, true, OF1X_PORT_ANY, OF1X_GROUP_ANY) == ROFL_SUCCESS);
+	CU_ASSERT(of1x_remove_flow_entry_table(&sw->pipeline, 0, entry, true, OF1X_PORT_ANY, OF1X_GROUP_ANY) == ROFL_OF1X_FM_SUCCESS);
 	CU_ASSERT(table->num_of_entries == 7);
 
 	of1x_full_dump_switch(sw, false);
@@ -782,9 +782,9 @@ void test_remove_flowmods(){
 	///
 	entry->priority = 6789; //whatever
 	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_ip4_src_match(0xC0A80003, 0xFFFFFFFF)) == ROFL_SUCCESS);
-	CU_ASSERT(of1x_remove_flow_entry_table(&sw->pipeline, 0, entry, true, OF1X_PORT_ANY, OF1X_GROUP_ANY) == ROFL_SUCCESS);
+	CU_ASSERT(of1x_remove_flow_entry_table(&sw->pipeline, 0, entry, true, OF1X_PORT_ANY, OF1X_GROUP_ANY) == ROFL_OF1X_FM_SUCCESS);
 	CU_ASSERT(table->num_of_entries == 7);
-	CU_ASSERT(of1x_remove_flow_entry_table(&sw->pipeline, 0, entry, false, OF1X_PORT_ANY, OF1X_GROUP_ANY) == ROFL_SUCCESS);
+	CU_ASSERT(of1x_remove_flow_entry_table(&sw->pipeline, 0, entry, false, OF1X_PORT_ANY, OF1X_GROUP_ANY) == ROFL_OF1X_FM_SUCCESS);
 	CU_ASSERT(table->num_of_entries == 5);
 
 	CU_ASSERT(trie->root->inner->inner->next->inner->next->next == NULL);
@@ -813,7 +813,7 @@ void test_remove_flowmods(){
 
 	entry->priority = 3999;
 	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_ip4_src_match(0xC0A80003, 0xFFFFFFFF)) == ROFL_SUCCESS);
-	CU_ASSERT(of1x_remove_flow_entry_table(&sw->pipeline, 0, entry, true, OF1X_PORT_ANY, OF1X_GROUP_ANY) == ROFL_SUCCESS);
+	CU_ASSERT(of1x_remove_flow_entry_table(&sw->pipeline, 0, entry, true, OF1X_PORT_ANY, OF1X_GROUP_ANY) == ROFL_OF1X_FM_SUCCESS);
 	CU_ASSERT(table->num_of_entries == 11);
 	of1x_full_dump_switch(sw, false);
 
@@ -821,11 +821,11 @@ void test_remove_flowmods(){
 
 	//Remove with an invalid priority
 	entry->priority = 1999;
-	CU_ASSERT(of1x_remove_flow_entry_table(&sw->pipeline, 0, entry, true, OF1X_PORT_ANY, OF1X_GROUP_ANY) == ROFL_SUCCESS);
+	CU_ASSERT(of1x_remove_flow_entry_table(&sw->pipeline, 0, entry, true, OF1X_PORT_ANY, OF1X_GROUP_ANY) == ROFL_OF1X_FM_SUCCESS);
 	CU_ASSERT(table->num_of_entries == 11);
 
 	entry->priority = 3999;
-	CU_ASSERT(of1x_remove_flow_entry_table(&sw->pipeline, 0, entry, true, OF1X_PORT_ANY, OF1X_GROUP_ANY) == ROFL_SUCCESS);
+	CU_ASSERT(of1x_remove_flow_entry_table(&sw->pipeline, 0, entry, true, OF1X_PORT_ANY, OF1X_GROUP_ANY) == ROFL_OF1X_FM_SUCCESS);
 	CU_ASSERT(table->num_of_entries == 10);
 
 	of1x_full_dump_switch(sw, false);
@@ -849,12 +849,12 @@ void test_remove_flowmods(){
 
 	entry->priority = 3999;
 	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_ip4_src_match(0xC0A80003, 0xFFFFFFFF)) == ROFL_SUCCESS);
-	CU_ASSERT(of1x_remove_flow_entry_table(&sw->pipeline, 0, entry, true, OF1X_PORT_ANY, OF1X_GROUP_ANY) == ROFL_SUCCESS);
+	CU_ASSERT(of1x_remove_flow_entry_table(&sw->pipeline, 0, entry, true, OF1X_PORT_ANY, OF1X_GROUP_ANY) == ROFL_OF1X_FM_SUCCESS);
 	CU_ASSERT(table->num_of_entries == 11);
 	of1x_full_dump_switch(sw, false);
 
 	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_ip4_dst_match(0xC0A80001, 0xFFFFFFFF)) == ROFL_SUCCESS);
-	CU_ASSERT(of1x_remove_flow_entry_table(&sw->pipeline, 0, entry, true, 0x1, OF1X_GROUP_ANY) == ROFL_SUCCESS);
+	CU_ASSERT(of1x_remove_flow_entry_table(&sw->pipeline, 0, entry, true, 0x1, OF1X_GROUP_ANY) == ROFL_OF1X_FM_SUCCESS);
 	CU_ASSERT(table->num_of_entries == 11);
 
 	of1x_full_dump_switch(sw, false);

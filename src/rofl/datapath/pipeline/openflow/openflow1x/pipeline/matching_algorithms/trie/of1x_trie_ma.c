@@ -883,7 +883,7 @@ ADD_END:
 	return res;
 }
 
-rofl_result_t of1x_modify_flow_entry_trie(of1x_flow_table_t *const table,
+rofl_of1x_fm_result_t of1x_modify_flow_entry_trie(of1x_flow_table_t *const table,
 						of1x_flow_entry_t *const entry,
 						const enum of1x_flow_removal_strictness strict,
 						bool reset_counts){
@@ -891,7 +891,7 @@ rofl_result_t of1x_modify_flow_entry_trie(of1x_flow_table_t *const table,
 	struct of1x_trie_leaf *prev, *next;
 	of1x_flow_entry_t *it;
 	of1x_trie_t* trie = (of1x_trie_t*)table->matching_aux[0];
-	rofl_result_t res = ROFL_SUCCESS;
+	rofl_of1x_fm_result_t res = ROFL_OF1X_FM_SUCCESS;
 	bool check_cookie = ( table->pipeline->sw->of_ver != OF_VERSION_10 ); //Ignore cookie in OF1.0
 	unsigned int moded=0;
 
@@ -942,7 +942,7 @@ rofl_result_t of1x_modify_flow_entry_trie(of1x_flow_table_t *const table,
 		platform_of1x_modify_entry_hook(it, entry, reset_counts);
 		ROFL_PIPELINE_DEBUG("[flowmod-modify(%p)] Existing entry (%p) will be updated with (%p)\n", entry, it, entry);
 		if(__of1x_update_flow_entry(it, entry, reset_counts) != ROFL_SUCCESS){
-			res = ROFL_FAILURE;
+			res = ROFL_OF1X_FM_FAILURE;
 			goto MODIFY_END;
 		}
 		moded++;
@@ -968,16 +968,13 @@ MODIFY_END:
 	of1x_destroy_flow_entry(entry);
 
 	//According to spec
-	if(moded == 0 && res == ROFL_SUCCESS){
-		rofl_of1x_fm_result_t r;
-		r = of1x_add_flow_entry_trie(table, entry, false, reset_counts);
-		return (r == ROFL_OF1X_FM_SUCCESS)? ROFL_SUCCESS : ROFL_FAILURE;
-	}
+	if(moded == 0 && res == ROFL_OF1X_FM_SUCCESS)
+		res = of1x_add_flow_entry_trie(table, entry, false, reset_counts);
 
 	return res;
 }
 
-rofl_result_t of1x_remove_flow_entry_trie(of1x_flow_table_t *const table,
+rofl_of1x_fm_result_t of1x_remove_flow_entry_trie(of1x_flow_table_t *const table,
 						of1x_flow_entry_t *const entry,
 						of1x_flow_entry_t *const specific_entry,
 						const enum of1x_flow_removal_strictness strict,
@@ -990,12 +987,13 @@ rofl_result_t of1x_remove_flow_entry_trie(of1x_flow_table_t *const table,
 	of1x_flow_entry_t *it, *aux, *tmp_next;
 	of1x_trie_t* trie = (of1x_trie_t*)table->matching_aux[0];
 
-	rofl_result_t res = ROFL_SUCCESS;
+	rofl_of1x_fm_result_t res = ROFL_OF1X_FM_SUCCESS;
+	rofl_result_t r; //Auxiliary (destroy)
 	bool check_cookie = ( table->pipeline->sw->of_ver != OF_VERSION_10 ); //Ignore cookie in OF1.0
 
 	//Basic sanitychecks
 	if( (entry&&specific_entry) ||  (!entry && !specific_entry) )
-		return ROFL_FAILURE;
+		return ROFL_OF1X_FM_FAILURE;
 
 	//Do not allow stats during insertion
 	platform_rwlock_wrlock(table->rwlock);
@@ -1072,10 +1070,12 @@ rofl_result_t of1x_remove_flow_entry_trie(of1x_flow_table_t *const table,
 #ifdef ROFL_PIPELINE_LOCKLESS
 		tid_wait_all_not_present(&table->tid_presence_mask);
 #endif
-		res = __of1x_destroy_flow_entry_with_reason(it, reason);
+		r = __of1x_destroy_flow_entry_with_reason(it, reason);
 
-		if(res != ROFL_SUCCESS)
+		if(r != ROFL_SUCCESS){
+			res = ROFL_OF1X_FM_FAILURE;
 			goto REMOVE_END;
+		}
 
 		//Prune (collapse) trie
 		if(__of1x_prune_leafs_trie(table, trie, prev)){
