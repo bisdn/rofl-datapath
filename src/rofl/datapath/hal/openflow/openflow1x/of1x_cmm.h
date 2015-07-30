@@ -7,6 +7,7 @@
 
 #include <inttypes.h>
 #include <rofl/datapath/pipeline/common/packet_matches.h>
+#include <rofl/datapath/pipeline/switch_port.h>
 #include <rofl/datapath/pipeline/openflow/openflow1x/of1x_switch.h>
 #include <rofl/datapath/pipeline/openflow/openflow1x/pipeline/of1x_flow_entry.h>
 #include "../../hal.h"

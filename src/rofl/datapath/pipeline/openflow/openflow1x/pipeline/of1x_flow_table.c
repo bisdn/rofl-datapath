@@ -439,7 +439,7 @@ rofl_result_t __of1x_destroy_table(of1x_flow_table_t* table){
 * Specific matchings may point them to their own routines, but they MUST always call
 * of1x_[whatever]_flow_entry_table_imp in order to update the main tables
 */
-inline rofl_of1x_fm_result_t of1x_add_flow_entry_table(of1x_pipeline_t *const pipeline, const unsigned int table_id, of1x_flow_entry_t **const entry, bool check_overlap, bool reset_counts){
+rofl_of1x_fm_result_t of1x_add_flow_entry_table(of1x_pipeline_t *const pipeline, const unsigned int table_id, of1x_flow_entry_t **const entry, bool check_overlap, bool reset_counts){
 
 	rofl_of1x_fm_result_t result;
 	of1x_flow_table_t* table;
@@ -453,8 +453,7 @@ inline rofl_of1x_fm_result_t of1x_add_flow_entry_table(of1x_pipeline_t *const pi
 	//Verify table_id
 	if(unlikely(table_id >= pipeline->num_of_tables)){
 		ROFL_PIPELINE_ERR("[flowmod-add(%p)] ERROR: invalid table id %u > switch max table id: %u\n", *entry, table_id, pipeline->num_of_tables-1);
-		assert(0);
-		return ROFL_OF1X_FM_FAILURE;
+		return ROFL_OF1X_FM_INVALID_TABLE_ID;
 	}
 
 	table = &pipeline->tables[table_id];
@@ -467,7 +466,7 @@ inline rofl_of1x_fm_result_t of1x_add_flow_entry_table(of1x_pipeline_t *const pi
 		//Release rdlock
 		platform_rwlock_rdunlock(pipeline->groups->rwlock);
 		ROFL_PIPELINE_INFO("[flowmod-add(%p)] FAILED validation. Ignoring...\n", *entry);
-		return ROFL_OF1X_FM_FAILURE;
+		return ROFL_OF1X_FM_VALIDATION;
 	}
 
 
@@ -498,8 +497,8 @@ inline rofl_of1x_fm_result_t of1x_add_flow_entry_table(of1x_pipeline_t *const pi
 }
 
 
-inline rofl_result_t of1x_modify_flow_entry_table(of1x_pipeline_t *const pipeline, const unsigned int table_id, of1x_flow_entry_t **const entry, const enum of1x_flow_removal_strictness strict, bool reset_counts){
-	rofl_result_t result;
+rofl_of1x_fm_result_t of1x_modify_flow_entry_table(of1x_pipeline_t *const pipeline, const unsigned int table_id, of1x_flow_entry_t **const entry, const enum of1x_flow_removal_strictness strict, bool reset_counts){
+	rofl_of1x_fm_result_t result;
 	of1x_flow_table_t* table;
 
 #ifdef DEBUG
@@ -512,8 +511,7 @@ inline rofl_result_t of1x_modify_flow_entry_table(of1x_pipeline_t *const pipelin
 	//Verify table_id
 	if(table_id >= pipeline->num_of_tables){
 		ROFL_PIPELINE_ERR("[flowmod-modify(%p)] ERROR: invalid table id %u > switch max table id: %u\n", *entry, table_id, pipeline->num_of_tables-1);
-		assert(0);
-		return ROFL_FAILURE;
+		return ROFL_OF1X_FM_INVALID_TABLE_ID;
 	}
 
 	table = &pipeline->tables[table_id];
@@ -526,13 +524,13 @@ inline rofl_result_t of1x_modify_flow_entry_table(of1x_pipeline_t *const pipelin
 		//Release rdlock
 		platform_rwlock_rdunlock(pipeline->groups->rwlock);
 		ROFL_PIPELINE_INFO("[flowmod-modify(%p)] FAILED validation. Ignoring...\n", *entry);
-		return ROFL_FAILURE;
+		return ROFL_OF1X_FM_VALIDATION;
 	}
 
 	//Perform insertion
 	result = of1x_matching_algorithms[table->matching_algorithm].modify_flow_entry_hook(table, *entry, strict, reset_counts);
 
-	if(result != ROFL_SUCCESS){
+	if(result != ROFL_OF1X_FM_SUCCESS){
 		//Release rdlock
 		platform_rwlock_rdunlock(pipeline->groups->rwlock);
 		ROFL_PIPELINE_INFO("[flowmod-modify(%p)] FAILED\n", *entry);
@@ -543,7 +541,6 @@ inline rofl_result_t of1x_modify_flow_entry_table(of1x_pipeline_t *const pipelin
 	
 	//Release rdlock
 	platform_rwlock_rdunlock(pipeline->groups->rwlock);
-		
 
 	//Was successful set the pointer to NULL
 	//so that is not further used outside the pipeline
@@ -553,10 +550,10 @@ inline rofl_result_t of1x_modify_flow_entry_table(of1x_pipeline_t *const pipelin
 	return result;
 }
 
-inline rofl_result_t of1x_remove_flow_entry_table(of1x_pipeline_t *const pipeline, const unsigned int table_id, of1x_flow_entry_t* entry, const enum of1x_flow_removal_strictness strict, uint32_t out_port, uint32_t out_group){
+rofl_of1x_fm_result_t of1x_remove_flow_entry_table(of1x_pipeline_t *const pipeline, const unsigned int table_id, of1x_flow_entry_t* entry, const enum of1x_flow_removal_strictness strict, uint32_t out_port, uint32_t out_group){
 	
 	of1x_flow_table_t* table;
-	rofl_result_t result;	
+	rofl_of1x_fm_result_t result;
 
 #ifdef DEBUG
 	//Dump entry	
@@ -580,14 +577,13 @@ inline rofl_result_t of1x_remove_flow_entry_table(of1x_pipeline_t *const pipelin
 	//Verify table_id
 	if(table_id >= pipeline->num_of_tables){
 		ROFL_PIPELINE_ERR("[flowmod-remove(%p)] ERROR: invalid table id %u > switch max table id: %u\n", entry, table_id, pipeline->num_of_tables-1);
-		assert(0);
-		return ROFL_FAILURE;
+		return ROFL_OF1X_FM_INVALID_TABLE_ID;
 	}
 
 	//Verify entry
 	if(__of1x_validate_flow_entry(entry, pipeline, table_id) != ROFL_SUCCESS){
 		ROFL_PIPELINE_INFO("[flowmod-remove(%p)] FAILED validation. Ignoring...\n", entry);
-		return ROFL_FAILURE;
+		return ROFL_OF1X_FM_VALIDATION;
 	}
 
 	//Recover table pointer
@@ -596,7 +592,7 @@ inline rofl_result_t of1x_remove_flow_entry_table(of1x_pipeline_t *const pipelin
 	result = of1x_matching_algorithms[table->matching_algorithm].remove_flow_entry_hook(table, entry, NULL, strict,  out_port, out_group, OF1X_FLOW_REMOVE_DELETE, MUTEX_NOT_ACQUIRED);
 	
 #ifdef DEBUG
-	if(result != ROFL_SUCCESS)
+	if(result != ROFL_OF1X_FM_SUCCESS)
 		ROFL_PIPELINE_INFO("[flowmod-remove(%p)] FAILED\n", entry);
 	else
 		ROFL_PIPELINE_INFO("[flowmod-remove(%p)] Succesful.\n", entry);
@@ -606,16 +602,16 @@ inline rofl_result_t of1x_remove_flow_entry_table(of1x_pipeline_t *const pipelin
 }
 
 //This API call should NOT be called from outside pipeline library
-rofl_result_t __of1x_remove_specific_flow_entry_table(of1x_pipeline_t *const pipeline, const unsigned int table_id, of1x_flow_entry_t *const specific_entry, of1x_flow_remove_reason_t reason, of1x_mutex_acquisition_required_t mutex_acquired){
+rofl_of1x_fm_result_t __of1x_remove_specific_flow_entry_table(of1x_pipeline_t *const pipeline, const unsigned int table_id, of1x_flow_entry_t *const specific_entry, of1x_flow_remove_reason_t reason, of1x_mutex_acquisition_required_t mutex_acquired){
 	of1x_flow_table_t* table;
-	
+
 	//Verify table_id
 	if(table_id >= pipeline->num_of_tables)
-		return ROFL_FAILURE;
+		return ROFL_OF1X_FM_FAILURE;
 
 	//Recover table pointer
 	table = &pipeline->tables[table_id];
-	
+
 	return of1x_matching_algorithms[table->matching_algorithm].remove_flow_entry_hook(table, NULL, specific_entry, STRICT, OF1X_PORT_ANY, OF1X_GROUP_ANY, reason, mutex_acquired);
 }
 

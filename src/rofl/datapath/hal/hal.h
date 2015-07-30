@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #ifndef HAL_H
-#define HAL_H 
+#define HAL_H
 
 /**
 * @file hal.h
@@ -13,22 +13,18 @@
 * @brief Hardware Abstraction Layer (HAL) main header file
 */
 
+#include <assert.h>
 #include <stdlib.h>
 #include <rofl_datapath.h>
-#include <rofl/datapath/pipeline/switch_port.h>
-#include <rofl/datapath/pipeline/openflow/of_switch.h>
 
 #include "hal_utils.h"
 
 /**
-* HAL return values
+* HAL general return codes
 */
 typedef enum hal_result {
 	HAL_SUCCESS	= ROFL_SUCCESS,
 	HAL_FAILURE	= ROFL_FAILURE,
-	
-	//Extra codes
-	HAL_FM_OVERLAP_FAILURE
 }hal_result_t;
 
 #endif /* HAL_H */

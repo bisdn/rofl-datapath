@@ -76,18 +76,20 @@ static of1x_flow_entry_t* of1x_flow_table_loop_check_identical(of1x_flow_entry_t
 * and table pointer, but no further checkings are done (including lookup in the table linked list)
 *
 */
-static rofl_result_t of1x_remove_flow_entry_table_specific_imp(of1x_flow_table_t *const table, of1x_flow_entry_t *const specific_entry, of1x_flow_remove_reason_t reason, void (*ma_hook_ptr)(of1x_flow_entry_t*)){
-	
+static rofl_of1x_fm_result_t of1x_remove_flow_entry_table_specific_imp(of1x_flow_table_t *const table, of1x_flow_entry_t *const specific_entry, of1x_flow_remove_reason_t reason, void (*ma_hook_ptr)(of1x_flow_entry_t*)){
+
+	rofl_result_t res;
+
 	if( unlikely(table->num_of_entries == 0) ) 
-		return ROFL_FAILURE; 
+		return ROFL_OF1X_FM_FAILURE; 
 
 	//Safety checks
 	if(unlikely(specific_entry->table != table))
-		return ROFL_FAILURE; 
+		return ROFL_OF1X_FM_FAILURE;
 	if(specific_entry->prev && unlikely(specific_entry->prev->next != specific_entry))
-		return ROFL_FAILURE; 
+		return ROFL_OF1X_FM_FAILURE;
 	if(specific_entry->next && unlikely(specific_entry->next->prev != specific_entry))
-		return ROFL_FAILURE; 
+		return ROFL_OF1X_FM_FAILURE;
 
 	//Prevent readers to jump in
 	platform_rwlock_wrlock(table->rwlock);
@@ -121,7 +123,9 @@ static rofl_result_t of1x_remove_flow_entry_table_specific_imp(of1x_flow_table_t
 #ifdef ROFL_PIPELINE_LOCKLESS
 	tid_wait_all_not_present(&table->tid_presence_mask);	
 #endif
-	return __of1x_destroy_flow_entry_with_reason(specific_entry, reason);
+	res = __of1x_destroy_flow_entry_with_reason(specific_entry, reason);
+
+	return (res == ROFL_SUCCESS)? ROFL_OF1X_FM_SUCCESS : ROFL_OF1X_FM_FAILURE;
 }
 
 /* 
@@ -220,7 +224,7 @@ rofl_of1x_fm_result_t of1x_add_flow_entry_table_imp(of1x_flow_table_t *const tab
 				tid_wait_all_not_present(&table->tid_presence_mask);	
 #endif
 
-				if(of1x_remove_flow_entry_table_specific_imp(table,existing, OF1X_FLOW_REMOVE_NO_REASON, ma_hook_ptr) != ROFL_SUCCESS){
+				if(of1x_remove_flow_entry_table_specific_imp(table,existing, OF1X_FLOW_REMOVE_NO_REASON, ma_hook_ptr) != ROFL_OF1X_FM_SUCCESS){
 					assert(0);
 				}
 			}
@@ -270,7 +274,7 @@ rofl_of1x_fm_result_t of1x_add_flow_entry_table_imp(of1x_flow_table_t *const tab
 		tid_wait_all_not_present(&table->tid_presence_mask);	
 #endif
 		
-		if(unlikely(of1x_remove_flow_entry_table_specific_imp(table,existing, OF1X_FLOW_REMOVE_NO_REASON, ma_hook_ptr) != ROFL_SUCCESS)){
+		if(unlikely(of1x_remove_flow_entry_table_specific_imp(table,existing, OF1X_FLOW_REMOVE_NO_REASON, ma_hook_ptr) != ROFL_OF1X_FM_SUCCESS)){
 			assert(0);
 		}
 	}
@@ -291,14 +295,14 @@ rofl_of1x_fm_result_t of1x_add_flow_entry_table_imp(of1x_flow_table_t *const tab
 * This function shall NOT be used if there is some prior knowledge by the lookup algorithm before (specially a pointer to the entry), as it is inherently VERY innefficient
 */
 
-static rofl_result_t of1x_remove_flow_entry_table_non_specific_imp(of1x_flow_table_t *const table, of1x_flow_entry_t *const entry, const enum of1x_flow_removal_strictness strict, uint32_t out_port, uint32_t out_group, of1x_flow_remove_reason_t reason, void (*ma_hook_ptr)(of1x_flow_entry_t*)){
+static rofl_of1x_fm_result_t of1x_remove_flow_entry_table_non_specific_imp(of1x_flow_table_t *const table, of1x_flow_entry_t *const entry, const enum of1x_flow_removal_strictness strict, uint32_t out_port, uint32_t out_group, of1x_flow_remove_reason_t reason, void (*ma_hook_ptr)(of1x_flow_entry_t*)){
 
 	int deleted=0; 
 	of1x_flow_entry_t *it, *it_next;
 	of_version_t ver = table->pipeline->sw->of_ver;
 
 	if(table->num_of_entries == 0) 
-		return ROFL_SUCCESS; //according to spec 
+		return ROFL_OF1X_FM_SUCCESS; //according to spec 
 
 	//Loop over all the table entries	
 	for(it=table->entries; it; it=it_next){
@@ -312,9 +316,9 @@ static rofl_result_t of1x_remove_flow_entry_table_non_specific_imp(of1x_flow_tab
 #ifdef DEBUG
 				__of1x_remove_flow_entry_table_trace("", entry, it, reason);
 #endif
-				if(of1x_remove_flow_entry_table_specific_imp(table, it, reason, ma_hook_ptr) != ROFL_SUCCESS){
+				if(of1x_remove_flow_entry_table_specific_imp(table, it, reason, ma_hook_ptr) != ROFL_OF1X_FM_SUCCESS){
 					assert(0); //This should never happen
-					return ROFL_FAILURE;
+					return ROFL_OF1X_FM_FAILURE;
 				}
 				deleted++;
 				break;
@@ -324,9 +328,9 @@ static rofl_result_t of1x_remove_flow_entry_table_non_specific_imp(of1x_flow_tab
 #ifdef DEBUG
 				__of1x_remove_flow_entry_table_trace("", entry, it, reason);
 #endif
-				if(of1x_remove_flow_entry_table_specific_imp(table, it, reason, ma_hook_ptr) != ROFL_SUCCESS){
+				if(of1x_remove_flow_entry_table_specific_imp(table, it, reason, ma_hook_ptr) != ROFL_OF1X_FM_SUCCESS){
 					assert(0); //This should never happen
-					return ROFL_FAILURE;
+					return ROFL_OF1X_FM_FAILURE;
 				}
 				deleted++;
 			}
@@ -337,7 +341,7 @@ static rofl_result_t of1x_remove_flow_entry_table_non_specific_imp(of1x_flow_tab
 	//if(deleted == 0)	
 	//	return ROFL_FAILURE; 
 	
-	return ROFL_SUCCESS;
+	return ROFL_OF1X_FM_SUCCESS;
 }
 
 
@@ -354,10 +358,10 @@ static rofl_result_t of1x_remove_flow_entry_table_non_specific_imp(of1x_flow_tab
 * 
 */
 
-static inline rofl_result_t of1x_remove_flow_entry_table_imp(of1x_flow_table_t *const table, of1x_flow_entry_t *const entry, of1x_flow_entry_t *const specific_entry, uint32_t out_port, uint32_t out_group, of1x_flow_remove_reason_t reason, const enum of1x_flow_removal_strictness strict, void (*ma_hook_ptr)(of1x_flow_entry_t*)){
+static inline rofl_of1x_fm_result_t of1x_remove_flow_entry_table_imp(of1x_flow_table_t *const table, of1x_flow_entry_t *const entry, of1x_flow_entry_t *const specific_entry, uint32_t out_port, uint32_t out_group, of1x_flow_remove_reason_t reason, const enum of1x_flow_removal_strictness strict, void (*ma_hook_ptr)(of1x_flow_entry_t*)){
 
 	if( unlikely( (entry&&specific_entry) ) || unlikely( (!entry && !specific_entry) ) )
-		return ROFL_FAILURE;
+		return ROFL_OF1X_FM_FAILURE;
  
 	if(entry)
 		return of1x_remove_flow_entry_table_non_specific_imp(table, entry, strict, out_port, out_group, reason, ma_hook_ptr);
@@ -384,7 +388,7 @@ rofl_of1x_fm_result_t of1x_add_flow_entry_loop(of1x_flow_table_t *const table, o
 	return __of1x_add_flow_entry_loop(table, entry, check_overlap, reset_counts, NULL);
 }
 
-rofl_result_t __of1x_modify_flow_entry_loop(of1x_flow_table_t *const table, of1x_flow_entry_t *const entry, const enum of1x_flow_removal_strictness strict, bool reset_counts, void (*ma_add_hook_ptr)(of1x_flow_entry_t*), void (*ma_modify_hook_ptr)(of1x_flow_entry_t*)){
+rofl_of1x_fm_result_t __of1x_modify_flow_entry_loop(of1x_flow_table_t *const table, of1x_flow_entry_t *const entry, const enum of1x_flow_removal_strictness strict, bool reset_counts, void (*ma_add_hook_ptr)(of1x_flow_entry_t*), void (*ma_modify_hook_ptr)(of1x_flow_entry_t*)){
 
 	int moded=0; 
 	of1x_flow_entry_t *it;
@@ -409,7 +413,7 @@ rofl_result_t __of1x_modify_flow_entry_loop(of1x_flow_table_t *const table, of1x
 				ROFL_PIPELINE_DEBUG("[flowmod-modify(%p)] Existing entry (%p) will be updated with (%p)\n", entry, it, entry);
 				
 				if(__of1x_update_flow_entry(it, entry, reset_counts) != ROFL_SUCCESS)
-					return ROFL_FAILURE;
+					return ROFL_OF1X_FM_FAILURE;
 				moded++;
 				break;
 			}
@@ -426,7 +430,7 @@ rofl_result_t __of1x_modify_flow_entry_loop(of1x_flow_table_t *const table, of1x
 				ROFL_PIPELINE_DEBUG("[flowmod-modify(%p)] Existing entry (%p) will be updated with (%p)\n", entry, it, entry);
 				
 				if(__of1x_update_flow_entry(it, entry, reset_counts) != ROFL_SUCCESS)
-					return ROFL_FAILURE;
+					return ROFL_OF1X_FM_FAILURE;
 				moded++;
 			}
 		}
@@ -435,44 +439,40 @@ rofl_result_t __of1x_modify_flow_entry_loop(of1x_flow_table_t *const table, of1x
 	platform_mutex_unlock(table->mutex);
 
 	//According to spec
-	if(moded == 0){	
-		//TODO: remove cast
-		return (rofl_result_t)__of1x_add_flow_entry_loop(table, entry, false, reset_counts, ma_add_hook_ptr);
-	}
+	if(moded == 0)
+		return __of1x_add_flow_entry_loop(table, entry, false, reset_counts, ma_add_hook_ptr);
 
 	ROFL_PIPELINE_DEBUG("[flowmod-modify(%p)] Deleting modifying flowmod \n", entry);
 	
 	//Delete the original flowmod (modify one)
 	of1x_destroy_flow_entry(entry);	
 
-	return ROFL_SUCCESS;
+	return ROFL_OF1X_FM_SUCCESS;
 }
 
-rofl_result_t of1x_modify_flow_entry_loop(of1x_flow_table_t *const table, of1x_flow_entry_t *const entry, const enum of1x_flow_removal_strictness strict, bool reset_counts){
+rofl_of1x_fm_result_t of1x_modify_flow_entry_loop(of1x_flow_table_t *const table, of1x_flow_entry_t *const entry, const enum of1x_flow_removal_strictness strict, bool reset_counts){
 	return __of1x_modify_flow_entry_loop(table, entry, strict, reset_counts, NULL, NULL);
 
 }
 
-rofl_result_t __of1x_remove_flow_entry_loop(of1x_flow_table_t *const table , of1x_flow_entry_t *const entry, of1x_flow_entry_t *const specific_entry, const enum of1x_flow_removal_strictness strict, uint32_t out_port, uint32_t out_group, of1x_flow_remove_reason_t reason, of1x_mutex_acquisition_required_t mutex_acquired, void (*ma_hook_ptr)(of1x_flow_entry_t*)){
+rofl_of1x_fm_result_t __of1x_remove_flow_entry_loop(of1x_flow_table_t *const table , of1x_flow_entry_t *const entry, of1x_flow_entry_t *const specific_entry, const enum of1x_flow_removal_strictness strict, uint32_t out_port, uint32_t out_group, of1x_flow_remove_reason_t reason, of1x_mutex_acquisition_required_t mutex_acquired, void (*ma_hook_ptr)(of1x_flow_entry_t*)){
 
-	rofl_result_t result;
+	rofl_of1x_fm_result_t result;
 
 	//Allow single add/remove operation over the table
-	if(!mutex_acquired){
+	if(!mutex_acquired)
 		platform_mutex_lock(table->mutex);
-	}
-	
+
 	result = of1x_remove_flow_entry_table_imp(table, entry, specific_entry, out_port, out_group,reason, strict, ma_hook_ptr);
 
 	//Green light to other threads
-	if(!mutex_acquired){
+	if(!mutex_acquired)
 		platform_mutex_unlock(table->mutex);
-	}
 
 	return result;
 }
 
-rofl_result_t of1x_remove_flow_entry_loop(of1x_flow_table_t *const table , of1x_flow_entry_t *const entry, of1x_flow_entry_t *const specific_entry, const enum of1x_flow_removal_strictness strict, uint32_t out_port, uint32_t out_group, of1x_flow_remove_reason_t reason, of1x_mutex_acquisition_required_t mutex_acquired){
+rofl_of1x_fm_result_t of1x_remove_flow_entry_loop(of1x_flow_table_t *const table , of1x_flow_entry_t *const entry, of1x_flow_entry_t *const specific_entry, const enum of1x_flow_removal_strictness strict, uint32_t out_port, uint32_t out_group, of1x_flow_remove_reason_t reason, of1x_mutex_acquisition_required_t mutex_acquired){
 	return __of1x_remove_flow_entry_loop(table, entry, specific_entry, strict, out_port, out_group, reason, mutex_acquired, NULL);
 }
 
