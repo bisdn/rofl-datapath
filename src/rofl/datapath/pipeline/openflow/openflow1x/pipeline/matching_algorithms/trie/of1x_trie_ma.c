@@ -1041,7 +1041,7 @@ rofl_of1x_fm_result_t of1x_remove_flow_entry_trie(of1x_flow_table_t *const table
 				goto REMOVE_NEXT;
 		}else{
 			if(__of1x_flow_entry_check_contained(it, aux, false,
-									false,
+									check_cookie,
 									out_port,
 									out_group,
 									true) == false)
