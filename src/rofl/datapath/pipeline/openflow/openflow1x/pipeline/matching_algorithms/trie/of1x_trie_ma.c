@@ -735,11 +735,11 @@ rofl_of1x_fm_result_t of1x_add_flow_entry_trie(of1x_flow_table_t *const table,
 	struct of1x_trie_leaf *prev, *next;
 	of1x_flow_entry_t *curr_entry, *to_be_removed=NULL, **ll_head;
 
-	//Do not allow stats during insertion
-	platform_rwlock_wrlock(table->rwlock);
-
 	//Allow single add/remove operation over the table
 	platform_mutex_lock(table->mutex);
+
+	//Do not allow stats during insertion
+	platform_rwlock_wrlock(table->rwlock);
 
 	/*
 	* Check overlap
@@ -870,8 +870,8 @@ rofl_of1x_fm_result_t of1x_add_flow_entry_trie(of1x_flow_table_t *const table,
 	entry->table = table;
 
 ADD_END:
-	platform_mutex_unlock(table->mutex);
 	platform_rwlock_wrunlock(table->rwlock);
+	platform_mutex_unlock(table->mutex);
 
 	if(to_be_removed){
 #ifdef ROFL_PIPELINE_LOCKLESS
@@ -895,11 +895,11 @@ rofl_of1x_fm_result_t of1x_modify_flow_entry_trie(of1x_flow_table_t *const table
 	bool check_cookie = ( table->pipeline->sw->of_ver != OF_VERSION_10 ); //Ignore cookie in OF1.0
 	unsigned int moded=0;
 
-	//Do not allow stats during insertion
-	platform_rwlock_wrlock(table->rwlock);
-
 	//Allow single add/remove operation over the table
 	platform_mutex_lock(table->mutex);
+
+	//Do not allow stats during insertion
+	platform_rwlock_wrlock(table->rwlock);
 
 	//Point to the root of the tree
 	prev = NULL;
@@ -957,8 +957,8 @@ MODIFY_NEXT:
 	}while(1);
 
 MODIFY_END:
-	platform_mutex_unlock(table->mutex);
 	platform_rwlock_wrunlock(table->rwlock);
+	platform_mutex_unlock(table->mutex);
 
 #ifdef ROFL_PIPELINE_LOCKLESS
 	tid_wait_all_not_present(&table->tid_presence_mask);
@@ -995,11 +995,12 @@ rofl_of1x_fm_result_t of1x_remove_flow_entry_trie(of1x_flow_table_t *const table
 	if( (entry&&specific_entry) ||  (!entry && !specific_entry) )
 		return ROFL_OF1X_FM_FAILURE;
 
+	//Allow single add/remove operation over the table
+	if(!mutex_acquired)
+		platform_mutex_lock(table->mutex);
+
 	//Do not allow stats during insertion
 	platform_rwlock_wrlock(table->rwlock);
-
-	//Allow single add/remove operation over the table
-	platform_mutex_lock(table->mutex);
 
 	//Point to the root of the tree
 	prev = NULL;
@@ -1096,8 +1097,9 @@ REMOVE_NEXT:
 
 
 REMOVE_END:
-	platform_mutex_unlock(table->mutex);
 	platform_rwlock_wrunlock(table->rwlock);
+	if(!mutex_acquired)
+		platform_mutex_unlock(table->mutex);
 
 	return res;
 }
