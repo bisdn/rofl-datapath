@@ -964,12 +964,11 @@ MODIFY_END:
 	tid_wait_all_not_present(&table->tid_presence_mask);
 #endif
 
-	//Destroy original entry
-	of1x_destroy_flow_entry(entry);
-
 	//According to spec
 	if(moded == 0 && res == ROFL_OF1X_FM_SUCCESS)
 		res = of1x_add_flow_entry_trie(table, entry, false, reset_counts);
+	else
+		of1x_destroy_flow_entry(entry);
 
 	return res;
 }
