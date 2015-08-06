@@ -24,13 +24,12 @@ ROFL_BEGIN_DECLS
 // NOTE: this can never be inlined. Just putting it here
 static inline void of1x_check_leaf_trie(datapacket_t *const pkt,
 					struct of1x_trie_leaf* leaf,
-					int64_t* match_priority,
 					of1x_flow_entry_t** best_match){
 	if(unlikely(leaf == NULL))
 		return;
 
 	//Check inner
-	if(((int64_t)leaf->imp) > *match_priority){
+	if(!(*best_match) || (leaf->imp > (*best_match)->priority)){
 		//Check match
 		if(__of1x_check_match(pkt, &leaf->match)){
 			if(leaf->entry)
@@ -38,14 +37,12 @@ static inline void of1x_check_leaf_trie(datapacket_t *const pkt,
 			if(leaf->inner)
 				of1x_check_leaf_trie(pkt,
 							leaf->inner,
-							match_priority,
 							best_match);
 		}
 	}
 
 	if(leaf->next)
 		of1x_check_leaf_trie(pkt, leaf->next,
-							match_priority,
 							best_match);
 }
 
@@ -53,14 +50,13 @@ static inline void of1x_check_leaf_trie(datapacket_t *const pkt,
 
 static inline void of1x_check_leaf_trie(datapacket_t *const pkt,
 					struct of1x_trie_leaf* leaf,
-					int64_t* match_priority,
 					of1x_flow_entry_t** best_match){
 	if(unlikely(leaf == NULL))
 		return;
 
 CHECK_LEAF:
 	//Check inner
-	if(((int64_t)leaf->imp) > *match_priority){
+	if(!(*best_match) || (leaf->imp > (*best_match)->priority)){
 		//Check match
 		if(__of1x_check_match(pkt, &leaf->match)){
 			if(leaf->entry)
@@ -93,7 +89,6 @@ static inline of1x_flow_entry_t* of1x_find_best_match_trie_ma(of1x_flow_table_t 
 							datapacket_t *const pkt){
 
 	struct of1x_trie* trie = ((of1x_trie_t*)table->matching_aux[0]);
-	int64_t match_priority;
 	of1x_flow_entry_t* best_match;
 	struct of1x_trie_leaf* leaf = trie->root;
 
@@ -105,13 +100,8 @@ static inline of1x_flow_entry_t* of1x_find_best_match_trie_ma(of1x_flow_table_t 
 	//Entries with no matches
 	best_match = trie->entry;
 
-	if(best_match)
-		match_priority = best_match->priority;
-	else
-		match_priority = -1;
-
 	//Start recursion
-	of1x_check_leaf_trie(pkt, leaf, &match_priority, &best_match);
+	of1x_check_leaf_trie(pkt, leaf, &best_match);
 
 #ifndef ROFL_PIPELINE_LOCKLESS
 	if(best_match){
