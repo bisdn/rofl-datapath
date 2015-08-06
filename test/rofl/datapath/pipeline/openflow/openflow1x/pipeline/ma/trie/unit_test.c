@@ -24,10 +24,11 @@ int main(int args, char** argv){
 	}
 
 	/* add the tests to the suite */
-	if ((NULL == CU_add_test(pSuite, "test install empty flowmods", test_install_empty_flowmods)) ||
-	(NULL == CU_add_test(pSuite, "test install regular flowmods without and without masks", test_install_flowmods)) ||
-	(NULL == CU_add_test(pSuite, "test removal regular flowmods without and without masks", test_remove_flowmods)) ||
-	(NULL == CU_add_test(pSuite, "test many entries", test_many_entries)) //||
+	if ((NULL == CU_add_test(pSuite, "Trie: test install empty flowmods", test_install_empty_flowmods)) ||
+	(NULL == CU_add_test(pSuite, "Trie: test install regular flowmods without and without masks", test_install_flowmods)) ||
+	(NULL == CU_add_test(pSuite, "Trie: test removal regular flowmods without and without masks", test_remove_flowmods)) ||
+	(NULL == CU_add_test(pSuite, "Trie: test many entries", test_many_entries)) ||
+	(NULL == CU_add_test(pSuite, "Trie: test regressions", test_regressions)) //||
 		)
 	{
 		fprintf(stderr,"ERROR WHILE ADDING TEST\n");

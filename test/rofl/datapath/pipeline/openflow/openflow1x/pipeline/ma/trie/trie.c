@@ -32,6 +32,13 @@ int tear_down(){
 	return EXIT_SUCCESS;
 }
 
+static void clean_all(){
+	of1x_flow_entry_t *entry = of1x_init_flow_entry(false);
+	CU_ASSERT(entry != NULL);
+
+	CU_ASSERT(of1x_remove_flow_entry_table(&sw->pipeline, 0, entry, false, OF1X_PORT_ANY, OF1X_GROUP_ANY) == ROFL_OF1X_FM_SUCCESS);
+}
+
 void test_install_empty_flowmods(){
 
 	of1x_flow_entry_t *entry, *tmp;
@@ -691,14 +698,7 @@ void test_install_flowmods(){
 	CU_ASSERT(trie->root->next->inner->next->match.__tern.mask.u64 == OF1X_MAC_VALUE(HTONB64(0xFFF0FFFFFFFF)));
 	CU_ASSERT(trie->root->next->inner->next->entry != NULL);
 	CU_ASSERT(trie->root->next->inner->next->entry->priority == 6999);
-}
 
-
-static void clean_all(){
-	of1x_flow_entry_t *entry = of1x_init_flow_entry(false);
-	CU_ASSERT(entry != NULL);
-
-	CU_ASSERT(of1x_remove_flow_entry_table(&sw->pipeline, 0, entry, false, OF1X_PORT_ANY, OF1X_GROUP_ANY) == ROFL_OF1X_FM_SUCCESS);
 }
 
 void test_remove_flowmods(){
@@ -858,7 +858,60 @@ void test_remove_flowmods(){
 	CU_ASSERT(table->num_of_entries == 11);
 
 	of1x_full_dump_switch(sw, false);
+
 }
+
+void test_regressions(){
+
+	/*--- Add 2 exact flows with different priorities ---*/
+
+	of1x_flow_entry_t* entry;
+
+	//First entry
+	clean_all();
+	entry = of1x_init_flow_entry(false);
+	CU_ASSERT(entry != NULL);
+
+	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_eth_src_match(0xAABBCCDDEEFF, 0xFFF0FFFFFFFF)) == ROFL_SUCCESS);
+	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_ip4_dst_match(0xC0A80001, 0xFFFFFFFF)) == ROFL_SUCCESS);
+	entry->priority=99;
+	CU_ASSERT(of1x_add_flow_entry_table(&sw->pipeline, 0, &entry, false,false) == ROFL_OF1X_FM_SUCCESS);
+
+	of1x_full_dump_switch(sw, false);
+	CU_ASSERT(table->num_of_entries == 1);
+
+	//Repeat; should overwrite it
+	entry = of1x_init_flow_entry(false);
+	CU_ASSERT(entry != NULL);
+
+	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_eth_src_match(0xAABBCCDDEEFF, 0xFFF0FFFFFFFF)) == ROFL_SUCCESS);
+	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_ip4_dst_match(0xC0A80001, 0xFFFFFFFF)) == ROFL_SUCCESS);
+	entry->priority=99; //Same exact priority => replace
+	CU_ASSERT(of1x_add_flow_entry_table(&sw->pipeline, 0, &entry, false,false) == ROFL_OF1X_FM_SUCCESS);
+
+	of1x_full_dump_switch(sw, false);
+	CU_ASSERT(table->num_of_entries == 1);
+
+	//Different priority; shall not overwrite it
+	entry = of1x_init_flow_entry(false);
+	CU_ASSERT(entry != NULL);
+
+	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_eth_src_match(0xAABBCCDDEEFF, 0xFFF0FFFFFFFF)) == ROFL_SUCCESS);
+	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_ip4_dst_match(0xC0A80001, 0xFFFFFFFF)) == ROFL_SUCCESS);
+	entry->priority=199; //!
+	CU_ASSERT(of1x_add_flow_entry_table(&sw->pipeline, 0, &entry, false,false) == ROFL_OF1X_FM_SUCCESS);
+
+	of1x_full_dump_switch(sw, false);
+	CU_ASSERT(table->num_of_entries == 2);
+
+	CU_ASSERT(trie->root->imp == 199);
+	CU_ASSERT(trie->root->entry == NULL);
+	CU_ASSERT(trie->root->inner->imp == 199);
+	CU_ASSERT(trie->root->inner->entry != NULL);
+	CU_ASSERT(trie->root->inner->entry->priority == 199);
+	CU_ASSERT(trie->root->inner->entry->next != NULL);
+}
+
 
 #define NUM_ENTRIES 260
 void test_many_entries(){

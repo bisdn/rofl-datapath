@@ -23,5 +23,6 @@ void test_install_empty_flowmods(void);
 void test_install_flowmods(void);
 void test_remove_flowmods(void);
 void test_many_entries(void);
+void test_regressions(void);
 
 #endif

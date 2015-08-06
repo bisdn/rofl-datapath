@@ -528,8 +528,8 @@ static rofl_of1x_fm_result_t __of1x_insert_terminal_leaf_trie(struct of1x_trie_l
 	}else{
 		l->entry = entry;
 		entry->prev = NULL;
+		entry->next = NULL;
 	}
-	entry->next = NULL;
 
 	/*
 	* Adjust imp
