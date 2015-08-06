@@ -910,6 +910,52 @@ void test_regressions(){
 	CU_ASSERT(trie->root->inner->entry != NULL);
 	CU_ASSERT(trie->root->inner->entry->priority == 199);
 	CU_ASSERT(trie->root->inner->entry->next != NULL);
+
+	/*--- Add/Modify preserve statistics --*/
+
+	//First entry
+	clean_all();
+	entry = of1x_init_flow_entry(false);
+	CU_ASSERT(entry != NULL);
+
+	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_eth_src_match(0xAABBCCDDEEFF, 0xFFF0FFFFFFFF)) == ROFL_SUCCESS);
+	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_ip4_dst_match(0xC0A80001, 0xFFFFFFFF)) == ROFL_SUCCESS);
+	entry->priority=99;
+	entry->stats.s.__internal[0].packet_count = 1;
+	CU_ASSERT(of1x_add_flow_entry_table(&sw->pipeline, 0, &entry, false,false) == ROFL_OF1X_FM_SUCCESS);
+
+	of1x_full_dump_switch(sw, false);
+	CU_ASSERT(table->num_of_entries == 1);
+
+	//Modify without reset_counters => pkt_count == 1
+	entry = of1x_init_flow_entry(false);
+	CU_ASSERT(entry != NULL);
+
+	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_eth_src_match(0xAABBCCDDEEFF, 0xFFF0FFFFFFFF)) == ROFL_SUCCESS);
+	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_ip4_dst_match(0xC0A80001, 0xFFFFFFFF)) == ROFL_SUCCESS);
+	entry->priority=99; //Same exact priority => replace
+	entry->stats.s.__internal[0].packet_count = 0;
+	CU_ASSERT(of1x_modify_flow_entry_table(&sw->pipeline, 0, &entry, false, false) == ROFL_OF1X_FM_SUCCESS);
+
+	of1x_full_dump_switch(sw, false);
+	CU_ASSERT(table->num_of_entries == 1);
+	CU_ASSERT(trie->root->inner->entry->stats.s.__internal[0].packet_count == 1);
+
+	//Add must clear stats
+	entry = of1x_init_flow_entry(false);
+	CU_ASSERT(entry != NULL);
+
+	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_eth_src_match(0xAABBCCDDEEFF, 0xFFF0FFFFFFFF)) == ROFL_SUCCESS);
+	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_ip4_dst_match(0xC0A80001, 0xFFFFFFFF)) == ROFL_SUCCESS);
+	entry->priority=99; //Same exact priority => replace
+	entry->stats.s.__internal[0].packet_count = 0;
+	CU_ASSERT(of1x_add_flow_entry_table(&sw->pipeline, 0, &entry, false,false) == ROFL_OF1X_FM_SUCCESS);
+
+	of1x_full_dump_switch(sw, false);
+	CU_ASSERT(table->num_of_entries == 1);
+	CU_ASSERT(trie->root->inner->entry->stats.s.__internal[0].packet_count == 0);
+
+
 }
 
 
