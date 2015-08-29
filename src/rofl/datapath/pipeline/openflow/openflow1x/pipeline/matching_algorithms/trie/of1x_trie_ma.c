@@ -930,7 +930,7 @@ rofl_of1x_fm_result_t of1x_modify_flow_entry_trie(of1x_flow_table_t *const table
 
 			if(__of1x_flow_entry_check_equal(it, entry, OF1X_PORT_ANY,
 									OF1X_GROUP_ANY,
-									true) == false)
+									check_cookie) == false)
 			goto MODIFY_NEXT;
 		}
 
