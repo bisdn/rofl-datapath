@@ -856,7 +856,7 @@ uint64_t of1x_get_match_value64(const of1x_match_t* match){
 //128 bit
 static inline 
 uint128__t __of1x_get_match_val128(const of1x_match_t* match, bool get_mask, bool raw_nbo){
-	uint128__t tmp;
+	uint128__t tmp = {};
 	wrap_uint_t* wrap;
 	
 	if(get_mask)
