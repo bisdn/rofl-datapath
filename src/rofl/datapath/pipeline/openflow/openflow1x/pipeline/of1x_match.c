@@ -1695,11 +1695,15 @@ bool __of1x_get_alike_match(of1x_match_t* match1, of1x_match_t* match2, of1x_mat
 	if(match1->type != match2->type)
 		return false;
 
+	if(match1->type == OF1X_MATCH_VLAN_VID && match1->vlan_present != match2->vlan_present)
+		return false;
+
 	if(common){
 		if(!__utern_get_alike(&match1->__tern, &match2->__tern, &common->__tern))
 			return false;
 		common->type = match1->type;
 		common->next = common->prev = NULL;
+		common->vlan_present = match1->vlan_present;
 		return true;
 	}
 

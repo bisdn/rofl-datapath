@@ -15,7 +15,7 @@ void __init_utern8(utern_t* tern, uint8_t value, uint8_t mask){
 		return;
 
 	tern->type = UTERN8_T;
-	tern->value.u8 = value;
+	tern->value.u8 = value&mask;
 	tern->mask.u8 = mask;
 }
 void __init_utern16(utern_t* tern, uint16_t value, uint16_t mask){
@@ -23,7 +23,7 @@ void __init_utern16(utern_t* tern, uint16_t value, uint16_t mask){
 		return;
 
 	tern->type = UTERN16_T;
-	tern->value.u16 = value;
+	tern->value.u16 = value&mask;
 	tern->mask.u16 = mask;
 }
 void __init_utern32(utern_t* tern, uint32_t value, uint32_t mask){
@@ -31,7 +31,7 @@ void __init_utern32(utern_t* tern, uint32_t value, uint32_t mask){
 		return;
 
 	tern->type = UTERN32_T;
-	tern->value.u32 = value;
+	tern->value.u32 = value&mask;
 	tern->mask.u32 = mask;
 }
 void __init_utern64(utern_t* tern, uint64_t value, uint64_t mask){
@@ -39,16 +39,25 @@ void __init_utern64(utern_t* tern, uint64_t value, uint64_t mask){
 		return;
 
 	tern->type = UTERN64_T;
-	tern->value.u64 = value;
+	tern->value.u64 = value&mask;
 	tern->mask.u64 = mask;
 }
 void __init_utern128(utern_t* tern, uint128__t value, uint128__t mask){ //uint128_t funny!
+
+	w128_t *tmp, *tmp2;
+
 	if(!tern)
 		return;
 
 	tern->type = UTERN128_T;
 	tern->value.u128 = value;
 	tern->mask.u128 = mask;
+
+	//Mask value
+	tmp = (w128_t*)&tern->value.u128;
+	tmp2 = (w128_t*)&tern->mask.u128;
+	tmp->hi = tmp->hi & tmp2->hi;
+	tmp->lo = tmp->lo & tmp2->lo;
 }
 
 /*
@@ -145,7 +154,7 @@ bool __utern_get_alike(const utern_t* tern1, const utern_t* tern2, utern_t* comm
 						value.u8 = tern1->value.u8 & __u8_alike_masks[i];
 						mask.u8 = tern1->mask.u8 & __u8_alike_masks[i];
 
-						if(mask.u8 == 0x0)
+						if((tern1->mask.u8 || tern2->mask.u8) && mask.u8 == 0x0)
 							return false;
 
 						goto MATCH_TERN_ALIKE;
@@ -165,7 +174,7 @@ bool __utern_get_alike(const utern_t* tern1, const utern_t* tern2, utern_t* comm
 						value.u16 = tern1->value.u16 & __u16_alike_masks[i];
 						mask.u16 = tern1->mask.u16 & __u16_alike_masks[i];
 
-						if(mask.u16 == 0x0)
+						if((tern1->mask.u16 || tern2->mask.u16) && mask.u16 == 0x0)
 							return false;
 
 						goto MATCH_TERN_ALIKE;
@@ -185,7 +194,7 @@ bool __utern_get_alike(const utern_t* tern1, const utern_t* tern2, utern_t* comm
 						value.u32 = tern1->value.u32 & __u32_alike_masks[i];
 						mask.u32 = tern1->mask.u32 & __u32_alike_masks[i];
 
-						if(mask.u32 == 0x0)
+						if((tern1->mask.u32 || tern2->mask.u32) && mask.u32 == 0x0)
 							return false;
 
 						goto MATCH_TERN_ALIKE;
@@ -204,6 +213,10 @@ bool __utern_get_alike(const utern_t* tern1, const utern_t* tern2, utern_t* comm
 						(tern2->value.u64 & tern2->mask.u64 & __u64_alike_masks[i] ) ){
 						value.u64 = tern1->value.u64 & __u64_alike_masks[i];
 						mask.u64 = tern1->mask.u64 & __u64_alike_masks[i];
+
+						if((tern1->mask.u64 || tern2->mask.u64) && mask.u64 == 0x0ULL)
+							return false;
+
 						goto MATCH_TERN_ALIKE;
 					}
 				}
@@ -252,6 +265,10 @@ bool __utern_get_alike(const utern_t* tern1, const utern_t* tern2, utern_t* comm
 						UINT128__T_HI(value.u128) = *value1_h;
 						UINT128__T_HI(mask.u128) = *mask1_h;
 
+						if( (*mask2_l || *mask2_h || *mask1_l || *mask2_l) &&
+							((UINT128__T_LO(mask.u128)&__u64_alike_masks[i]) == 0x0ULL))
+							return false;
+
 						goto MATCH_TERN_ALIKE;
 					}
 				}
@@ -272,7 +289,8 @@ bool __utern_get_alike(const utern_t* tern1, const utern_t* tern2, utern_t* comm
 						UINT128__T_HI(value.u128) = *value1_h & __u64_alike_masks[i];
 						UINT128__T_HI(mask.u128) = *mask1_h & __u64_alike_masks[i];
 
-						if(UINT128__T_HI(mask.u128) == 0x0ULL)
+						if( (*mask2_l || *mask2_h || *mask1_l || *mask2_l) &&
+							((UINT128__T_HI(mask.u128)&__u64_alike_masks[i]) == 0x0ULL))
 							return false;
 
 						goto MATCH_TERN_ALIKE;

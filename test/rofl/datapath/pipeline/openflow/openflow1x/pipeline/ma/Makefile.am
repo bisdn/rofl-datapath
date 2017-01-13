@@ -2,7 +2,7 @@ MAINTAINERCLEANFILES = Makefile.in
 
 AUTOMAKE_OPTIONS = no-dependencies
 
-SUBDIRS=loop l2hash
+SUBDIRS=loop l2hash trie
 
 SHARED_SRC= $(top_srcdir)/src/rofl/datapath/pipeline/physical_switch.c \
 	$(top_srcdir)/src/rofl/datapath/pipeline/monitoring.c \
@@ -24,6 +24,7 @@ SHARED_SRC= $(top_srcdir)/src/rofl/datapath/pipeline/physical_switch.c \
 	$(top_srcdir)/src/rofl/datapath/pipeline/openflow/openflow1x/pipeline/of1x_group_table.c \
 	$(top_srcdir)/src/rofl/datapath/pipeline/openflow/openflow1x/pipeline/matching_algorithms/loop/of1x_loop_ma.c \
 	$(top_srcdir)/src/rofl/datapath/pipeline/openflow/openflow1x/pipeline/matching_algorithms/l2hash/of1x_l2hash_ma.c \
+	$(top_srcdir)/src/rofl/datapath/pipeline/openflow/openflow1x/pipeline/matching_algorithms/trie/of1x_trie_ma.c \
 	$(top_srcdir)/src/rofl/datapath/pipeline/openflow/openflow1x/pipeline/matching_algorithms/available_ma.c \
 	$(top_srcdir)/src/rofl/datapath/pipeline/common/alike_masks.c \
 	../memory.c \

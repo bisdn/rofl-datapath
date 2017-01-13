@@ -80,6 +80,7 @@ AC_CONFIG_FILES([
 	test/rofl/datapath/pipeline/openflow/openflow1x/pipeline/ma/Makefile
 	test/rofl/datapath/pipeline/openflow/openflow1x/pipeline/ma/loop/Makefile
 	test/rofl/datapath/pipeline/openflow/openflow1x/pipeline/ma/l2hash/Makefile
+	test/rofl/datapath/pipeline/openflow/openflow1x/pipeline/ma/trie/Makefile
 	test/rofl/datapath/pipeline/openflow/openflow1x/pipeline/static/Makefile
 	test/rofl/datapath/pipeline/openflow/openflow1x/pipeline/reset_pipeline/Makefile
 

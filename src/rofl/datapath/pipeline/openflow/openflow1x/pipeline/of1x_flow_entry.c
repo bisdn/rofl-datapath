@@ -338,3 +338,24 @@ rofl_result_t __of1x_validate_flow_entry( of1x_flow_entry_t* entry, of1x_pipelin
 	return ROFL_SUCCESS;
 }
 
+//Useful
+void __of1x_remove_flow_entry_table_trace(const char* prefix, of1x_flow_entry_t *const entry, of1x_flow_entry_t *const it, of1x_flow_remove_reason_t reason){
+	switch(reason){	
+		case OF1X_FLOW_REMOVE_DELETE:
+			ROFL_PIPELINE_DEBUG("[flowmod-remove(%p)]%s Existing entry (%p) will be removed\n", entry, prefix, it);
+			break;
+		case OF1X_FLOW_REMOVE_IDLE_TIMEOUT:
+			ROFL_PIPELINE_DEBUG("[flowmod-remove]%s Removing entry(%p) due to IDLE timeout\n", prefix, it);
+			break;
+		case OF1X_FLOW_REMOVE_HARD_TIMEOUT:
+			ROFL_PIPELINE_DEBUG("[flowmod-remove]%s Removing entry(%p) due to HARD timeout\n", prefix, it);
+			break;
+		case OF1X_FLOW_REMOVE_GROUP_DELETE:
+			ROFL_PIPELINE_DEBUG("[flowmod-remove]%s Removing entry(%p) due to GROUP delete\n", prefix, it);
+			break;
+		default:
+			break;	
+	}
+
+}
+
