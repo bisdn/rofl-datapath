@@ -41,7 +41,7 @@ static_unit_test_SOURCES=../unit_test.c \
 	$(top_srcdir)/src/rofl/datapath/pipeline/common/alike_masks.c \
 	$(top_srcdir)/src/rofl/datapath/pipeline/util/logging.c
 
-static_unit_test_LDADD= -lcunit -lpthread
+static_unit_test_LDADD=$(top_builddir)/src/rofl/datapath/pipeline/librofl_pipeline.la -lcunit -lpthread
 
 #-lrofl_pipeline -lrofl
 # we need to link to the local libraries, not the installed ones
