@@ -26,7 +26,7 @@ SHARED_SRC= $(top_srcdir)/src/rofl/datapath/pipeline/physical_switch.c \
 	$(top_srcdir)/src/rofl/datapath/pipeline/openflow/openflow1x/pipeline/matching_algorithms/trie/of1x_trie_ma.c \
 	$(top_srcdir)/src/rofl/datapath/pipeline/openflow/openflow1x/pipeline/matching_algorithms/available_ma.c \
 	../memory.c \
-	../platform_empty_hooks_of12.cc\
+	../platform_empty_hooks_of12.c\
 	../pthread_atomic_operations.c\
 	../pthread_lock.c \
 	../timing.c

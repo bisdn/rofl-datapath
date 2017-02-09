@@ -11,7 +11,7 @@ static_unit_test_SOURCES=../unit_test.c \
 	../timers_hard_timeout.c \
 	../pp_isolation.c\
 	../empty_packet.c \
-	../platform_empty_hooks_of12.cc\
+	../platform_empty_hooks_of12.c\
 	../memory.c \
 	../pthread_atomic_operations.c \
 	../pthread_lock.c \
