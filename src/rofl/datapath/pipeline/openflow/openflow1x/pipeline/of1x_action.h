@@ -554,7 +554,7 @@ uint64_t __of1x_get_packet_action_field64(const of1x_packet_action_t* action, bo
 
 /**
 * @ingroup core_of1x 
-* Retrieve the action field for 64 bit values (or less) in HOST BYTE ORDER
+* Retrieve the action field for 64 bit values (or less)
 *
 * @retval The value of the field in host byte order 
 */
@@ -565,36 +565,19 @@ uint64_t of1x_get_packet_action_field64(const of1x_packet_action_t* action){
 
 //128 bit
 static inline 
-uint128__t __of1x_get_packet_action_field128(const of1x_packet_action_t* action, bool raw_nbo){
-	uint128__t tmp= {{0x00}};
-
-	if(raw_nbo)
-		return action->__field.u128;
-
-	switch(action->type){
-		case OF1X_AT_SET_FIELD_IPV6_ND_TARGET:
-		case OF1X_AT_SET_FIELD_IPV6_SRC:
-		case OF1X_AT_SET_FIELD_IPV6_DST:
-			tmp = action->__field.u128;
-			NTOHB128(tmp);
-			return tmp;
-			break;
-		default:
-			return tmp;
-			break;
-	}
-	return tmp;
+uint128__t __of1x_get_packet_action_field128(const of1x_packet_action_t* action){
+	return *(uint128__t*)&action->__field.u128;
 }
 
 /**
 * @ingroup core_of1x 
-* Retrieve the action field for 128 bit values (or less) in HOST BYTE ORDER
+* Retrieve the action field for 128 bit values (or less)
 *
 * @retval The value of the field in host byte order 
 */
 static inline 
 uint128__t of1x_get_packet_action_field128(const of1x_packet_action_t* action){
-	return __of1x_get_packet_action_field128(action, false);
+	return __of1x_get_packet_action_field128(action);
 }
 
 //Action group

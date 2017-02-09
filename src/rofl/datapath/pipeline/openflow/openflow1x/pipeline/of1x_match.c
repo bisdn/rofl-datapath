@@ -597,10 +597,6 @@ of1x_match_t* of1x_init_ip6_src_match(uint128__t value, uint128__t mask){
 	if(unlikely(match == NULL))
 		return NULL;
 	
-	// Align to pipeline convention (NBO, lower memory address)
-	HTONB128(value);
-	HTONB128(mask);
-
 	uint128__t fixed_mask = {{0xff,0xff,0xff,0xff, 0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, 0xff,0xff,0xff,0xff}};
 	match->type = OF1X_MATCH_IPV6_SRC;
 	__init_utern128(&match->__tern, value,mask); 
@@ -624,10 +620,6 @@ of1x_match_t* of1x_init_ip6_dst_match(uint128__t value, uint128__t mask){
 	if(unlikely(match == NULL))
 		return NULL;
 	
-	// Align to pipeline convention (NBO, lower memory address)
-	HTONB128(value);
-	HTONB128(mask);
-
 	uint128__t fixed_mask = {{0xff,0xff,0xff,0xff, 0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, 0xff,0xff,0xff,0xff}};
 	match->type = OF1X_MATCH_IPV6_DST;
 	__init_utern128(&match->__tern, value,mask); 
@@ -651,10 +643,6 @@ of1x_match_t* of1x_init_ip6_flabel_match(uint32_t value, uint32_t mask){
 	if(unlikely(match == NULL))
 		return NULL;
 	
-	// Align to pipeline convention (NBO, lower memory address)
-	value = HTONB32(OF1X_IP6_FLABEL_ALIGN(value));
-	mask = HTONB32(OF1X_IP6_FLABEL_ALIGN(mask));
-
 	match->type = OF1X_MATCH_IPV6_FLABEL;
 	__init_utern32(&match->__tern, value&OF1X_20_BITS_IPV6_FLABEL_MASK,mask&OF1X_20_BITS_IPV6_FLABEL_MASK); // ensure 20 bits. 
 
@@ -674,9 +662,6 @@ of1x_match_t* of1x_init_ip6_nd_target_match(uint128__t value){
 	if(unlikely(match == NULL))
 		return NULL;
 	
-	// Align to pipeline convention (NBO, lower memory address)
-	HTONB128(value);
-
 	uint128__t mask = {{0xff,0xff,0xff,0xff, 0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, 0xff,0xff,0xff,0xff}};
 	
 	match->type = OF1X_MATCH_IPV6_ND_TARGET;
@@ -1837,8 +1822,8 @@ void __of1x_dump_matches(of1x_match_t* matches, bool raw_nbo){
 			//IPv6
 			case OF1X_MATCH_IPV6_SRC: 
 				{
-					uint128__t value = __of1x_get_match_val128(it, false, raw_nbo);	
-					uint128__t mask = __of1x_get_match_val128(it, true, raw_nbo);
+					uint128__t value = __of1x_get_match_val128(it, false);	
+					uint128__t mask = __of1x_get_match_val128(it, true);
 					(void)value;	
 					(void)mask;	
 					ROFL_PIPELINE_INFO_NO_PREFIX("[IPV6_SRC:0x%lx:%lx|0x%lx:%lx], ",UINT128__T_HI(value),UINT128__T_LO(value),UINT128__T_HI(mask),UINT128__T_LO(mask));
@@ -1846,8 +1831,8 @@ void __of1x_dump_matches(of1x_match_t* matches, bool raw_nbo){
 				break;
 			case OF1X_MATCH_IPV6_DST: 
 				{
-					uint128__t value = __of1x_get_match_val128(it, false, raw_nbo);	
-					uint128__t mask = __of1x_get_match_val128(it, true, raw_nbo);
+					uint128__t value = __of1x_get_match_val128(it, false);	
+					uint128__t mask = __of1x_get_match_val128(it, true);
 					(void)value;	
 					(void)mask;	
 
@@ -1857,8 +1842,8 @@ void __of1x_dump_matches(of1x_match_t* matches, bool raw_nbo){
 			case OF1X_MATCH_IPV6_FLABEL:  ROFL_PIPELINE_INFO_NO_PREFIX("[IPV6_FLABEL:%lu], ",__of1x_get_match_val32(it, false, raw_nbo));
 				break; 
 			case OF1X_MATCH_IPV6_ND_TARGET: {
-					uint128__t value = __of1x_get_match_val128(it, false, raw_nbo);	
-					uint128__t mask = __of1x_get_match_val128(it, true, raw_nbo);
+					uint128__t value = __of1x_get_match_val128(it, false);	
+					uint128__t mask = __of1x_get_match_val128(it, true);
 					(void)value;	
 					(void)mask;	
 

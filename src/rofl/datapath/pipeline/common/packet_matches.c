@@ -246,15 +246,11 @@ void dump_packet_matches(datapacket_t *const pkt, bool raw_nbo){
 	if( UINT128__T_LO(m->__ipv6_src) || UINT128__T_HI(m->__ipv6_src) ){
 		uint128__t tmp = m->__ipv6_src;
 		(void)tmp;
-		if(!raw_nbo)
-			NTOHB128(tmp); 	
 		ROFL_PIPELINE_INFO_NO_PREFIX("IPV6_SRC:0x%lx:%lx, ",UINT128__T_HI(tmp),UINT128__T_LO(tmp));
 	}
 	if( UINT128__T_LO(m->__ipv6_dst) || UINT128__T_HI(m->__ipv6_dst) ){
 		uint128__t tmp = m->__ipv6_dst;
 		(void)tmp;
-		if(!raw_nbo)
-			NTOHB128(tmp); 
 		ROFL_PIPELINE_INFO_NO_PREFIX("IPV6_DST:0x%lx:%lx, ",UINT128__T_HI(tmp),UINT128__T_LO(tmp));
 	}
 	if(m->__eth_type == ETH_TYPE_IPV6){
@@ -266,8 +262,6 @@ void dump_packet_matches(datapacket_t *const pkt, bool raw_nbo){
 	if(m->__ip_proto == IP_PROTO_ICMPV6){
 		uint128__t tmp = m->__ipv6_nd_target; 
 		(void)tmp;
-		if(!raw_nbo)
-			NTOHB128(tmp); 	
 		ROFL_PIPELINE_INFO_NO_PREFIX("IPV6_ND_TARGET:0x%lx:%lx, ",UINT128__T_HI(tmp),UINT128__T_LO(tmp));
 	}
 	if(m->__ip_proto == IP_PROTO_ICMPV6){
