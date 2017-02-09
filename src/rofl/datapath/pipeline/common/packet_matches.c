@@ -1,5 +1,6 @@
 #include "packet_matches.h"
 
+#include <arpa/inet.h>
 #include "rofl_datapath.h"
 #include "endianness.h"
 #include "protocol_constants.h"
@@ -140,6 +141,7 @@ void fill_packet_matches(datapacket_t *const pkt, packet_matches_t* m){
 //Dump packet matches
 void dump_packet_matches(datapacket_t *const pkt, bool raw_nbo){
 
+	char buf_ip[INET6_ADDRSTRLEN];
 	packet_matches_t matches;
 	packet_matches_t* m = &matches;
 
@@ -208,19 +210,34 @@ void dump_packet_matches(datapacket_t *const pkt, bool raw_nbo){
 
 	if((m->__eth_type == ETH_TYPE_IPV4 || m->__eth_type == ETH_TYPE_IPV6) && m->__ip_ecn)
 		ROFL_PIPELINE_INFO_NO_PREFIX("IP_ECN:0x%x, ",m->__ip_ecn);
-	
+
 	if((m->__eth_type == ETH_TYPE_IPV4 || m->__eth_type == ETH_TYPE_IPV6) && m->__ip_dscp){
 		uint8_t tmp = m->__ip_dscp;
 		if(!raw_nbo)
 			tmp = OF1X_IP_DSCP_VALUE(tmp); 
-		
+
 		ROFL_PIPELINE_INFO_NO_PREFIX("IP_DSCP:0x%x, ", tmp);
 	}
-	
-	if(m->__ipv4_src)
-		ROFL_PIPELINE_INFO_NO_PREFIX("IPV4_SRC:0x%x, ", COND_NTOHB32(raw_nbo,m->__ipv4_src));
-	if(m->__ipv4_dst)
-		ROFL_PIPELINE_INFO_NO_PREFIX("IPV4_DST:0x%x, ", COND_NTOHB32(raw_nbo,m->__ipv4_dst));
+
+	if(m->__ipv4_src){
+		if(raw_nbo){
+			ROFL_PIPELINE_INFO_NO_PREFIX("IPV4_SRC:0x%x, ", COND_NTOHB32(raw_nbo,m->__ipv4_src));
+		}else{
+			uint32_t value = m->__ipv4_src;
+			inet_ntop(AF_INET, &value, buf_ip, INET_ADDRSTRLEN);
+			ROFL_PIPELINE_INFO_NO_PREFIX("IPV4_SRC: %s, ", buf_ip);
+		}
+	}
+	if(m->__ipv4_dst){
+		if(raw_nbo){
+			ROFL_PIPELINE_INFO_NO_PREFIX("IPV4_DST:0x%x, ", COND_NTOHB32(raw_nbo,m->__ipv4_dst));
+		}else{
+			uint32_t value = m->__ipv4_dst;
+			inet_ntop(AF_INET, &value, buf_ip, INET_ADDRSTRLEN);
+			ROFL_PIPELINE_INFO_NO_PREFIX("IPV4_DST: %s, ", buf_ip);
+		}
+	}
+
 	//TCP
 	if(m->__tcp_src)
 		ROFL_PIPELINE_INFO_NO_PREFIX("TCP_SRC:%u, ", COND_NTOHB16(raw_nbo,m->__tcp_src));
@@ -241,17 +258,19 @@ void dump_packet_matches(datapacket_t *const pkt, bool raw_nbo){
 	//ICMPV4
 	if(m->__ip_proto == IP_PROTO_ICMPV4)
 		ROFL_PIPELINE_INFO_NO_PREFIX("ICMPV4_TYPE:%u, ICMPV4_CODE:%u, ",m->__icmpv4_type,m->__icmpv4_code);
-	
+
 	//IPv6
 	if( UINT128__T_LO(m->__ipv6_src) || UINT128__T_HI(m->__ipv6_src) ){
 		uint128__t tmp = m->__ipv6_src;
 		(void)tmp;
-		ROFL_PIPELINE_INFO_NO_PREFIX("IPV6_SRC:0x%lx:%lx, ",UINT128__T_HI(tmp),UINT128__T_LO(tmp));
+		inet_ntop(AF_INET6, &tmp, buf_ip, INET6_ADDRSTRLEN);
+		ROFL_PIPELINE_INFO_NO_PREFIX("IPV6_SRC: %s, ", buf_ip);
 	}
 	if( UINT128__T_LO(m->__ipv6_dst) || UINT128__T_HI(m->__ipv6_dst) ){
 		uint128__t tmp = m->__ipv6_dst;
 		(void)tmp;
-		ROFL_PIPELINE_INFO_NO_PREFIX("IPV6_DST:0x%lx:%lx, ",UINT128__T_HI(tmp),UINT128__T_LO(tmp));
+		inet_ntop(AF_INET6, &tmp, buf_ip, INET6_ADDRSTRLEN);
+		ROFL_PIPELINE_INFO_NO_PREFIX("IPV6_DST: %s, ", buf_ip);
 	}
 	if(m->__eth_type == ETH_TYPE_IPV6){
 		uint32_t tmp = m->__ipv6_flabel;

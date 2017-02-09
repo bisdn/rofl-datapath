@@ -2,6 +2,7 @@
 #include "../../../common/datapacket.h"
 #include "../../../common/protocol_constants.h"
 
+#include <arpa/inet.h>
 #include <stdio.h>
 #include <assert.h>
 
@@ -737,6 +738,7 @@ of1x_write_actions_t* __of1x_copy_write_actions(of1x_write_actions_t* origin){
 
 /* Dumping */
 static void __of1x_dump_packet_action(of1x_packet_action_t* action, bool raw_nbo){
+	char buf_ip[INET6_ADDRSTRLEN];
 
 	ROFL_PIPELINE_INFO_NO_PREFIX("<");
 	switch(action->type){
@@ -816,9 +818,23 @@ static void __of1x_dump_packet_action(of1x_packet_action_t* action, bool raw_nbo
 		case OF1X_AT_SET_FIELD_IP_PROTO:ROFL_PIPELINE_INFO_NO_PREFIX("SET_IP_PROTO: 0x%x", __of1x_get_packet_action_field8(action, raw_nbo));
 			break;
 
-		case OF1X_AT_SET_FIELD_IPV4_SRC:ROFL_PIPELINE_INFO_NO_PREFIX("SET_IPV4_SRC: 0x%x", __of1x_get_packet_action_field32(action, raw_nbo));
+		case OF1X_AT_SET_FIELD_IPV4_SRC:
+			if(raw_nbo){
+				ROFL_PIPELINE_INFO_NO_PREFIX("SET_IPV4_SRC: 0x%x", __of1x_get_packet_action_field32(action, raw_nbo));
+			}else{
+				uint32_t value = __of1x_get_packet_action_field32(action, true);
+				inet_ntop(AF_INET, &value, buf_ip, INET_ADDRSTRLEN);
+				ROFL_PIPELINE_INFO_NO_PREFIX("SET_IPV4_SRC: %s", buf_ip);
+			}
 			break;
-		case OF1X_AT_SET_FIELD_IPV4_DST:ROFL_PIPELINE_INFO_NO_PREFIX("SET_IPV4_DST: 0x%x", __of1x_get_packet_action_field32(action, raw_nbo));
+		case OF1X_AT_SET_FIELD_IPV4_DST:
+			if(raw_nbo){
+				ROFL_PIPELINE_INFO_NO_PREFIX("SET_IPV4_DST: 0x%x", __of1x_get_packet_action_field32(action, raw_nbo));
+			}else{
+				uint32_t value = __of1x_get_packet_action_field32(action, true);
+				inet_ntop(AF_INET, &value, buf_ip, INET_ADDRSTRLEN);
+				ROFL_PIPELINE_INFO_NO_PREFIX("SET_IPV4_DST: %s", buf_ip);
+			}
 			break;
 
 		/* OF1.0 only */
@@ -867,14 +883,16 @@ static void __of1x_dump_packet_action(of1x_packet_action_t* action, bool raw_nbo
 			{
 				uint128__t addr = __of1x_get_packet_action_field128(action);
 				(void)addr;
-				ROFL_PIPELINE_INFO_NO_PREFIX("SET_IPV6_SRC: 0x%lx %lx",UINT128__T_HI(addr),UINT128__T_LO(addr));
+				inet_ntop(AF_INET6, &addr, buf_ip, INET6_ADDRSTRLEN);
+				ROFL_PIPELINE_INFO_NO_PREFIX("SET_IPV6_SRC: %s", buf_ip);
 			}
 			break;
 		case OF1X_AT_SET_FIELD_IPV6_DST:
 			{
 				uint128__t addr = __of1x_get_packet_action_field128(action);
 				(void)addr;
-				ROFL_PIPELINE_INFO_NO_PREFIX("SET_IPV6_DST: 0x%lx %lx",UINT128__T_HI(addr),UINT128__T_LO(addr));
+				inet_ntop(AF_INET6, &addr, buf_ip, INET6_ADDRSTRLEN);
+				ROFL_PIPELINE_INFO_NO_PREFIX("SET_IPV6_DST: %s", buf_ip);
 			}
 			break;
 		case OF1X_AT_SET_FIELD_IPV6_FLABEL:ROFL_PIPELINE_INFO_NO_PREFIX("SET_IPV6_FLABEL: 0x%u", __of1x_get_packet_action_field32(action, raw_nbo));
@@ -883,7 +901,8 @@ static void __of1x_dump_packet_action(of1x_packet_action_t* action, bool raw_nbo
 			{
 				uint128__t addr = __of1x_get_packet_action_field128(action);
 				(void)addr;
-				ROFL_PIPELINE_INFO_NO_PREFIX("SET_IPV6_ND_TARGET: 0x%lx %lx",UINT128__T_HI(addr),UINT128__T_LO(addr));
+				inet_ntop(AF_INET6, &addr, buf_ip, INET6_ADDRSTRLEN);
+				ROFL_PIPELINE_INFO_NO_PREFIX("SET_IPV6_ND_TARGET: %s", buf_ip);
 			}
 			break;
 		case OF1X_AT_SET_FIELD_IPV6_ND_SLL:ROFL_PIPELINE_INFO_NO_PREFIX("SET_IPV6_ND_SLL: 0x%x", __of1x_get_packet_action_field64(action, raw_nbo));

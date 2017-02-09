@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <arpa/inet.h>
 #include "of1x_match.h"
 
 #include "../../../common/datapacket.h"
@@ -1727,7 +1728,11 @@ bool __of1x_is_submatch(of1x_match_t* sub_match, of1x_match_t* match){
 
 //Matches with mask (including matches that do not support)
 void __of1x_dump_matches(of1x_match_t* matches, bool raw_nbo){
+
 	of1x_match_t* it;
+	char buf_ip[INET6_ADDRSTRLEN];
+	char buf_mask[INET6_ADDRSTRLEN];
+
 	for(it=matches;it;it=it->next){
 		switch(it->type){
 			case OF1X_MATCH_IN_PORT: ROFL_PIPELINE_INFO_NO_PREFIX("[PORT_IN:%u], ", __of1x_get_match_val32(it, false, raw_nbo)); 
@@ -1787,9 +1792,31 @@ void __of1x_dump_matches(of1x_match_t* matches, bool raw_nbo){
 			case OF1X_MATCH_IP_PROTO:  ROFL_PIPELINE_INFO_NO_PREFIX("[IP_PROTO:%u|0x%x], ",__of1x_get_match_val8(it, false, raw_nbo),__of1x_get_match_val8(it, true, raw_nbo));
 				break; 
 
-			case OF1X_MATCH_IPV4_SRC:  ROFL_PIPELINE_INFO_NO_PREFIX("[IP4_SRC:0x%x|0x%x], ",__of1x_get_match_val32(it, false, raw_nbo),__of1x_get_match_val32(it, true, raw_nbo));
+			case OF1X_MATCH_IPV4_SRC:
+				if(raw_nbo){
+					ROFL_PIPELINE_INFO_NO_PREFIX("[IP4_SRC:0x%x|0x%x], ",__of1x_get_match_val32(it, false, raw_nbo),__of1x_get_match_val32(it, true, raw_nbo));
+				}else{
+					uint32_t value = __of1x_get_match_val32(it, false, true);
+					uint32_t mask = __of1x_get_match_val32(it, true, true);
+					inet_ntop(AF_INET, &value, buf_ip, INET_ADDRSTRLEN);
+					inet_ntop(AF_INET, &mask, buf_mask, INET_ADDRSTRLEN);
+					(void)value;
+					(void)mask;
+					ROFL_PIPELINE_INFO_NO_PREFIX("[IP4_SRC: %s|%s], ", buf_ip, buf_mask);
+				}
 				break; 
-			case OF1X_MATCH_IPV4_DST:  ROFL_PIPELINE_INFO_NO_PREFIX("[IP4_DST:0x%x|0x%x], ",__of1x_get_match_val32(it, false, raw_nbo),__of1x_get_match_val32(it, true, raw_nbo));
+			case OF1X_MATCH_IPV4_DST:
+				if(raw_nbo){
+					ROFL_PIPELINE_INFO_NO_PREFIX("[IP4_DST:0x%x|0x%x], ",__of1x_get_match_val32(it, false, raw_nbo),__of1x_get_match_val32(it, true, raw_nbo));
+				}else{
+					uint32_t value = __of1x_get_match_val32(it, false, true);
+					uint32_t mask = __of1x_get_match_val32(it, true, true);
+					inet_ntop(AF_INET, &value, buf_ip, INET_ADDRSTRLEN);
+					inet_ntop(AF_INET, &mask, buf_mask, INET_ADDRSTRLEN);
+					(void)value;
+					(void)mask;
+					ROFL_PIPELINE_INFO_NO_PREFIX("[IP4_DST: %s|%s], ", buf_ip, buf_mask);
+				}
 				break; 
 
 			case OF1X_MATCH_TCP_SRC:  ROFL_PIPELINE_INFO_NO_PREFIX("[TCP_SRC:%u], ",__of1x_get_match_val16(it, false, raw_nbo));
@@ -1824,19 +1851,23 @@ void __of1x_dump_matches(of1x_match_t* matches, bool raw_nbo){
 				{
 					uint128__t value = __of1x_get_match_val128(it, false);	
 					uint128__t mask = __of1x_get_match_val128(it, true);
-					(void)value;	
-					(void)mask;	
-					ROFL_PIPELINE_INFO_NO_PREFIX("[IPV6_SRC:0x%lx:%lx|0x%lx:%lx], ",UINT128__T_HI(value),UINT128__T_LO(value),UINT128__T_HI(mask),UINT128__T_LO(mask));
+					inet_ntop(AF_INET6, &value, buf_ip, INET6_ADDRSTRLEN);
+					inet_ntop(AF_INET6, &mask, buf_mask, INET6_ADDRSTRLEN);
+					(void)value;
+					(void)mask;
+					ROFL_PIPELINE_INFO_NO_PREFIX("[IPV6_SRC: %s|%s], ", buf_ip, buf_mask);
+
 				}
 				break;
 			case OF1X_MATCH_IPV6_DST: 
 				{
 					uint128__t value = __of1x_get_match_val128(it, false);	
 					uint128__t mask = __of1x_get_match_val128(it, true);
-					(void)value;	
-					(void)mask;	
-
-					ROFL_PIPELINE_INFO_NO_PREFIX("[IPV6_DST:0x%lx:%lx|0x%lx:%lx], ",UINT128__T_HI(value),UINT128__T_LO(value),UINT128__T_HI(mask),UINT128__T_LO(mask));
+					inet_ntop(AF_INET6, &value, buf_ip, INET6_ADDRSTRLEN);
+					inet_ntop(AF_INET6, &mask, buf_mask, INET6_ADDRSTRLEN);
+					(void)value;
+					(void)mask;
+					ROFL_PIPELINE_INFO_NO_PREFIX("[IPV6_DST: %s|%s], ", buf_ip, buf_mask);
 				}
 				break;
 			case OF1X_MATCH_IPV6_FLABEL:  ROFL_PIPELINE_INFO_NO_PREFIX("[IPV6_FLABEL:%lu], ",__of1x_get_match_val32(it, false, raw_nbo));
@@ -1844,10 +1875,11 @@ void __of1x_dump_matches(of1x_match_t* matches, bool raw_nbo){
 			case OF1X_MATCH_IPV6_ND_TARGET: {
 					uint128__t value = __of1x_get_match_val128(it, false);	
 					uint128__t mask = __of1x_get_match_val128(it, true);
-					(void)value;	
-					(void)mask;	
-
-					ROFL_PIPELINE_INFO_NO_PREFIX("[IPV6_ND_TARGET:0x%lx:%lx], ",UINT128__T_HI(value),UINT128__T_LO(mask));
+					inet_ntop(AF_INET6, &value, buf_ip, INET6_ADDRSTRLEN);
+					inet_ntop(AF_INET6, &mask, buf_mask, INET6_ADDRSTRLEN);
+					(void)value;
+					(void)mask;
+					ROFL_PIPELINE_INFO_NO_PREFIX("[IPV6_ND_TARGET: %s|%s], ", buf_ip, buf_mask);
 				}
 				break;
 			case OF1X_MATCH_IPV6_ND_SLL:  ROFL_PIPELINE_INFO_NO_PREFIX("[IPV6_ND_SLL:0x%"PRIx64"], ",__of1x_get_match_val64(it, false, raw_nbo));
