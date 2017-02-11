@@ -22,7 +22,6 @@ AC_ENABLE_STATIC
 
 # default flags
 CFLAGS="-std=gnu89 -Werror -Wall $CFLAGS"
-CXXFLAGS="-Werror -Wall $CXXFLAGS"
 AC_DEFINE([__STDC_FORMAT_MACROS], [], [Description])
 
 
