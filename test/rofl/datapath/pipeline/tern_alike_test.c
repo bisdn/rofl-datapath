@@ -3,7 +3,7 @@
 #include <assert.h>
 #include <arpa/inet.h>
 #include "CUnit/Basic.h"
-#include "../../../../../src/rofl/datapath/pipeline/common/ternary_fields.h"
+#include "rofl/datapath/pipeline/common/ternary_fields.h"
 
 int set_up(){
 	return 0;
