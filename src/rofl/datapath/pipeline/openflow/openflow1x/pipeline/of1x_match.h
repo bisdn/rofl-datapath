@@ -573,13 +573,11 @@ of1x_match_t* of1x_init_icmpv4_code_match(uint8_t value);
 /**
  * @brief Create an IP6_SRC match
  * @ingroup core_of1x
- * @warning parameters value and mask be in Host Byte Order
  */
 of1x_match_t* of1x_init_ip6_src_match(uint128__t value, uint128__t mask);
 /**
  * @brief Create an IP6_DST match
  * @ingroup core_of1x
- * @warning parameters value and mask must be in Host Byte Order
  */
 of1x_match_t* of1x_init_ip6_dst_match(uint128__t value, uint128__t mask);
 /**
@@ -591,7 +589,6 @@ of1x_match_t* of1x_init_ip6_flabel_match(uint32_t value, uint32_t mask);
 /**
  * @brief Create an IP6_ND_TARGET match
  * @ingroup core_of1x
- * @warning parameter value must be in Host Byte Order
  */
 of1x_match_t* of1x_init_ip6_nd_target_match(uint128__t value);
 /**
@@ -859,42 +856,24 @@ uint64_t of1x_get_match_value64(const of1x_match_t* match){
 
 //128 bit
 static inline 
-uint128__t __of1x_get_match_val128(const of1x_match_t* match, bool get_mask, bool raw_nbo){
-	uint128__t tmp = {};
-	const wrap_uint_t* wrap;
-	
+uint128__t __of1x_get_match_val128(const of1x_match_t* match, bool get_mask){
+	uint128__t* aux;
+
 	if(get_mask)
-		wrap = &match->__tern.mask; 
+		aux = (uint128__t*)&match->__tern.mask;
 	else
-		wrap = &match->__tern.value; 
+		aux = (uint128__t*)&match->__tern.value;
 
-	if(raw_nbo)
-		return wrap->u128;
-
-	switch(match->type){
-		case OF1X_MATCH_IPV6_SRC:
-		case OF1X_MATCH_IPV6_DST:
-		case OF1X_MATCH_IPV6_ND_TARGET:
-			tmp = wrap->u128;
-			NTOHB128(tmp);
-			return tmp;
-		default:{
-			//ROFL_PIPELINE_ERR("%s: Match type %u not found\n",__func__,match->type);
-			assert(0);
-			return tmp;
-		}
-	}
+	return *aux;
 }
 
 /**
 * @ingroup core_of1x 
 * Retrieve the match value for 128 bit values (or less) in HOST BYTE ORDER
-*
-* @retval The value in host byte order 
 */
 static inline 
 uint128__t of1x_get_match_value128(const of1x_match_t* match){
-	return __of1x_get_match_val128(match,  false, false);
+	return __of1x_get_match_val128(match, false);
 }
 
 //
@@ -948,12 +927,10 @@ uint64_t of1x_get_match_mask64(const of1x_match_t* match){
 /**
 * @ingroup core_of1x 
 * Retrieve the match mask value for 128 bit values (or less) in HOST BYTE ORDER
-*
-* @retval The value of the mask in host byte order 
 */
 static inline 
 uint128__t of1x_get_match_mask128(const of1x_match_t* match){
-	return __of1x_get_match_val128(match, true, false);
+	return __of1x_get_match_val128(match, true);
 }
 
 //

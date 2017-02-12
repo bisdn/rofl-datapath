@@ -27,23 +27,6 @@ typedef struct wrap_u128{
 #define UINT128__T_HI(x) ((w128_t*)&x)->hi
 #define UINT128__T_LO(x) ((w128_t*)&x)->lo
 
-#if defined(LITTLE_ENDIAN_DETECTED)
-	#define HTONB128(x) do{ \
-		((w128_t*)&(x))->hi = HTONB64(((w128_t*)&(x))->hi); \
-		((w128_t*)&(x))->lo = HTONB64(((w128_t*)&(x))->lo); \
-	}while(0)
-	#define NTOHB128(x) HTONB128(x) 
-
-	//Conditional byte swap
-	#define COND_NTOHB128(cond, x) do { if(cond)NTOHB128(x); }while(0)
-#else
-	#define HTONB128(x) do{}while(0)
-	#define NTOHB128(x) do{}while(0)
-
-	//Conditional byte swap
-	#define COND_NTOHB128(cond, x) do{}while(0);
-#endif //LITTLE_ENDIAN_DETECTED
-
 //Helpers
 #define UINT128__T_IS_NOT_ZERO(x) ( (UINT128__T_HI(x) != 0x0ULL) || (UINT128__T_LO(x) != 0x0ULL) )
 #define UINT128__T_IS_ZERO(x) ! UINT128__T_IS_NOT_ZERO(x) 

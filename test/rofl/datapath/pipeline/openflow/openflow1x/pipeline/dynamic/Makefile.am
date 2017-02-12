@@ -3,7 +3,7 @@ MAINTAINERCLEANFILES = Makefile.in
 AUTOMAKE_OPTIONS = no-dependencies
 
 dynamic_unit_test_CFLAGS= -DTIMERS_FAKE_TIME  -DOF1X_TIMER_DYNAMIC_ALLOCATION_SLOTS
-dynamic_unit_test_CPPFLAGS= -I$(top_srcdir)/src/ -DROFL_TEST=1
+dynamic_unit_test_CPPFLAGS= -I$(top_srcdir)/src/
 
 #FIXME add output actions test
 dynamic_unit_test_SOURCES=../unit_test.c \
@@ -11,34 +11,14 @@ dynamic_unit_test_SOURCES=../unit_test.c \
 	../timers_hard_timeout.c \
 	../pp_isolation.c\
 	../empty_packet.c \
-	../platform_empty_hooks_of12.cc\
+	../platform_empty_hooks_of12.c\
 	../memory.c \
 	../pthread_atomic_operations.c \
 	../pthread_lock.c \
 	../timing.c \
-	../lib_random.c \
-	$(top_srcdir)/src/rofl/datapath/pipeline/physical_switch.c \
-	$(top_srcdir)/src/rofl/datapath/pipeline/monitoring.c \
-	$(top_srcdir)/src/rofl/datapath/pipeline/openflow/of_switch.c \
-	$(top_srcdir)/src/rofl/datapath/pipeline/port_queue.c \
-	$(top_srcdir)/src/rofl/datapath/pipeline/switch_port.c \
-	$(top_srcdir)/src/rofl/datapath/pipeline/openflow/openflow1x/pipeline/matching_algorithms/available_ma.c \
-	$(top_srcdir)/src/rofl/datapath/pipeline/openflow/openflow1x/pipeline/matching_algorithms/loop/of1x_loop_ma.c \
-	$(top_srcdir)/src/rofl/datapath/pipeline/openflow/openflow1x/pipeline/matching_algorithms/l2hash/of1x_l2hash_ma.c \
-	$(top_srcdir)/src/rofl/datapath/pipeline/openflow/openflow1x/of1x_switch.c \
-	$(top_srcdir)/src/rofl/datapath/pipeline/openflow/openflow1x/pipeline/of1x_action.c \
-	$(top_srcdir)/src/rofl/datapath/pipeline/openflow/openflow1x/pipeline/of1x_flow_entry.c \
-	$(top_srcdir)/src/rofl/datapath/pipeline/openflow/openflow1x/pipeline/of1x_flow_table.c \
-	$(top_srcdir)/src/rofl/datapath/pipeline/openflow/openflow1x/pipeline/of1x_group_table.c \
-	$(top_srcdir)/src/rofl/datapath/pipeline/openflow/openflow1x/pipeline/of1x_instruction.c \
-	$(top_srcdir)/src/rofl/datapath/pipeline/openflow/openflow1x/pipeline/of1x_match.c \
-	$(top_srcdir)/src/rofl/datapath/pipeline/openflow/openflow1x/pipeline/of1x_pipeline.c \
-	$(top_srcdir)/src/rofl/datapath/pipeline/openflow/openflow1x/pipeline/of1x_statistics.c \
-	$(top_srcdir)/src/rofl/datapath/pipeline/openflow/openflow1x/pipeline/of1x_timers.c \
-	$(top_srcdir)/src/rofl/datapath/pipeline/common/packet_matches.c \
-	$(top_srcdir)/src/rofl/datapath/pipeline/common/ternary_fields.c
+	../lib_random.c
 
-dynamic_unit_test_LDADD= -lcunit -lpthread
+dynamic_unit_test_LDADD=$(top_builddir)/src/rofl/datapath/pipeline/librofl_pipeline.la -lcunit -lpthread
 
 #-lrofl_pipeline -lrofl
 # we need to link to the local libraries, not the installed ones

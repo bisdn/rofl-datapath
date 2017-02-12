@@ -9,9 +9,7 @@ AC_GNU_SOURCE
 
 AC_PROG_INSTALL
 AC_PROG_CC
-AC_PROG_CXX
 AC_PROG_LD
-AM_PROG_CC_C_O
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
@@ -24,7 +22,6 @@ AC_ENABLE_STATIC
 
 # default flags
 CFLAGS="-std=gnu89 -Werror -Wall $CFLAGS"
-CXXFLAGS="-Werror -Wall $CXXFLAGS"
 AC_DEFINE([__STDC_FORMAT_MACROS], [], [Description])
 
 
