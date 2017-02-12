@@ -978,16 +978,6 @@ void test_regression1(){
 	entry = of1x_init_flow_entry(false);
 	CU_ASSERT(entry != NULL);
 
-#if 0
-	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_eth_src_match(0xAABBCCDDEEFF, 0xFFF0FFFFFFFF)) == ROFL_SUCCESS);
-	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_ip4_dst_match(0xC0A80001, 0xFFFFFFFF)) == ROFL_SUCCESS);
-	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_ip4_src_match(0xC0A80002, 0xFFFFFFFF)) == ROFL_SUCCESS);
-	entry->priority=99; //Same exact priority => replace
-	CU_ASSERT(of1x_add_flow_entry_table(&sw->pipeline, 0, &entry, false,false) == ROFL_OF1X_FM_SUCCESS);
-
-	of1x_full_dump_switch(sw, false);
-	CU_ASSERT(table->num_of_entries == 2);
-#endif
 	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_ip4_dst_match(0xC0A80001, 0xFFFFFFFF)) == ROFL_SUCCESS);
 	entry->priority=31; //Same exact priority => replace
 	CU_ASSERT(of1x_add_flow_entry_table(&sw->pipeline, 0, &entry, false,false) == ROFL_OF1X_FM_SUCCESS);
