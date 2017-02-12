@@ -618,6 +618,13 @@ rofl_of1x_fm_result_t __of1x_add_leafs_trie(of1x_trie_t* trie,
 		}
 
 ADD_LEAFS_INNER:
+		if(!l->inner){
+			//This is the point of insertion
+			res = __of1x_insert_intermediate_leaf_trie(trie, l,
+									m_it,
+									entry);
+			goto ADD_LEAFS_END;
+		}
 		l = l->inner;
 		continue;
 

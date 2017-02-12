@@ -28,7 +28,8 @@ int main(int args, char** argv){
 	(NULL == CU_add_test(pSuite, "Trie: test install regular flowmods without and without masks", test_install_flowmods)) ||
 	(NULL == CU_add_test(pSuite, "Trie: test removal regular flowmods without and without masks", test_remove_flowmods)) ||
 	(NULL == CU_add_test(pSuite, "Trie: test many entries", test_many_entries)) ||
-	(NULL == CU_add_test(pSuite, "Trie: test regressions", test_regressions)) //||
+	(NULL == CU_add_test(pSuite, "Trie: test regressions", test_regressions)) ||
+	(NULL == CU_add_test(pSuite, "Trie: test regressions 1", test_regression1)) //||
 		)
 	{
 		fprintf(stderr,"ERROR WHILE ADDING TEST\n");

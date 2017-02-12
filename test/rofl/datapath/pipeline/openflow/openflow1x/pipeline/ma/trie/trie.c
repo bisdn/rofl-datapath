@@ -958,6 +958,47 @@ void test_regressions(){
 
 }
 
+void test_regression1(){
+
+	of1x_flow_entry_t* entry;
+
+	//First entry
+	clean_all();
+	entry = of1x_init_flow_entry(false);
+	CU_ASSERT(entry != NULL);
+
+	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_ip4_dst_match(0xC0A80000, 0xFFFFFF00)) == ROFL_SUCCESS);
+	entry->priority=32;
+	CU_ASSERT(of1x_add_flow_entry_table(&sw->pipeline, 0, &entry, false,false) == ROFL_OF1X_FM_SUCCESS);
+
+	of1x_full_dump_switch(sw, false);
+	CU_ASSERT(table->num_of_entries == 1);
+
+	//Add one with the same + 1 match
+	entry = of1x_init_flow_entry(false);
+	CU_ASSERT(entry != NULL);
+
+	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_ip4_dst_match(0xC0A80001, 0xFFFFFFFF)) == ROFL_SUCCESS);
+	entry->priority=31; //Same exact priority => replace
+	CU_ASSERT(of1x_add_flow_entry_table(&sw->pipeline, 0, &entry, false,false) == ROFL_OF1X_FM_SUCCESS);
+
+	of1x_full_dump_switch(sw, false);
+	CU_ASSERT(table->num_of_entries == 2);
+
+	//Remove intermediate, intermediate should be pruned
+	entry = of1x_init_flow_entry(false);
+	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_ip4_dst_match(0xC0A80000, 0xFFFFFF00)) == ROFL_SUCCESS);
+	CU_ASSERT(of1x_remove_flow_entry_table(&sw->pipeline, 0, entry, false, OF1X_PORT_ANY, OF1X_GROUP_ANY) == ROFL_OF1X_FM_SUCCESS);
+	of1x_full_dump_switch(sw, false);
+	CU_ASSERT(table->num_of_entries == 1);
+
+	entry = of1x_init_flow_entry(false);
+	CU_ASSERT(entry != NULL);
+	CU_ASSERT(of1x_remove_flow_entry_table(&sw->pipeline, 0, entry, false, OF1X_PORT_ANY, OF1X_GROUP_ANY) == ROFL_OF1X_FM_SUCCESS);
+
+	of1x_full_dump_switch(sw, false);
+	CU_ASSERT(table->num_of_entries == 0);
+}
 
 #define NUM_ENTRIES 260
 void test_many_entries(){
