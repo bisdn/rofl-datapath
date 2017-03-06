@@ -172,6 +172,29 @@ rofl_result_t __of1x_destroy_table(of1x_flow_table_t* table);
 */
 
 /**
+* @brief Add flow entry to table being able to match cookie
+* @warning As a rule of thumb use always of1x_add_flow_entry_table()
+*
+* OpenFlow spec treats ADD as ADD or MODIFY, even though MODIFY action also
+* exists (all versions). To make things even more bizzare, it strictly
+* forbbids to match on cookie for ADD, but allows the checking on MODIFY.
+*
+* __of1x_add_flow_entry_table() allows insertion of entries with the optional
+* cookie match flag. This can simplifying insertion of backup rules instead of
+* having them to treat them as ECMP always.
+*
+* When multiple entries with the same matches are inserted, only the highest
+* priority one will be matched. The rest will be inserted but not used, unless
+* higher priority rules are removed. If two or more entries have the same match
+* but different priority, matching is undefined (one of them will be match
+* only).
+*
+* @warning Some HW platforms may not support it in some/all tables.
+* @warning Out of OpenFlow spec.
+*/
+rofl_of1x_fm_result_t __of1x_add_flow_entry_table(struct of1x_pipeline *const pipeline, const unsigned int table_id, of1x_flow_entry_t **const entry, bool check_overlap, bool reset_counts, bool check_cookie);
+
+/**
 * @ingroup core_of1x 
 * Add a flow_entry to a table.
 *
@@ -196,7 +219,9 @@ rofl_result_t __of1x_destroy_table(of1x_flow_table_t* table);
 * @warning On success (ROFL_FM_SUCCESS), the entry pointer (*entry) will be set to NULL. 
 * or freed from outside the library.
 */
-rofl_of1x_fm_result_t of1x_add_flow_entry_table(struct of1x_pipeline *const pipeline, const unsigned int table_id, of1x_flow_entry_t **const entry, bool check_overlap, bool reset_counts);
+static inline rofl_of1x_fm_result_t of1x_add_flow_entry_table(struct of1x_pipeline *const pipeline, const unsigned int table_id, of1x_flow_entry_t **const entry, bool check_overlap, bool reset_counts){
+	return __of1x_add_flow_entry_table(pipeline, table_id, entry, check_overlap, reset_counts, false);
+}
 
 /**
 * @ingroup core_of1x 

@@ -736,7 +736,8 @@ bool __of1x_prune_leafs_trie(of1x_flow_table_t *const table, of1x_trie_t* trie,
 rofl_of1x_fm_result_t of1x_add_flow_entry_trie(of1x_flow_table_t *const table,
 								of1x_flow_entry_t *const entry,
 								bool check_overlap,
-								bool reset_counts){
+								bool reset_counts,
+								bool check_cookie){
 	rofl_of1x_fm_result_t res = ROFL_OF1X_FM_SUCCESS;
 	of1x_trie_t* trie = (of1x_trie_t*)table->matching_aux[0];
 	struct of1x_trie_leaf *prev, *next;
@@ -822,7 +823,7 @@ rofl_of1x_fm_result_t of1x_add_flow_entry_trie(of1x_flow_table_t *const table,
 
 		if(curr_entry && __of1x_check_priority_cookie_trie(entry, curr_entry,
 										true,
-										false)){
+										check_cookie)){
 			ROFL_PIPELINE_DEBUG("[flowmod-modify(%p)][trie] Existing entry (%p) will be updated with (%p)\n", entry, curr_entry, entry);
 
 			//Head of the entry linked list
@@ -973,7 +974,7 @@ MODIFY_END:
 
 	//According to spec
 	if(moded == 0 && res == ROFL_OF1X_FM_SUCCESS)
-		res = of1x_add_flow_entry_trie(table, entry, false, reset_counts);
+		res = of1x_add_flow_entry_trie(table, entry, false, reset_counts, check_cookie);
 	else
 		of1x_destroy_flow_entry(entry);
 

@@ -101,7 +101,8 @@ typedef struct of1x_matching_algorithm_functions{
 	(*add_flow_entry_hook)(struct of1x_flow_table *const table,
 			of1x_flow_entry_t *const entry,
 			bool check_overlap,
-			bool reset_counts);
+			bool reset_counts,
+			bool check_cookie);
 
 
 	/**

@@ -132,7 +132,7 @@ static rofl_of1x_fm_result_t of1x_remove_flow_entry_table_specific_imp(of1x_flow
 * Adds flow_entry to the main table. This function is NOT thread safe, and mutual exclusion should be 
 * acquired BEFORE this function being called, using table->mutex var. 
 */
-rofl_of1x_fm_result_t of1x_add_flow_entry_table_imp(of1x_flow_table_t *const table, of1x_flow_entry_t *const entry, bool check_overlap, bool reset_counts, void (*ma_hook_ptr)(of1x_flow_entry_t*)){
+rofl_of1x_fm_result_t of1x_add_flow_entry_table_imp(of1x_flow_table_t *const table, of1x_flow_entry_t *const entry, bool check_overlap, bool reset_counts, bool check_cookie, void (*ma_hook_ptr)(of1x_flow_entry_t*)){
 	of1x_flow_entry_t *it, *prev, *existing=NULL;
 	
 	if(unlikely(table->num_of_entries == OF1X_MAX_NUMBER_OF_TABLE_ENTRIES)){
@@ -163,7 +163,7 @@ rofl_of1x_fm_result_t of1x_add_flow_entry_table_imp(of1x_flow_table_t *const tab
 
 	//Look for existing entries (only if check_overlap is false)
 	if(!check_overlap)
-		existing = of1x_flow_table_loop_check_identical(table->entries, entry, OF1X_PORT_ANY, OF1X_GROUP_ANY, false); //According to spec do NOT check cookie
+		existing = of1x_flow_table_loop_check_identical(table->entries, entry, OF1X_PORT_ANY, OF1X_GROUP_ANY, check_cookie); //According to spec do NOT check cookie
 
 	if(existing){
 		ROFL_PIPELINE_DEBUG("[flowmod-add(%p)] Existing entry(%p) will be replaced by (%p)\n", entry, existing, entry);
@@ -370,22 +370,22 @@ static inline rofl_of1x_fm_result_t of1x_remove_flow_entry_table_imp(of1x_flow_t
 }
 
 /* Conveniently wraps call with mutex.  */
-rofl_of1x_fm_result_t __of1x_add_flow_entry_loop(of1x_flow_table_t *const table, of1x_flow_entry_t *const entry, bool check_overlap, bool reset_counts, void (*ma_hook_ptr)(of1x_flow_entry_t*)){
+rofl_of1x_fm_result_t __of1x_add_flow_entry_loop(of1x_flow_table_t *const table, of1x_flow_entry_t *const entry, bool check_overlap, bool reset_counts, bool check_cookie, void (*ma_hook_ptr)(of1x_flow_entry_t*)){
 
 	rofl_of1x_fm_result_t return_value;
 
 	//Allow single add/remove operation over the table
 	platform_mutex_lock(table->mutex);
 	
-	return_value = of1x_add_flow_entry_table_imp(table, entry, check_overlap, reset_counts, ma_hook_ptr);
+	return_value = of1x_add_flow_entry_table_imp(table, entry, check_overlap, reset_counts, check_cookie, ma_hook_ptr);
 
 	//Green light to other threads
 	platform_mutex_unlock(table->mutex);
 
 	return return_value;
 }
-rofl_of1x_fm_result_t of1x_add_flow_entry_loop(of1x_flow_table_t *const table, of1x_flow_entry_t *const entry, bool check_overlap, bool reset_counts){
-	return __of1x_add_flow_entry_loop(table, entry, check_overlap, reset_counts, NULL);
+rofl_of1x_fm_result_t of1x_add_flow_entry_loop(of1x_flow_table_t *const table, of1x_flow_entry_t *const entry, bool check_overlap, bool reset_counts, bool check_cookie){
+	return __of1x_add_flow_entry_loop(table, entry, check_overlap, reset_counts, check_cookie, NULL);
 }
 
 rofl_of1x_fm_result_t __of1x_modify_flow_entry_loop(of1x_flow_table_t *const table, of1x_flow_entry_t *const entry, const enum of1x_flow_removal_strictness strict, bool reset_counts, void (*ma_add_hook_ptr)(of1x_flow_entry_t*), void (*ma_modify_hook_ptr)(of1x_flow_entry_t*)){
@@ -440,7 +440,7 @@ rofl_of1x_fm_result_t __of1x_modify_flow_entry_loop(of1x_flow_table_t *const tab
 
 	//According to spec
 	if(moded == 0)
-		return __of1x_add_flow_entry_loop(table, entry, false, reset_counts, ma_add_hook_ptr);
+		return __of1x_add_flow_entry_loop(table, entry, false, reset_counts, false, ma_add_hook_ptr);
 
 	ROFL_PIPELINE_DEBUG("[flowmod-modify(%p)] Deleting modifying flowmod \n", entry);
 	

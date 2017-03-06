@@ -258,7 +258,7 @@ void of1x_remove_hook_l2hash(of1x_flow_entry_t *const entry){
 
 
 /* Conveniently wraps call with mutex.  */
-rofl_of1x_fm_result_t of1x_add_flow_entry_l2hash(of1x_flow_table_t *const table, of1x_flow_entry_t *const entry, bool check_overlap, bool reset_counts){
+rofl_of1x_fm_result_t of1x_add_flow_entry_l2hash(of1x_flow_table_t *const table, of1x_flow_entry_t *const entry, bool check_overlap, bool reset_counts, bool check_cookie){
 
 	//Check if the flowmod is not empty, and return
 	//Note that this cannot be checked by the fast validation bitmap
@@ -266,7 +266,7 @@ rofl_of1x_fm_result_t of1x_add_flow_entry_l2hash(of1x_flow_table_t *const table,
 		return ROFL_OF1X_FM_FAILURE;
 
 	//Call loop with the right hooks
-	return __of1x_add_flow_entry_loop(table, entry, check_overlap, reset_counts, of1x_add_hook_l2hash);
+	return __of1x_add_flow_entry_loop(table, entry, check_overlap, reset_counts, check_cookie, of1x_add_hook_l2hash);
 }
 
 rofl_of1x_fm_result_t of1x_modify_flow_entry_l2hash(of1x_flow_table_t *const table, of1x_flow_entry_t *const entry, const enum of1x_flow_removal_strictness strict, bool reset_counts){
