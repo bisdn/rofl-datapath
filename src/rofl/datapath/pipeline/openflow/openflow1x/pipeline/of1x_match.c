@@ -643,6 +643,10 @@ of1x_match_t* of1x_init_ip6_flabel_match(uint32_t value, uint32_t mask){
 
 	if(unlikely(match == NULL))
 		return NULL;
+
+ 	// Align to pipeline convention (NBO, lower memory address)
+ 	value = HTONB32(OF1X_IP6_FLABEL_ALIGN(value));
+ 	mask = HTONB32(OF1X_IP6_FLABEL_ALIGN(mask));
 	
 	match->type = OF1X_MATCH_IPV6_FLABEL;
 	__init_utern32(&match->__tern, value&OF1X_20_BITS_IPV6_FLABEL_MASK,mask&OF1X_20_BITS_IPV6_FLABEL_MASK); // ensure 20 bits. 
