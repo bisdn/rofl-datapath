@@ -223,79 +223,79 @@ bool __utern_get_alike(const utern_t* tern1, const utern_t* tern2, utern_t* comm
 				return false;
 		case UTERN128_T:
 				{
-				max_pos = (sizeof(uint64_t)*8)-1;
-				uint64_t *value1_h, *value1_l, *mask1_h, *mask1_l;
-				uint64_t *value2_h, *value2_l, *mask2_h, *mask2_l;
+				bool alike = false;
+				uint8_t max_u64_bit = (sizeof(uint64_t)*8);
+				uint64_t *value1, *mask1;
+				uint64_t *value2, *mask2;
+				uint64_t tmp1, tmp2;
+				uint64_t *val_ptr, *mask_ptr;
+
+				/*
+				* Check from left to right (bytes 1...16)
+				*/
 
 				//Make code more readable
-				value1_h = &UINT128__T_HI(tern1->value.u128);
-				value2_h = &UINT128__T_HI(tern2->value.u128);
-				mask1_h = &UINT128__T_HI(tern1->mask.u128);
-				mask2_h = &UINT128__T_HI(tern2->mask.u128);
+				value1 = &UINT128__T_HI(tern1->value.u128);
+				value2 = &UINT128__T_HI(tern2->value.u128);
+				mask1 = &UINT128__T_HI(tern1->mask.u128);
+				mask2 = &UINT128__T_HI(tern2->mask.u128);
 
-				value1_l = &UINT128__T_LO(tern1->value.u128);
-				value2_l = &UINT128__T_LO(tern2->value.u128);
-				mask1_l = &UINT128__T_LO(tern1->mask.u128);
-				mask2_l = &UINT128__T_LO(tern2->mask.u128);
+				//Clear up lows
+				((w128_t*)&value.u128)->hi = 0x0UL;
+				((w128_t*)&value.u128)->lo = 0x0UL;
+				((w128_t*)&mask.u128)->hi = 0x0UL;
+				((w128_t*)&mask.u128)->lo = 0x0UL;
 
-				//Check right 64 bits first(LOW)
-				for(i=max_pos; i>=0; i--){
+				val_ptr = &(((w128_t*)&value.u128)->hi);
+				mask_ptr = &(((w128_t*)&mask.u128)->hi);
 
-					//Check that masks match (HIGH)
-					if ( (*mask1_h  & __u64_alike_masks[max_pos]) !=
-						(*mask2_h  & __u64_alike_masks[max_pos]) )
+				//HIGH
+				for(i=0; i<max_u64_bit; ++i){
+					tmp1 = *mask1 & __u64_alike_masks[i];
+					tmp2 = *mask2 & __u64_alike_masks[i];
+
+					if(tmp1 != tmp2)
 						break;
 
-					//We want contiguos masks, so if HIGH does not match skip LOG checks
-					if ( (*value1_h & *mask1_h  & __u64_alike_masks[max_pos]) !=
-						(*value2_h & *mask2_h  & __u64_alike_masks[max_pos]) )
+					if((tmp1&*value1) != (tmp2&*value2))
 						break;
 
-					//Check that masks match (LOW)
-					if ( (*mask1_l  & __u64_alike_masks[i]) !=
-						(*mask2_l  & __u64_alike_masks[i]) )
-						continue;
+					*val_ptr = tmp1&*value1;
+					*mask_ptr = tmp1;
 
-					if ( (*value1_l & *mask1_l  & __u64_alike_masks[i]) ==
-						(*value2_l & *mask2_l  & __u64_alike_masks[i]) ){
-						//Set LOW
-						UINT128__T_LO(value.u128) = *value1_l & __u64_alike_masks[i];
-						UINT128__T_LO(mask.u128) = *mask1_l & __u64_alike_masks[i];
-						//Set HIGH
-						UINT128__T_HI(value.u128) = *value1_h;
-						UINT128__T_HI(mask.u128) = *mask1_h;
-
-						if( (*mask2_l || *mask2_h || *mask1_l || *mask2_l) &&
-							((UINT128__T_LO(mask.u128)&__u64_alike_masks[i]) == 0x0ULL))
-							return false;
-
-						goto MATCH_TERN_ALIKE;
-					}
+					alike = true;
 				}
 
-				//Check left 64bit chunk (HIGH)
-				for(i=max_pos; i>=0; i--){
+				if(i != 64)
+					goto MATCH_TERN_SKIP_LO_U128;
 
-					//Check that masks match (HIGH)
-					if ( (*mask1_h  & __u64_alike_masks[max_pos]) !=
-						(*mask2_h  & __u64_alike_masks[max_pos]) )
+				value1 = &UINT128__T_LO(tern1->value.u128);
+				value2 = &UINT128__T_LO(tern2->value.u128);
+				mask1 = &UINT128__T_LO(tern1->mask.u128);
+				mask2 = &UINT128__T_LO(tern2->mask.u128);
+
+				val_ptr = &(((w128_t*)&value.u128)->lo);
+				mask_ptr = &(((w128_t*)&mask.u128)->lo);
+
+				//LOW
+				for(i=0; i<max_u64_bit; ++i){
+					tmp1 = *mask1 & __u64_alike_masks[i];
+					tmp2 = *mask2 & __u64_alike_masks[i];
+
+					if(tmp1 != tmp2)
 						break;
 
-					if ( (*value1_h & *mask1_h  & __u64_alike_masks[i]) ==
-						(*value2_h & *mask2_h  & __u64_alike_masks[i]) ){
-						//Set LOW
-						UINT128__T_LO(value.u128) = UINT128__T_LO(mask.u128) = 0x0ULL;
-						//Set HIGH
-						UINT128__T_HI(value.u128) = *value1_h & __u64_alike_masks[i];
-						UINT128__T_HI(mask.u128) = *mask1_h & __u64_alike_masks[i];
+					if((tmp1&*value1) != (tmp2&*value2))
+						break;
 
-						if( (*mask2_l || *mask2_h || *mask1_l || *mask2_l) &&
-							((UINT128__T_HI(mask.u128)&__u64_alike_masks[i]) == 0x0ULL))
-							return false;
+					*val_ptr = tmp1&*value1;
+					*mask_ptr = tmp1;
+				}
 
-						goto MATCH_TERN_ALIKE;
-					}
-				} //for
+MATCH_TERN_SKIP_LO_U128:
+				//There's match
+				if(alike)
+					goto MATCH_TERN_ALIKE;
 
 				} //case scope
 				return false;
