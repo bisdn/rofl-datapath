@@ -1000,6 +1000,85 @@ void test_regression1(){
 	CU_ASSERT(table->num_of_entries == 0);
 }
 
+void test_regression2(){
+
+	of1x_flow_entry_t* entry;
+
+	//First entry
+	clean_all();
+	entry = of1x_init_flow_entry(false);
+	CU_ASSERT(entry != NULL);
+
+	entry->priority=0;
+	CU_ASSERT(of1x_add_flow_entry_table(&sw->pipeline, 0, &entry, false,false) == ROFL_OF1X_FM_SUCCESS);
+
+	of1x_full_dump_switch(sw, false);
+	CU_ASSERT(table->num_of_entries == 1);
+
+	//Add PORT_IN p=64
+	entry = of1x_init_flow_entry(false);
+	CU_ASSERT(entry != NULL);
+
+	entry->priority=64;
+	of1x_add_match_to_entry(entry,of1x_init_port_in_match(3));
+	CU_ASSERT(of1x_add_flow_entry_table(&sw->pipeline, 0, &entry, false,false) == ROFL_OF1X_FM_SUCCESS);
+
+	entry = of1x_init_flow_entry(false);
+	CU_ASSERT(entry != NULL);
+
+	entry->priority=64;
+	of1x_add_match_to_entry(entry,of1x_init_port_in_match(4));
+	CU_ASSERT(of1x_add_flow_entry_table(&sw->pipeline, 0, &entry, false,false) == ROFL_OF1X_FM_SUCCESS);
+
+	//Add PORT_IN p=128
+	entry = of1x_init_flow_entry(false);
+	CU_ASSERT(entry != NULL);
+
+	entry->priority=128;
+	of1x_add_match_to_entry(entry,of1x_init_port_in_match(1));
+	CU_ASSERT(of1x_add_flow_entry_table(&sw->pipeline, 0, &entry, false,false) == ROFL_OF1X_FM_SUCCESS);
+
+	entry = of1x_init_flow_entry(false);
+	CU_ASSERT(entry != NULL);
+
+	entry->priority=128;
+	of1x_add_match_to_entry(entry,of1x_init_port_in_match(2));
+	CU_ASSERT(of1x_add_flow_entry_table(&sw->pipeline, 0, &entry, false,false) == ROFL_OF1X_FM_SUCCESS);
+
+	//Add PORT_IN + ETH TYPE p = 32768
+	entry = of1x_init_flow_entry(false);
+	CU_ASSERT(entry != NULL);
+
+	entry->priority=32768;
+	of1x_add_match_to_entry(entry,of1x_init_port_in_match(1));
+	of1x_add_match_to_entry(entry,of1x_init_eth_type_match(0x806));
+
+	CU_ASSERT(of1x_add_flow_entry_table(&sw->pipeline, 0, &entry, false,false) == ROFL_OF1X_FM_SUCCESS);
+
+	entry = of1x_init_flow_entry(false);
+	CU_ASSERT(entry != NULL);
+
+	entry->priority=32768;
+	of1x_add_match_to_entry(entry,of1x_init_port_in_match(2));
+	of1x_add_match_to_entry(entry,of1x_init_eth_type_match(0x806));
+
+	CU_ASSERT(of1x_add_flow_entry_table(&sw->pipeline, 0, &entry, false,false) == ROFL_OF1X_FM_SUCCESS);
+
+
+	//Add PORT_IN + ETH TYPE + IP_PROTO + UDP_SRC + UDP_DST p = 32768
+	entry = of1x_init_flow_entry(false);
+	CU_ASSERT(entry != NULL);
+
+	entry->priority=32768;
+	of1x_add_match_to_entry(entry,of1x_init_port_in_match(1));
+	of1x_add_match_to_entry(entry,of1x_init_eth_type_match(0x800));
+	of1x_add_match_to_entry(entry,of1x_init_ip_proto_match(17));
+
+	CU_ASSERT(of1x_add_flow_entry_table(&sw->pipeline, 0, &entry, false,false) == ROFL_OF1X_FM_SUCCESS);
+
+
+}
+
 #define NUM_ENTRIES 260
 void test_many_entries(){
 

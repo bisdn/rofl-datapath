@@ -604,9 +604,11 @@ rofl_of1x_fm_result_t __of1x_add_leafs_trie(of1x_trie_t* trie,
 				goto ADD_LEAFS_END;
 			}
 
-			//Go to next match
-			m_it = __of1x_get_next_match(entry, m_it);
-			m = entry->matches.m_array[m_it];
+			//Go to next match only if there are inner branches
+			if(l->inner){
+				m_it = __of1x_get_next_match(entry, m_it);
+				m = entry->matches.m_array[m_it];
+			}
 
 			//Go deeper
 			goto ADD_LEAFS_INNER;
@@ -618,16 +620,16 @@ rofl_of1x_fm_result_t __of1x_add_leafs_trie(of1x_trie_t* trie,
 		}
 
 ADD_LEAFS_INNER:
-		if(!l->inner){
-			//This is the point of insertion
-			res = __of1x_insert_intermediate_leaf_trie(trie, l,
-									m_it,
-									entry);
-			goto ADD_LEAFS_END;
+		if(l->inner){
+			l = l->inner;
+			continue;
 		}
-		l = l->inner;
-		continue;
 
+		//This is the point of insertion
+		assert(m_it == l->match.type);
+		res = __of1x_insert_intermediate_leaf_trie(trie, l, m_it,
+								entry);
+		goto ADD_LEAFS_END;
 ADD_LEAFS_NEXT:
 		if(!l->next){
 			//This is the point of insertion

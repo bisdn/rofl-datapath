@@ -25,5 +25,6 @@ void test_remove_flowmods(void);
 void test_many_entries(void);
 void test_regressions(void);
 void test_regression1(void);
+void test_regression2(void);
 
 #endif
