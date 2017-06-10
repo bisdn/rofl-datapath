@@ -8,6 +8,12 @@ Legend:
 Change log
 ==========
 
+v0.6.5
+
+[B] Fix trie errors (PR #17)
+[B] Fix get alike 128 (PR #16)
+[B] toolchain: added AM_PROG_CC_C_O again (PR #15)
+
 v0.6.4
 
 [B] Fix return codes of pipeline/hal #9 (bisdn/xdpd#76)
