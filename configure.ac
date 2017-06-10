@@ -9,9 +9,8 @@ AC_GNU_SOURCE
 
 AC_PROG_INSTALL
 AC_PROG_CC
-AC_PROG_CXX
+AM_PROG_CC_C_O # this is still needed for rhel
 AC_PROG_LD
-AM_PROG_CC_C_O
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
@@ -24,7 +23,6 @@ AC_ENABLE_STATIC
 
 # default flags
 CFLAGS="-std=gnu89 -Werror -Wall $CFLAGS"
-CXXFLAGS="-Werror -Wall $CXXFLAGS"
 AC_DEFINE([__STDC_FORMAT_MACROS], [], [Description])
 
 
@@ -73,12 +71,14 @@ AC_CONFIG_FILES([
 	src/rofl/datapath/pipeline/openflow/openflow1x/pipeline/matching_algorithms/Makefile
 	src/rofl/datapath/pipeline/util/Makefile
 
+	test/rofl/datapath/pipeline/Makefile
 	test/rofl/datapath/pipeline/openflow/openflow1x/pipeline/Makefile
 	test/rofl/datapath/pipeline/monitoring/Makefile
 	test/rofl/datapath/pipeline/openflow/openflow1x/pipeline/bufs/Makefile
 	test/rofl/datapath/pipeline/openflow/openflow1x/pipeline/ma/Makefile
 	test/rofl/datapath/pipeline/openflow/openflow1x/pipeline/ma/loop/Makefile
 	test/rofl/datapath/pipeline/openflow/openflow1x/pipeline/ma/l2hash/Makefile
+	test/rofl/datapath/pipeline/openflow/openflow1x/pipeline/ma/trie/Makefile
 	test/rofl/datapath/pipeline/openflow/openflow1x/pipeline/static/Makefile
 	test/rofl/datapath/pipeline/openflow/openflow1x/pipeline/reset_pipeline/Makefile
 

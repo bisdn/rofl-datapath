@@ -155,7 +155,7 @@ typedef struct of1x_match{
 	of1x_match_type_t type;
 
 	//Ternary value
-	utern_t* __tern;
+	utern_t __tern;
 	
 	//Previous entry
 	struct of1x_match* prev;
@@ -192,6 +192,10 @@ typedef struct of1x_match_group{
 	bitmap128_t match_bm;
 	bitmap128_t wildcard_bm; 
 	bitmap128_t of10_wildcard_bm; //OF1.0 only
+
+	// Array for direct access to matches
+	of1x_match_t *m_array[OF1X_MATCH_MAX];
+
 }of1x_match_group_t;
 
 
@@ -569,13 +573,11 @@ of1x_match_t* of1x_init_icmpv4_code_match(uint8_t value);
 /**
  * @brief Create an IP6_SRC match
  * @ingroup core_of1x
- * @warning parameters value and mask be in Host Byte Order
  */
 of1x_match_t* of1x_init_ip6_src_match(uint128__t value, uint128__t mask);
 /**
  * @brief Create an IP6_DST match
  * @ingroup core_of1x
- * @warning parameters value and mask must be in Host Byte Order
  */
 of1x_match_t* of1x_init_ip6_dst_match(uint128__t value, uint128__t mask);
 /**
@@ -587,7 +589,6 @@ of1x_match_t* of1x_init_ip6_flabel_match(uint32_t value, uint32_t mask);
 /**
  * @brief Create an IP6_ND_TARGET match
  * @ingroup core_of1x
- * @warning parameter value must be in Host Byte Order
  */
 of1x_match_t* of1x_init_ip6_nd_target_match(uint128__t value);
 /**
@@ -653,12 +654,12 @@ void of1x_destroy_match(of1x_match_t* match);
 static inline 
 uint8_t __of1x_get_match_val8(const of1x_match_t* match, bool get_mask, bool raw_nbo){
 
-	wrap_uint_t* wrap;
+	const wrap_uint_t* wrap;
 	
 	if(get_mask)
-		wrap = &match->__tern->mask; 
+		wrap = &match->__tern.mask; 
 	else
-		wrap = &match->__tern->value; 
+		wrap = &match->__tern.value; 
 
 	if(raw_nbo)
 		return wrap->u8;
@@ -706,12 +707,12 @@ uint8_t of1x_get_match_value8(const of1x_match_t* match){
 static inline 
 uint16_t __of1x_get_match_val16(const of1x_match_t* match, bool get_mask, bool raw_nbo){
 
-	wrap_uint_t* wrap;
+	const wrap_uint_t* wrap;
 	
 	if(get_mask)
-		wrap = &match->__tern->mask; 
+		wrap = &match->__tern.mask; 
 	else
-		wrap = &match->__tern->value; 
+		wrap = &match->__tern.value; 
 
 
 	if(raw_nbo)
@@ -757,12 +758,12 @@ uint16_t of1x_get_match_value16(const of1x_match_t* match){
 static inline 
 uint32_t __of1x_get_match_val32(const of1x_match_t* match, bool get_mask, bool raw_nbo){
 	
-	wrap_uint_t* wrap;
+	const wrap_uint_t* wrap;
 	
 	if(get_mask)
-		wrap = &match->__tern->mask; 
+		wrap = &match->__tern.mask; 
 	else
-		wrap = &match->__tern->value; 
+		wrap = &match->__tern.value; 
 
 
 	if(raw_nbo)
@@ -811,12 +812,12 @@ uint32_t of1x_get_match_value32(const of1x_match_t* match){
 static inline 
 uint64_t __of1x_get_match_val64(const of1x_match_t* match, bool get_mask, bool raw_nbo){
 	
-	wrap_uint_t* wrap;
+	const wrap_uint_t* wrap;
 	
 	if(get_mask)
-		wrap = &match->__tern->mask; 
+		wrap = &match->__tern.mask; 
 	else
-		wrap = &match->__tern->value; 
+		wrap = &match->__tern.value; 
 
 
 	if(raw_nbo)
@@ -855,42 +856,24 @@ uint64_t of1x_get_match_value64(const of1x_match_t* match){
 
 //128 bit
 static inline 
-uint128__t __of1x_get_match_val128(const of1x_match_t* match, bool get_mask, bool raw_nbo){
-	uint128__t tmp = {};
-	wrap_uint_t* wrap;
-	
+uint128__t __of1x_get_match_val128(const of1x_match_t* match, bool get_mask){
+	uint128__t* aux;
+
 	if(get_mask)
-		wrap = &match->__tern->mask; 
+		aux = (uint128__t*)&match->__tern.mask;
 	else
-		wrap = &match->__tern->value; 
+		aux = (uint128__t*)&match->__tern.value;
 
-	if(raw_nbo)
-		return wrap->u128;
-
-	switch(match->type){
-		case OF1X_MATCH_IPV6_SRC:
-		case OF1X_MATCH_IPV6_DST:
-		case OF1X_MATCH_IPV6_ND_TARGET:
-			tmp = wrap->u128;
-			NTOHB128(tmp);
-			return tmp;
-		default:{
-			//ROFL_PIPELINE_ERR("%s: Match type %u not found\n",__func__,match->type);
-			assert(0);
-			return tmp;
-		}
-	}
+	return *aux;
 }
 
 /**
 * @ingroup core_of1x 
 * Retrieve the match value for 128 bit values (or less) in HOST BYTE ORDER
-*
-* @retval The value in host byte order 
 */
 static inline 
 uint128__t of1x_get_match_value128(const of1x_match_t* match){
-	return __of1x_get_match_val128(match,  false, false);
+	return __of1x_get_match_val128(match, false);
 }
 
 //
@@ -944,12 +927,10 @@ uint64_t of1x_get_match_mask64(const of1x_match_t* match){
 /**
 * @ingroup core_of1x 
 * Retrieve the match mask value for 128 bit values (or less) in HOST BYTE ORDER
-*
-* @retval The value of the mask in host byte order 
 */
 static inline 
 uint128__t of1x_get_match_mask128(const of1x_match_t* match){
-	return __of1x_get_match_val128(match, true, false);
+	return __of1x_get_match_val128(match, true);
 }
 
 //
@@ -959,7 +940,7 @@ uint128__t of1x_get_match_mask128(const of1x_match_t* match){
 /* match group */
 void __of1x_init_match_group(of1x_match_group_t* group);
 void __of1x_destroy_match_group(of1x_match_group_t* group);
-void __of1x_match_group_push_back(of1x_match_group_t* group, of1x_match_t* match);
+rofl_result_t __of1x_match_group_insert(of1x_match_group_t* group, of1x_match_t* match);
 
 /* Push match at the end of the match */
 rofl_result_t __of1x_add_match(of1x_match_t* root_match, of1x_match_t* add_match);
@@ -973,7 +954,7 @@ of1x_match_t* __of1x_copy_matches(of1x_match_t* matches);
 /* 
 * Get alike match 
 */ 
-of1x_match_t* __of1x_get_alike_match(of1x_match_t* match1, of1x_match_t* match2);
+bool __of1x_get_alike_match(of1x_match_t* match1, of1x_match_t* match2, of1x_match_t* res);
 
 /*
 * Matching 

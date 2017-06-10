@@ -439,24 +439,20 @@ uint8_t packet_matches_get_icmpv4_code_value(packet_matches_t *const pkt_matches
 
 //IPv6
 /**
- * @brief Get the packet match IP6_SRC value in HOST BYTE ORDER
+ * @brief Get the packet match IP6_SRC value
  * @ingroup core_of1x
  */
 static inline
 uint128__t packet_matches_get_ipv6_src_value(packet_matches_t *const pkt_matches){
-	uint128__t tmp =  pkt_matches->__ipv6_src;
-	NTOHB128(tmp);
-	return tmp;
+	return pkt_matches->__ipv6_src;
 };
 /**
- * @brief Get the packet match IP6_DST value in HOST BYTE ORDER
+ * @brief Get the packet match IP6_DST value
  * @ingroup core_of1x
  */
 static inline
 uint128__t packet_matches_get_ipv6_dst_value(packet_matches_t *const pkt_matches){
-	uint128__t tmp =  pkt_matches->__ipv6_dst;
-	NTOHB128(tmp);
-	return tmp;
+	return pkt_matches->__ipv6_dst;
 };
 /**
  * @brief Get the packet match IP6_FLABEL value in HOST BYTE ORDER
@@ -467,14 +463,12 @@ uint64_t packet_matches_get_ipv6_flabel_value(packet_matches_t *const pkt_matche
 	return OF1X_IP6_FLABEL_VALUE(NTOHB64(pkt_matches->__ipv6_flabel));
 };
 /**
- * @brief Get the packet match IP6_ND_TARGET value in HOST BYTE ORDER
+ * @brief Get the packet match IP6_ND_TARGET value
  * @ingroup core_of1x
  */
 static inline
 uint128__t packet_matches_get_ipv6_nd_target_value(packet_matches_t *const pkt_matches){
-	uint128__t tmp = pkt_matches->__ipv6_nd_target;
-	NTOHB128(tmp);
-	return tmp;
+	return pkt_matches->__ipv6_nd_target;
 };
 /**
  * @brief Get the packet match IP6_ND_SLL value in HOST BYTE ORDER

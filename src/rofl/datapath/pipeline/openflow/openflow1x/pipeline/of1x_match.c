@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <arpa/inet.h>
 #include "of1x_match.h"
 
 #include "../../../common/datapacket.h"
@@ -22,7 +23,7 @@ of1x_match_t* of1x_init_port_in_match(uint32_t value){
 		return NULL;
 
 	match->type = OF1X_MATCH_IN_PORT; 
-	match->__tern = __init_utern32(value,OF1X_4_BYTE_MASK); //No wildcard
+	__init_utern32(&match->__tern, value,OF1X_4_BYTE_MASK); //No wildcard
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_10;	//First supported in OF1.0
@@ -42,7 +43,7 @@ of1x_match_t* of1x_init_port_in_phy_match(uint32_t value){
 		return NULL;
 
 	match->type = OF1X_MATCH_IN_PHY_PORT; 
-	match->__tern = __init_utern32(value,OF1X_4_BYTE_MASK); //No wildcard 
+	__init_utern32(&match->__tern, value,OF1X_4_BYTE_MASK); //No wildcard 
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_12;	//First supported in OF1.2
@@ -63,7 +64,7 @@ of1x_match_t* of1x_init_metadata_match(uint64_t value, uint64_t mask){
 		return NULL;
 
 	match->type = OF1X_MATCH_METADATA; 
-	match->__tern = __init_utern64(value, mask);
+	__init_utern64(&match->__tern, value, mask);
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_12;	//First supported in OF1.2
@@ -91,7 +92,7 @@ of1x_match_t* of1x_init_eth_dst_match(uint64_t value, uint64_t mask){
 	mask = HTONB64(OF1X_MAC_ALIGN(mask));
 	
 	match->type = OF1X_MATCH_ETH_DST; 
-	match->__tern = __init_utern64(value&OF1X_48_BITS_MASK, mask&OF1X_48_BITS_MASK); //Enforce mask bits are always 00 for the first bits
+	__init_utern64(&match->__tern, value&OF1X_48_BITS_MASK, mask&OF1X_48_BITS_MASK); //Enforce mask bits are always 00 for the first bits
 
 
 	//Set fast validation flags	
@@ -118,7 +119,7 @@ of1x_match_t* of1x_init_eth_src_match(uint64_t value, uint64_t mask){
 	mask = HTONB64(OF1X_MAC_ALIGN(mask));
 
 	match->type = OF1X_MATCH_ETH_SRC; 
-	match->__tern = __init_utern64(value&OF1X_48_BITS_MASK, mask&OF1X_48_BITS_MASK); //Enforce mask bits are always 00 for the first bits
+	__init_utern64(&match->__tern, value&OF1X_48_BITS_MASK, mask&OF1X_48_BITS_MASK); //Enforce mask bits are always 00 for the first bits
 	
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_10;	//First supported in OF1.0
@@ -142,7 +143,7 @@ of1x_match_t* of1x_init_eth_type_match(uint16_t value){
 	value = HTONB16(value);
 
 	match->type = OF1X_MATCH_ETH_TYPE; 
-	match->__tern = __init_utern16(value,OF1X_2_BYTE_MASK); //No wildcard 
+	__init_utern16(&match->__tern, value,OF1X_2_BYTE_MASK); //No wildcard 
 	
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_10;	//First supported in OF1.0
@@ -169,7 +170,7 @@ of1x_match_t* of1x_init_vlan_vid_match(uint16_t value, uint16_t mask, enum of1x_
 	match->type = OF1X_MATCH_VLAN_VID; 
 	//Setting values; note that value includes the flag HAS_VLAN in the 13th bit
 	//The mask is set to be strictly 12 bits, so only matching the VLAN ID itself
-	match->__tern = __init_utern16(value&OF1X_VLAN_ID_MASK,mask&OF1X_VLAN_ID_MASK);
+	__init_utern16(&match->__tern, value&OF1X_VLAN_ID_MASK,mask&OF1X_VLAN_ID_MASK);
 	match->vlan_present = vlan_present;
 
 	//Set fast validation flags	
@@ -195,7 +196,7 @@ of1x_match_t* of1x_init_vlan_pcp_match(uint8_t value){
 	value = OF1X_VLAN_PCP_ALIGN(value);
 
 	match->type = OF1X_MATCH_VLAN_PCP; 
-	match->__tern = __init_utern8(value&OF1X_3MSBITS_MASK,OF1X_3MSBITS_MASK); //Ensure only 3 bit value, no wildcard 
+	__init_utern8(&match->__tern, value&OF1X_3MSBITS_MASK,OF1X_3MSBITS_MASK); //Ensure only 3 bit value, no wildcard 
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_10;	//First supported in OF1.0
@@ -219,7 +220,7 @@ of1x_match_t* of1x_init_mpls_label_match(uint32_t value){
 	value = HTONB32(OF1X_MPLS_LABEL_ALIGN(value));
 
 	match->type = OF1X_MATCH_MPLS_LABEL; 
-	match->__tern = __init_utern32(value&OF1X_20_BITS_MASK,OF1X_20_BITS_MASK); //no wildcard?? wtf! 
+	__init_utern32(&match->__tern, value&OF1X_20_BITS_MASK,OF1X_20_BITS_MASK); //no wildcard?? wtf! 
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_12;	//First supported in OF1.2
@@ -241,7 +242,7 @@ of1x_match_t* of1x_init_mpls_tc_match(uint8_t value){
 	value = OF1X_MPLS_TC_ALIGN(value);
 
 	match->type = OF1X_MATCH_MPLS_TC; 
-	match->__tern = __init_utern8(value&OF1X_BITS_12AND3_MASK,OF1X_BITS_12AND3_MASK); //Ensure only 3 bit value, no wildcard 
+	__init_utern8(&match->__tern, value&OF1X_BITS_12AND3_MASK,OF1X_BITS_12AND3_MASK); //Ensure only 3 bit value, no wildcard 
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_12;	//First supported in OF1.2
@@ -260,7 +261,7 @@ of1x_match_t* of1x_init_mpls_bos_match(uint8_t value){
 		return NULL;
 
 	match->type = OF1X_MATCH_MPLS_BOS; 
-	match->__tern = __init_utern8(value&OF1X_BIT0_MASK,OF1X_BIT0_MASK); //Ensure only 1 bit value, no wildcard 
+	__init_utern8(&match->__tern, value&OF1X_BIT0_MASK,OF1X_BIT0_MASK); //Ensure only 1 bit value, no wildcard 
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_13;	//First supported in OF1.3
@@ -284,7 +285,7 @@ of1x_match_t* of1x_init_arp_opcode_match(uint16_t value){
 	value = HTONB16(value);
 
 	match->type = OF1X_MATCH_ARP_OP;
-	match->__tern = __init_utern16(value,OF1X_2_BYTE_MASK); //No wildcard
+	__init_utern16(&match->__tern, value,OF1X_2_BYTE_MASK); //No wildcard
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_10;	//First supported in OF1.0 (1.0: lower 8bits of opcode)
@@ -307,7 +308,7 @@ of1x_match_t* of1x_init_arp_tha_match(uint64_t value, uint64_t mask){
 	mask = HTONB64(OF1X_MAC_ALIGN(mask));
 
 	match->type = OF1X_MATCH_ARP_THA;
-	match->__tern = __init_utern64(value&OF1X_48_BITS_MASK, mask&OF1X_48_BITS_MASK); //Enforce mask bits are always 00 for the first bits
+	__init_utern64(&match->__tern, value&OF1X_48_BITS_MASK, mask&OF1X_48_BITS_MASK); //Enforce mask bits are always 00 for the first bits
 
 
 	//Set fast validation flags	
@@ -334,7 +335,7 @@ of1x_match_t* of1x_init_arp_sha_match(uint64_t value, uint64_t mask){
 	mask = HTONB64(OF1X_MAC_ALIGN(mask));
 
 	match->type = OF1X_MATCH_ARP_SHA;
-	match->__tern = __init_utern64(value&OF1X_48_BITS_MASK, mask&OF1X_48_BITS_MASK); //Enforce mask bits are always 00 for the first bits
+	__init_utern64(&match->__tern, value&OF1X_48_BITS_MASK, mask&OF1X_48_BITS_MASK); //Enforce mask bits are always 00 for the first bits
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_12;	//First supported in OF1.2
@@ -360,7 +361,7 @@ of1x_match_t* of1x_init_arp_tpa_match(uint32_t value, uint32_t mask){
 	mask = HTONB32(mask);
 
 	match->type = OF1X_MATCH_ARP_TPA;
-	match->__tern = __init_utern32(value,mask);
+	__init_utern32(&match->__tern, value,mask);
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_10;	//First supported in OF1.0
@@ -386,7 +387,7 @@ of1x_match_t* of1x_init_arp_spa_match(uint32_t value, uint32_t mask){
 	mask = HTONB32(mask);
 
 	match->type = OF1X_MATCH_ARP_SPA;
-	match->__tern = __init_utern32(value,mask);
+	__init_utern32(&match->__tern, value,mask);
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_10;	//First supported in OF1.0
@@ -410,7 +411,7 @@ of1x_match_t* of1x_init_nw_proto_match(uint8_t value){
 		return NULL;
 
 	match->type = OF1X_MATCH_NW_PROTO; 
-	match->__tern = __init_utern8(value,OF1X_1_BYTE_MASK); //no wildcard 
+	__init_utern8(&match->__tern, value,OF1X_1_BYTE_MASK); //no wildcard 
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_10;	//First supported in OF1.0
@@ -433,7 +434,7 @@ of1x_match_t* of1x_init_nw_src_match(uint32_t value, uint32_t mask){
 	mask = HTONB32(mask);
 
 	match->type = OF1X_MATCH_NW_SRC;
-	match->__tern = __init_utern32(value,mask); 
+	__init_utern32(&match->__tern, value,mask); 
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_10;	//First supported in OF1.0
@@ -459,7 +460,7 @@ of1x_match_t* of1x_init_nw_dst_match(uint32_t value, uint32_t mask){
 	mask = HTONB32(mask);
 
 	match->type = OF1X_MATCH_NW_DST;
-	match->__tern = __init_utern32(value,mask); 
+	__init_utern32(&match->__tern, value,mask); 
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_10;	//First supported in OF1.0
@@ -487,7 +488,7 @@ of1x_match_t* of1x_init_ip4_src_match(uint32_t value, uint32_t mask){
 	mask = HTONB32(mask);
 
 	match->type = OF1X_MATCH_IPV4_SRC;
-	match->__tern = __init_utern32(value,mask); 
+	__init_utern32(&match->__tern, value,mask); 
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_10;	//First supported in OF1.0
@@ -513,7 +514,7 @@ of1x_match_t* of1x_init_ip4_dst_match(uint32_t value, uint32_t mask){
 	mask = HTONB32(mask);
 
 	match->type = OF1X_MATCH_IPV4_DST;
-	match->__tern = __init_utern32(value,mask); 
+	__init_utern32(&match->__tern, value,mask); 
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_10;	//First supported in OF1.0
@@ -535,7 +536,7 @@ of1x_match_t* of1x_init_ip_proto_match(uint8_t value){
 		return NULL;
 
 	match->type = OF1X_MATCH_IP_PROTO; 
-	match->__tern = __init_utern8(value,OF1X_1_BYTE_MASK); //no wildcard 
+	__init_utern8(&match->__tern, value,OF1X_1_BYTE_MASK); //no wildcard 
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_10;	//First supported in OF1.0
@@ -557,7 +558,7 @@ of1x_match_t* of1x_init_ip_dscp_match(uint8_t value){
 	value = OF1X_IP_DSCP_ALIGN(value);
 
 	match->type = OF1X_MATCH_IP_DSCP; 
-	match->__tern = __init_utern8(value&OF1X_6MSBITS_MASK,OF1X_6MSBITS_MASK); //no wildcard 
+	__init_utern8(&match->__tern, value&OF1X_6MSBITS_MASK,OF1X_6MSBITS_MASK); //no wildcard 
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_10;	//First supported in OF1.0 (ToS)
@@ -577,7 +578,7 @@ of1x_match_t* of1x_init_ip_ecn_match(uint8_t value){
 		return NULL;
 
 	match->type = OF1X_MATCH_IP_ECN; 
-	match->__tern = __init_utern8(value&OF1X_2LSBITS_MASK,OF1X_2LSBITS_MASK); //no wildcard 
+	__init_utern8(&match->__tern, value&OF1X_2LSBITS_MASK,OF1X_2LSBITS_MASK); //no wildcard 
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_12;	//First supported in OF1.2
@@ -597,13 +598,9 @@ of1x_match_t* of1x_init_ip6_src_match(uint128__t value, uint128__t mask){
 	if(unlikely(match == NULL))
 		return NULL;
 	
-	// Align to pipeline convention (NBO, lower memory address)
-	HTONB128(value);
-	HTONB128(mask);
-
 	uint128__t fixed_mask = {{0xff,0xff,0xff,0xff, 0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, 0xff,0xff,0xff,0xff}};
 	match->type = OF1X_MATCH_IPV6_SRC;
-	match->__tern = __init_utern128(value,mask); 
+	__init_utern128(&match->__tern, value,mask); 
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_12;	//First supported in OF1.2
@@ -624,13 +621,9 @@ of1x_match_t* of1x_init_ip6_dst_match(uint128__t value, uint128__t mask){
 	if(unlikely(match == NULL))
 		return NULL;
 	
-	// Align to pipeline convention (NBO, lower memory address)
-	HTONB128(value);
-	HTONB128(mask);
-
 	uint128__t fixed_mask = {{0xff,0xff,0xff,0xff, 0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, 0xff,0xff,0xff,0xff}};
 	match->type = OF1X_MATCH_IPV6_DST;
-	match->__tern = __init_utern128(value,mask); 
+	__init_utern128(&match->__tern, value,mask); 
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_12;	//First supported in OF1.2
@@ -651,12 +644,8 @@ of1x_match_t* of1x_init_ip6_flabel_match(uint32_t value, uint32_t mask){
 	if(unlikely(match == NULL))
 		return NULL;
 	
-	// Align to pipeline convention (NBO, lower memory address)
-	value = HTONB32(OF1X_IP6_FLABEL_ALIGN(value));
-	mask = HTONB32(OF1X_IP6_FLABEL_ALIGN(mask));
-
 	match->type = OF1X_MATCH_IPV6_FLABEL;
-	match->__tern = __init_utern32(value&OF1X_20_BITS_IPV6_FLABEL_MASK,mask&OF1X_20_BITS_IPV6_FLABEL_MASK); // ensure 20 bits. 
+	__init_utern32(&match->__tern, value&OF1X_20_BITS_IPV6_FLABEL_MASK,mask&OF1X_20_BITS_IPV6_FLABEL_MASK); // ensure 20 bits. 
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_12;	//First supported in OF1.2
@@ -674,13 +663,10 @@ of1x_match_t* of1x_init_ip6_nd_target_match(uint128__t value){
 	if(unlikely(match == NULL))
 		return NULL;
 	
-	// Align to pipeline convention (NBO, lower memory address)
-	HTONB128(value);
-
 	uint128__t mask = {{0xff,0xff,0xff,0xff, 0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, 0xff,0xff,0xff,0xff}};
 	
 	match->type = OF1X_MATCH_IPV6_ND_TARGET;
-	match->__tern = __init_utern128(value,mask); //No wildcard
+	__init_utern128(&match->__tern, value,mask); //No wildcard
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_12;	//First supported in OF1.2
@@ -702,7 +688,7 @@ of1x_match_t* of1x_init_ip6_nd_sll_match(uint64_t value){
 	value = HTONB64(OF1X_MAC_ALIGN(value));
 
 	match->type = OF1X_MATCH_IPV6_ND_SLL;
-	match->__tern = __init_utern64(value & OF1X_48_BITS_MASK, OF1X_48_BITS_MASK); //ensure 48 bits. No wildcard
+	__init_utern64(&match->__tern, value & OF1X_48_BITS_MASK, OF1X_48_BITS_MASK); //ensure 48 bits. No wildcard
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_12;	//First supported in OF1.2
@@ -724,7 +710,7 @@ of1x_match_t* of1x_init_ip6_nd_tll_match(uint64_t value){
 	value = HTONB64(OF1X_MAC_ALIGN(value));
 
 	match->type = OF1X_MATCH_IPV6_ND_TLL;
-	match->__tern = __init_utern64(value & OF1X_48_BITS_MASK, OF1X_48_BITS_MASK); //ensure 48 bits. No wildcard
+	__init_utern64(&match->__tern, value & OF1X_48_BITS_MASK, OF1X_48_BITS_MASK); //ensure 48 bits. No wildcard
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_12;	//First supported in OF1.2
@@ -745,7 +731,7 @@ of1x_match_t* of1x_init_ip6_exthdr_match(uint16_t value, uint16_t mask){
 	// TODO Align to pipeline convention (NBO, lower memory address) -- currently not implemented
 
 	match->type = OF1X_MATCH_IPV6_EXTHDR;
-	match->__tern = __init_utern16(value&OF1X_9_BITS_MASK, mask & OF1X_9_BITS_MASK );  //ensure 9 bits, with Wildcard
+	__init_utern16(&match->__tern, value&OF1X_9_BITS_MASK, mask & OF1X_9_BITS_MASK );  //ensure 9 bits, with Wildcard
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_13;	//First supported in OF1.2
@@ -769,7 +755,7 @@ of1x_match_t* of1x_init_icmpv6_type_match(uint8_t value){
 		return NULL;
 
 	match->type = OF1X_MATCH_ICMPV6_TYPE;
-	match->__tern = __init_utern8(value,OF1X_1_BYTE_MASK);
+	__init_utern8(&match->__tern, value,OF1X_1_BYTE_MASK);
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_12;	//First supported in OF1.2
@@ -788,7 +774,7 @@ of1x_match_t* of1x_init_icmpv6_code_match(uint8_t value){
 		return NULL;
 
 	match->type = OF1X_MATCH_ICMPV6_CODE;
-	match->__tern = __init_utern8(value,OF1X_1_BYTE_MASK);
+	__init_utern8(&match->__tern, value,OF1X_1_BYTE_MASK);
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_12;	//First supported in OF1.2
@@ -812,7 +798,7 @@ of1x_match_t* of1x_init_tcp_src_match(uint16_t value){
 	value = HTONB16(value);
 
 	match->type = OF1X_MATCH_TCP_SRC;
-	match->__tern = __init_utern16(value,OF1X_2_BYTE_MASK); //no wildcard 
+	__init_utern16(&match->__tern, value,OF1X_2_BYTE_MASK); //no wildcard 
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_12;	//First supported in OF1.2
@@ -835,7 +821,7 @@ of1x_match_t* of1x_init_tcp_dst_match(uint16_t value){
 	value = HTONB16(value);
 
 	match->type = OF1X_MATCH_TCP_DST;
-	match->__tern = __init_utern16(value,OF1X_2_BYTE_MASK); //no wildcard 
+	__init_utern16(&match->__tern, value,OF1X_2_BYTE_MASK); //no wildcard 
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_12;	//First supported in OF1.2
@@ -858,7 +844,7 @@ of1x_match_t* of1x_init_udp_src_match(uint16_t value){
 	value = HTONB16(value);
 
 	match->type = OF1X_MATCH_UDP_SRC;
-	match->__tern = __init_utern16(value,OF1X_2_BYTE_MASK); //no wildcard 
+	__init_utern16(&match->__tern, value,OF1X_2_BYTE_MASK); //no wildcard 
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_12;	//First supported in OF1.2
@@ -880,7 +866,7 @@ of1x_match_t* of1x_init_udp_dst_match(uint16_t value){
 	value = HTONB16(value);
 
 	match->type = OF1X_MATCH_UDP_DST;
-	match->__tern = __init_utern16(value,OF1X_2_BYTE_MASK); //no wildcard 
+	__init_utern16(&match->__tern, value,OF1X_2_BYTE_MASK); //no wildcard 
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_12;	//First supported in OF1.2
@@ -904,7 +890,7 @@ of1x_match_t* of1x_init_sctp_src_match(uint16_t value){
 	value = HTONB16(value);
 
 	match->type = OF1X_MATCH_SCTP_SRC;
-	match->__tern = __init_utern16(value,OF1X_2_BYTE_MASK); //no wildcard 
+	__init_utern16(&match->__tern, value,OF1X_2_BYTE_MASK); //no wildcard 
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_12;	//First supported in OF1.2
@@ -927,7 +913,7 @@ of1x_match_t* of1x_init_sctp_dst_match(uint16_t value){
 	value = HTONB16(value);
 
 	match->type = OF1X_MATCH_SCTP_DST;
-	match->__tern = __init_utern16(value,OF1X_2_BYTE_MASK); //no wildcard 
+	__init_utern16(&match->__tern, value,OF1X_2_BYTE_MASK); //no wildcard 
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_12;	//First supported in OF1.2
@@ -951,7 +937,7 @@ of1x_match_t* of1x_init_tp_src_match(uint16_t value){
 	value = HTONB16(value);
 
 	match->type = OF1X_MATCH_TP_SRC;
-	match->__tern = __init_utern16(value,OF1X_2_BYTE_MASK); //no wildcard 
+	__init_utern16(&match->__tern, value,OF1X_2_BYTE_MASK); //no wildcard 
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_10;	//First supported in OF1.0
@@ -973,7 +959,7 @@ of1x_match_t* of1x_init_tp_dst_match(uint16_t value){
 	value = HTONB16(value);
 
 	match->type = OF1X_MATCH_TP_DST;
-	match->__tern = __init_utern16(value,OF1X_2_BYTE_MASK); //no wildcard 
+	__init_utern16(&match->__tern, value,OF1X_2_BYTE_MASK); //no wildcard 
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_10;	//First supported in OF1.0
@@ -993,7 +979,7 @@ of1x_match_t* of1x_init_icmpv4_type_match(uint8_t value){
 		return NULL;
 
 	match->type = OF1X_MATCH_ICMPV4_TYPE; 
-	match->__tern = __init_utern8(value,OF1X_1_BYTE_MASK); //no wildcard 
+	__init_utern8(&match->__tern, value,OF1X_1_BYTE_MASK); //no wildcard 
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_12;	//First supported in OF1.2
@@ -1012,7 +998,7 @@ of1x_match_t* of1x_init_icmpv4_code_match(uint8_t value){
 		return NULL;
 
 	match->type = OF1X_MATCH_ICMPV4_CODE; 
-	match->__tern = __init_utern8(value,OF1X_1_BYTE_MASK); //no wildcard 
+	__init_utern8(&match->__tern, value,OF1X_1_BYTE_MASK); //no wildcard 
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_12;	//First supported in OF1.2
@@ -1037,7 +1023,7 @@ of1x_match_t* of1x_init_pbb_isid_match(uint32_t value, uint32_t mask){
 	mask = HTONB32(OF1X_PBB_ISID_ALIGN(mask));
 
 	match->type = OF1X_MATCH_PBB_ISID;
-	match->__tern = __init_utern32(value&OF1X_3_BYTE_MASK, mask&OF1X_3_BYTE_MASK); //no wildcard 
+	__init_utern32(&match->__tern, value&OF1X_3_BYTE_MASK, mask&OF1X_3_BYTE_MASK); //no wildcard 
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_13;	//First supported in OF1.3
@@ -1063,7 +1049,7 @@ of1x_match_t* of1x_init_tunnel_id_match(uint64_t value, uint64_t mask){
 	//TODO align?
 
 	match->type = OF1X_MATCH_TUNNEL_ID; 
-	match->__tern = __init_utern64(value, mask); //no wildcard 
+	__init_utern64(&match->__tern, value, mask); //no wildcard 
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_13;	//First supported in OF1.3
@@ -1091,7 +1077,7 @@ of1x_match_t* of1x_init_pppoe_code_match(uint8_t value){
 		return NULL;
 
 	match->type = OF1X_MATCH_PPPOE_CODE; 
-	match->__tern = __init_utern8(value&OF1X_1_BYTE_MASK,OF1X_1_BYTE_MASK); //no wildcard 
+	__init_utern8(&match->__tern, value&OF1X_1_BYTE_MASK,OF1X_1_BYTE_MASK); //no wildcard 
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_12;	//First supported in OF1.2 (extensions)
@@ -1110,7 +1096,7 @@ of1x_match_t* of1x_init_pppoe_type_match(uint8_t value){
 		return NULL;
 
 	match->type = OF1X_MATCH_PPPOE_TYPE; 
-	match->__tern = __init_utern8(value&OF1X_4_BITS_MASK,OF1X_4_BITS_MASK); //Ensure only 4 bit value, no wildcard 
+	__init_utern8(&match->__tern, value&OF1X_4_BITS_MASK,OF1X_4_BITS_MASK); //Ensure only 4 bit value, no wildcard 
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_12;	//First supported in OF1.2 (extensions)
@@ -1132,7 +1118,7 @@ of1x_match_t* of1x_init_pppoe_session_match(uint16_t value){
 	value = HTONB16(value);
 
 	match->type = OF1X_MATCH_PPPOE_SID; 
-	match->__tern = __init_utern16(value,OF1X_2_BYTE_MASK); //no wildcard 
+	__init_utern16(&match->__tern, value,OF1X_2_BYTE_MASK); //no wildcard 
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_12;	//First supported in OF1.2 (extensions)
@@ -1154,7 +1140,7 @@ of1x_match_t* of1x_init_ppp_prot_match(uint16_t value){
 	value = HTONB16(value);
 
 	match->type = OF1X_MATCH_PPP_PROT; 
-	match->__tern = __init_utern16(value,OF1X_2_BYTE_MASK); //no wildcard 
+	__init_utern16(&match->__tern, value,OF1X_2_BYTE_MASK); //no wildcard 
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_12;	//First supported in OF1.2 (extensions)
@@ -1174,7 +1160,7 @@ of1x_match_t* of1x_init_gtp_msg_type_match(uint8_t value){
 		return NULL;
 
 	match->type = OF1X_MATCH_GTP_MSG_TYPE;
-	match->__tern = __init_utern8(value,OF1X_1_BYTE_MASK); //no wildcard
+	__init_utern8(&match->__tern, value,OF1X_1_BYTE_MASK); //no wildcard
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_12;	//First supported in OF1.2 (extensions)
@@ -1196,7 +1182,7 @@ of1x_match_t* of1x_init_gtp_teid_match(uint32_t value, uint32_t mask){
 	value = HTONB32(value);
 
 	match->type = OF1X_MATCH_GTP_TEID;
-	match->__tern = __init_utern32(value, mask);
+	__init_utern32(&match->__tern, value, mask);
 
 	//Set fast validation flags	
 	match->ver_req.min_ver = OF_VERSION_12;	//First supported in OF1.2 (extensions)
@@ -1219,7 +1205,7 @@ of1x_match_t* of1x_init_capwap_wbid_match(uint8_t value, uint8_t mask){
 		return NULL;
 
 	match->type = OF1X_MATCH_CAPWAP_WBID;
-	match->__tern = __init_utern8(value, mask);
+	__init_utern8(&match->__tern, value, mask);
 
 	//Set fast validation flags
 	match->ver_req.min_ver = OF_VERSION_12;	//First supported in OF1.2 (extensions)
@@ -1241,7 +1227,7 @@ of1x_match_t* of1x_init_capwap_rid_match(uint8_t value, uint8_t mask){
 		return NULL;
 
 	match->type = OF1X_MATCH_CAPWAP_RID;
-	match->__tern = __init_utern8(value, mask);
+	__init_utern8(&match->__tern, value, mask);
 
 	//Set fast validation flags
 	match->ver_req.min_ver = OF_VERSION_12;	//First supported in OF1.2 (extensions)
@@ -1267,7 +1253,7 @@ of1x_match_t* of1x_init_capwap_flags_match(uint16_t value, uint16_t mask){
 	mask = HTONB16(mask);
 
 	match->type = OF1X_MATCH_CAPWAP_FLAGS;
-	match->__tern = __init_utern16(value, mask);
+	__init_utern16(&match->__tern, value, mask);
 
 	//Set fast validation flags
 	match->ver_req.min_ver = OF_VERSION_12;	//First supported in OF1.2 (extensions)
@@ -1294,7 +1280,7 @@ of1x_match_t* of1x_init_wlan_fc_match(uint16_t value, uint16_t mask){
 	mask = HTONB16(mask);
 
 	match->type = OF1X_MATCH_WLAN_FC;
-	match->__tern = __init_utern16(value, mask);
+	__init_utern16(&match->__tern, value, mask);
 
 	//Set fast validation flags
 	match->ver_req.min_ver = OF_VERSION_12;	//First supported in OF1.2 (extensions)
@@ -1316,7 +1302,7 @@ of1x_match_t* of1x_init_wlan_type_match(uint8_t value, uint8_t mask){
 		return NULL;
 
 	match->type = OF1X_MATCH_WLAN_TYPE;
-	match->__tern = __init_utern8(value, mask);
+	__init_utern8(&match->__tern, value, mask);
 
 	//Set fast validation flags
 	match->ver_req.min_ver = OF_VERSION_12;	//First supported in OF1.2 (extensions)
@@ -1338,7 +1324,7 @@ of1x_match_t* of1x_init_wlan_subtype_match(uint8_t value, uint8_t mask){
 		return NULL;
 
 	match->type = OF1X_MATCH_WLAN_SUBTYPE;
-	match->__tern = __init_utern8(value, mask);
+	__init_utern8(&match->__tern, value, mask);
 
 	//Set fast validation flags
 	match->ver_req.min_ver = OF_VERSION_12;	//First supported in OF1.2 (extensions)
@@ -1360,7 +1346,7 @@ of1x_match_t* of1x_init_wlan_direction_match(uint8_t value, uint8_t mask){
 		return NULL;
 
 	match->type = OF1X_MATCH_WLAN_DIRECTION;
-	match->__tern = __init_utern8(value, mask);
+	__init_utern8(&match->__tern, value, mask);
 
 	//Set fast validation flags
 	match->ver_req.min_ver = OF_VERSION_12;	//First supported in OF1.2 (extensions)
@@ -1386,7 +1372,7 @@ of1x_match_t* of1x_init_wlan_address_1_match(uint64_t value, uint64_t mask){
 	mask = HTONB64(OF1X_MAC_ALIGN(mask));
 
 	match->type = OF1X_MATCH_WLAN_ADDRESS_1;
-	match->__tern = __init_utern64(value&OF1X_48_BITS_MASK, mask&OF1X_48_BITS_MASK); //Enforce mask bits are always 00 for the first bits
+	__init_utern64(&match->__tern, value&OF1X_48_BITS_MASK, mask&OF1X_48_BITS_MASK); //Enforce mask bits are always 00 for the first bits
 
 	//Set fast validation flags
 	match->ver_req.min_ver = OF_VERSION_12;	//First supported in OF1.2
@@ -1412,7 +1398,7 @@ of1x_match_t* of1x_init_wlan_address_2_match(uint64_t value, uint64_t mask){
 	mask = HTONB64(OF1X_MAC_ALIGN(mask));
 
 	match->type = OF1X_MATCH_WLAN_ADDRESS_2;
-	match->__tern = __init_utern64(value&OF1X_48_BITS_MASK, mask&OF1X_48_BITS_MASK); //Enforce mask bits are always 00 for the first bits
+	__init_utern64(&match->__tern, value&OF1X_48_BITS_MASK, mask&OF1X_48_BITS_MASK); //Enforce mask bits are always 00 for the first bits
 
 	//Set fast validation flags
 	match->ver_req.min_ver = OF_VERSION_12;	//First supported in OF1.2
@@ -1438,7 +1424,7 @@ of1x_match_t* of1x_init_wlan_address_3_match(uint64_t value, uint64_t mask){
 	mask = HTONB64(OF1X_MAC_ALIGN(mask));
 
 	match->type = OF1X_MATCH_WLAN_ADDRESS_3;
-	match->__tern = __init_utern64(value&OF1X_48_BITS_MASK, mask&OF1X_48_BITS_MASK); //Enforce mask bits are always 00 for the first bits
+	__init_utern64(&match->__tern, value&OF1X_48_BITS_MASK, mask&OF1X_48_BITS_MASK); //Enforce mask bits are always 00 for the first bits
 
 	//Set fast validation flags
 	match->ver_req.min_ver = OF_VERSION_12;	//First supported in OF1.2
@@ -1463,7 +1449,7 @@ of1x_match_t* of1x_init_gre_version_match(uint16_t value){
 	value = HTONB16(value);
 
 	match->type = OF1X_MATCH_GRE_VERSION;
-	match->__tern = __init_utern16(value&OF1X_3_BITS_MASK,OF1X_3_BITS_MASK); //no wildcard
+	__init_utern16(&match->__tern, value&OF1X_3_BITS_MASK,OF1X_3_BITS_MASK); //no wildcard
 
 	//Set fast validation flags
 	match->ver_req.min_ver = OF_VERSION_12;	//First supported in OF1.2 (extensions)
@@ -1484,7 +1470,7 @@ of1x_match_t* of1x_init_gre_prot_type_match(uint16_t value){
 	value = HTONB16(value);
 
 	match->type = OF1X_MATCH_GRE_PROT_TYPE;
-	match->__tern = __init_utern16(value,OF1X_2_BYTE_MASK); //no wildcard
+	__init_utern16(&match->__tern, value,OF1X_2_BYTE_MASK); //no wildcard
 
 	//Set fast validation flags
 	match->ver_req.min_ver = OF_VERSION_12;	//First supported in OF1.2 (extensions)
@@ -1506,7 +1492,7 @@ of1x_match_t* of1x_init_gre_key_match(uint32_t value){
 	value = HTONB32(value);
 
 	match->type = OF1X_MATCH_GRE_KEY;
-	match->__tern = __init_utern32(value, OF1X_4_BYTE_MASK);
+	__init_utern32(&match->__tern, value, OF1X_4_BYTE_MASK);
 
 	//Set fast validation flags
 	match->ver_req.min_ver = OF_VERSION_12;	//First supported in OF1.2 (extensions)
@@ -1557,47 +1543,75 @@ void __of1x_destroy_match_group(of1x_match_group_t* group){
 
 
 
-void __of1x_match_group_push_back(of1x_match_group_t* group, of1x_match_t* match){
+rofl_result_t __of1x_match_group_insert(of1x_match_group_t* group, of1x_match_t* match){
+	of1x_match_t* iter = NULL;
 
-	if ( unlikely(group==NULL) || unlikely(match==NULL) )
-		return;
+ 	if ( unlikely(group==NULL) || unlikely(match==NULL) )
+		return ROFL_FAILURE;
+
+	if ( unlikely(match->type) >= OF1X_MATCH_MAX)
+		return ROFL_FAILURE;
 
 	match->next = match->prev = NULL; 
 
-	if(!group->head){
-		group->head = match;
-	}else{
-		match->prev = group->tail;
-		group->tail->next = match;
+	//Insert in array
+	if ( group->m_array[match->type] != NULL ){
+		ROFL_PIPELINE_ERR("%s: Match type %u is already defined in match group\n",__func__,match->type);
+		return ROFL_FAILURE;
+	} else {
+		group->m_array[match->type] = match;
 	}
 
+	if(!group->head){
+		//Group empty, insert match as head & tail
+		group->head = match;
+		group->tail = match;
+	}else{
+		//Insert the match in the list following the match type order
+		for( iter=group->head; iter != NULL; iter=iter->next ){
+			if (iter->type > match->type){
+				//Insert before iter
+				match->prev = iter->prev;
+				match->next = iter;
+				if( iter->prev )
+					iter->prev->next = match;
+				else
+					group->head = match;
+				iter->prev = match;
+				break;
+			}else if (iter->type == match->type){
+				//Type already there! Should not happen cause we checked the array already.
+				ROFL_PIPELINE_ERR("%s: Match type %u is already defined in match group\n",__func__,match->type);
+				assert(0);
+				return ROFL_FAILURE;
+			}
+		}
+		if (iter == NULL){
+			//Insert as tail
+			match->prev = group->tail;
+			group->tail->next = match;
+			group->tail = match;
+		}
+	}
+
+	group->num_elements++;
+
 	//Deduce new tail and update validation flags and num of elements
-	do{
-		//Update fast validation flags (required versions)
-		if(group->ver_req.min_ver < match->ver_req.min_ver)
-			group->ver_req.min_ver = match->ver_req.min_ver;
-		if(group->ver_req.max_ver > match->ver_req.max_ver)
-			group->ver_req.max_ver = match->ver_req.max_ver;
+	//Update fast validation flags (required versions)
+	if(group->ver_req.min_ver < match->ver_req.min_ver)
+		group->ver_req.min_ver = match->ver_req.min_ver;
+	if(group->ver_req.max_ver > match->ver_req.max_ver)
+		group->ver_req.max_ver = match->ver_req.max_ver;
 
-		//Update matches
-		bitmap128_set(&group->match_bm, match->type);
+	//Update matches
+	bitmap128_set(&group->match_bm, match->type);
 
-		if(!match->has_wildcard)
-			bitmap128_unset(&group->of10_wildcard_bm, match->type);
-		else	
-			bitmap128_set(&group->wildcard_bm, match->type);
+	if(!match->has_wildcard)
+		bitmap128_unset(&group->of10_wildcard_bm, match->type);
+	else	
+		bitmap128_set(&group->wildcard_bm, match->type);
 
-		group->num_elements++;
-
-		if(match->next == NULL)
-			break;
-		else	
-			match = match->next;
-	}while(1);
-	
-	//Add new tail
-	group->tail = match;
-	
+	return ROFL_SUCCESS;
 }
 
 /*
@@ -1617,12 +1631,9 @@ of1x_match_t* __of1x_copy_match(of1x_match_t* match){
 	tmp->prev=tmp->next=NULL;
 
 	//Create a whatever type utern and copy from the orignal tern
-	tmp->__tern = __init_utern8(0x0, 0x0);
+	__init_utern8(&tmp->__tern, 0x0, 0x0);
 
-	if(!tmp->__tern)
-		return NULL;
-
-	*tmp->__tern = *match->__tern;
+	tmp->__tern = match->__tern;
 
 	return tmp;
 }
@@ -1665,29 +1676,29 @@ of1x_match_t* __of1x_copy_matches(of1x_match_t* matches){
 /*
 * Try to find the largest common value among match1 and match2, being ALWAYS match2 with a more strict mask 
 */
-of1x_match_t* __of1x_get_alike_match(of1x_match_t* match1, of1x_match_t* match2){
-	utern_t* common_tern = NULL;	
+bool __of1x_get_alike_match(of1x_match_t* match1, of1x_match_t* match2, of1x_match_t* common){
 
-	if( match1->type != match2->type )
-		return NULL;	
+	if(match1->type != match2->type)
+		return false;
 
-	common_tern = __utern_get_alike(*match1->__tern,*match2->__tern);
+	if(match1->type == OF1X_MATCH_VLAN_VID && match1->vlan_present != match2->vlan_present)
+		return false;
 
-	if(common_tern){
-		of1x_match_t* match = (of1x_match_t*)platform_malloc_shared(sizeof(of1x_match_t));
-		match->__tern = common_tern;
-		match->type = match1->type;
-		match->next = NULL;
-		match->prev = NULL;
-		return match;
+	if(common){
+		if(!__utern_get_alike(&match1->__tern, &match2->__tern, &common->__tern))
+			return false;
+		common->type = match1->type;
+		common->next = common->prev = NULL;
+		common->vlan_present = match1->vlan_present;
+		return true;
 	}
-	return NULL;
+
+	return __utern_get_alike(&match1->__tern, &match2->__tern, NULL);
 }
 /*
 * Common destructor
 */
 void of1x_destroy_match(of1x_match_t* match){
-	__destroy_utern(match->__tern);
 	platform_free_shared(match);
 }
 
@@ -1703,7 +1714,7 @@ bool __of1x_equal_matches(of1x_match_t* match1, of1x_match_t* match2){
 	if( match1->type != match2->type )
 		return false; 
 
-	return __utern_equals(match1->__tern,match2->__tern);
+	return __utern_equals(&match1->__tern, &match2->__tern);
 }
 
 //Finds out if sub_match is a submatch of match
@@ -1712,12 +1723,16 @@ bool __of1x_is_submatch(of1x_match_t* sub_match, of1x_match_t* match){
 	if( match->type != sub_match->type )
 		return false; 
 	
-	return __utern_is_contained(sub_match->__tern,match->__tern);
+	return __utern_is_contained(&sub_match->__tern, &match->__tern);
 }
 
 //Matches with mask (including matches that do not support)
 void __of1x_dump_matches(of1x_match_t* matches, bool raw_nbo){
+
 	of1x_match_t* it;
+	char buf_ip[INET6_ADDRSTRLEN];
+	char buf_mask[INET6_ADDRSTRLEN];
+
 	for(it=matches;it;it=it->next){
 		switch(it->type){
 			case OF1X_MATCH_IN_PORT: ROFL_PIPELINE_INFO_NO_PREFIX("[PORT_IN:%u], ", __of1x_get_match_val32(it, false, raw_nbo)); 
@@ -1777,9 +1792,31 @@ void __of1x_dump_matches(of1x_match_t* matches, bool raw_nbo){
 			case OF1X_MATCH_IP_PROTO:  ROFL_PIPELINE_INFO_NO_PREFIX("[IP_PROTO:%u|0x%x], ",__of1x_get_match_val8(it, false, raw_nbo),__of1x_get_match_val8(it, true, raw_nbo));
 				break; 
 
-			case OF1X_MATCH_IPV4_SRC:  ROFL_PIPELINE_INFO_NO_PREFIX("[IP4_SRC:0x%x|0x%x], ",__of1x_get_match_val32(it, false, raw_nbo),__of1x_get_match_val32(it, true, raw_nbo));
+			case OF1X_MATCH_IPV4_SRC:
+				if(raw_nbo){
+					ROFL_PIPELINE_INFO_NO_PREFIX("[IP4_SRC:0x%x|0x%x], ",__of1x_get_match_val32(it, false, raw_nbo),__of1x_get_match_val32(it, true, raw_nbo));
+				}else{
+					uint32_t value = __of1x_get_match_val32(it, false, true);
+					uint32_t mask = __of1x_get_match_val32(it, true, true);
+					inet_ntop(AF_INET, &value, buf_ip, INET_ADDRSTRLEN);
+					inet_ntop(AF_INET, &mask, buf_mask, INET_ADDRSTRLEN);
+					(void)value;
+					(void)mask;
+					ROFL_PIPELINE_INFO_NO_PREFIX("[IP4_SRC: %s|%s], ", buf_ip, buf_mask);
+				}
 				break; 
-			case OF1X_MATCH_IPV4_DST:  ROFL_PIPELINE_INFO_NO_PREFIX("[IP4_DST:0x%x|0x%x], ",__of1x_get_match_val32(it, false, raw_nbo),__of1x_get_match_val32(it, true, raw_nbo));
+			case OF1X_MATCH_IPV4_DST:
+				if(raw_nbo){
+					ROFL_PIPELINE_INFO_NO_PREFIX("[IP4_DST:0x%x|0x%x], ",__of1x_get_match_val32(it, false, raw_nbo),__of1x_get_match_val32(it, true, raw_nbo));
+				}else{
+					uint32_t value = __of1x_get_match_val32(it, false, true);
+					uint32_t mask = __of1x_get_match_val32(it, true, true);
+					inet_ntop(AF_INET, &value, buf_ip, INET_ADDRSTRLEN);
+					inet_ntop(AF_INET, &mask, buf_mask, INET_ADDRSTRLEN);
+					(void)value;
+					(void)mask;
+					ROFL_PIPELINE_INFO_NO_PREFIX("[IP4_DST: %s|%s], ", buf_ip, buf_mask);
+				}
 				break; 
 
 			case OF1X_MATCH_TCP_SRC:  ROFL_PIPELINE_INFO_NO_PREFIX("[TCP_SRC:%u], ",__of1x_get_match_val16(it, false, raw_nbo));
@@ -1812,32 +1849,37 @@ void __of1x_dump_matches(of1x_match_t* matches, bool raw_nbo){
 			//IPv6
 			case OF1X_MATCH_IPV6_SRC: 
 				{
-					uint128__t value = __of1x_get_match_val128(it, false, raw_nbo);	
-					uint128__t mask = __of1x_get_match_val128(it, true, raw_nbo);
-					(void)value;	
-					(void)mask;	
-					ROFL_PIPELINE_INFO_NO_PREFIX("[IPV6_SRC:0x%lx:%lx|0x%lx:%lx], ",UINT128__T_HI(value),UINT128__T_LO(value),UINT128__T_HI(mask),UINT128__T_LO(mask));
+					uint128__t value = __of1x_get_match_val128(it, false);	
+					uint128__t mask = __of1x_get_match_val128(it, true);
+					inet_ntop(AF_INET6, &value, buf_ip, INET6_ADDRSTRLEN);
+					inet_ntop(AF_INET6, &mask, buf_mask, INET6_ADDRSTRLEN);
+					(void)value;
+					(void)mask;
+					ROFL_PIPELINE_INFO_NO_PREFIX("[IPV6_SRC: %s|%s], ", buf_ip, buf_mask);
+
 				}
 				break;
 			case OF1X_MATCH_IPV6_DST: 
 				{
-					uint128__t value = __of1x_get_match_val128(it, false, raw_nbo);	
-					uint128__t mask = __of1x_get_match_val128(it, true, raw_nbo);
-					(void)value;	
-					(void)mask;	
-
-					ROFL_PIPELINE_INFO_NO_PREFIX("[IPV6_DST:0x%lx:%lx|0x%lx:%lx], ",UINT128__T_HI(value),UINT128__T_LO(value),UINT128__T_HI(mask),UINT128__T_LO(mask));
+					uint128__t value = __of1x_get_match_val128(it, false);	
+					uint128__t mask = __of1x_get_match_val128(it, true);
+					inet_ntop(AF_INET6, &value, buf_ip, INET6_ADDRSTRLEN);
+					inet_ntop(AF_INET6, &mask, buf_mask, INET6_ADDRSTRLEN);
+					(void)value;
+					(void)mask;
+					ROFL_PIPELINE_INFO_NO_PREFIX("[IPV6_DST: %s|%s], ", buf_ip, buf_mask);
 				}
 				break;
 			case OF1X_MATCH_IPV6_FLABEL:  ROFL_PIPELINE_INFO_NO_PREFIX("[IPV6_FLABEL:%lu], ",__of1x_get_match_val32(it, false, raw_nbo));
 				break; 
 			case OF1X_MATCH_IPV6_ND_TARGET: {
-					uint128__t value = __of1x_get_match_val128(it, false, raw_nbo);	
-					uint128__t mask = __of1x_get_match_val128(it, true, raw_nbo);
-					(void)value;	
-					(void)mask;	
-
-					ROFL_PIPELINE_INFO_NO_PREFIX("[IPV6_ND_TARGET:0x%lx:%lx], ",UINT128__T_HI(value),UINT128__T_LO(mask));
+					uint128__t value = __of1x_get_match_val128(it, false);	
+					uint128__t mask = __of1x_get_match_val128(it, true);
+					inet_ntop(AF_INET6, &value, buf_ip, INET6_ADDRSTRLEN);
+					inet_ntop(AF_INET6, &mask, buf_mask, INET6_ADDRSTRLEN);
+					(void)value;
+					(void)mask;
+					ROFL_PIPELINE_INFO_NO_PREFIX("[IPV6_ND_TARGET: %s|%s], ", buf_ip, buf_mask);
 				}
 				break;
 			case OF1X_MATCH_IPV6_ND_SLL:  ROFL_PIPELINE_INFO_NO_PREFIX("[IPV6_ND_SLL:0x%"PRIx64"], ",__of1x_get_match_val64(it, false, raw_nbo));

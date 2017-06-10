@@ -105,9 +105,9 @@ rofl_result_t of1x_destroy_flow_entry(of1x_flow_entry_t* entry){
 //Adds one or more to the entry
 rofl_result_t of1x_add_match_to_entry(of1x_flow_entry_t* entry, of1x_match_t* match){
 
-	__of1x_match_group_push_back(&entry->matches, match);
+	int result = __of1x_match_group_insert(&entry->matches, match);
 	
-	return ROFL_SUCCESS;
+	return result;
 }
 
 rofl_result_t __of1x_update_flow_entry(of1x_flow_entry_t* entry_to_update, of1x_flow_entry_t* mod, bool reset_counts){
@@ -336,5 +336,26 @@ rofl_result_t __of1x_validate_flow_entry( of1x_flow_entry_t* entry, of1x_pipelin
 	if(version == OF_VERSION_10 && entry->matches.head && !__of10_is_wildcard(&entry->matches))
 		entry->priority |= OF10_NON_WILDCARDED_PRIORITY_FLAG;
 	return ROFL_SUCCESS;
+}
+
+//Useful
+void __of1x_remove_flow_entry_table_trace(const char* prefix, of1x_flow_entry_t *const entry, of1x_flow_entry_t *const it, of1x_flow_remove_reason_t reason){
+	switch(reason){	
+		case OF1X_FLOW_REMOVE_DELETE:
+			ROFL_PIPELINE_DEBUG("[flowmod-remove(%p)]%s Existing entry (%p) will be removed\n", entry, prefix, it);
+			break;
+		case OF1X_FLOW_REMOVE_IDLE_TIMEOUT:
+			ROFL_PIPELINE_DEBUG("[flowmod-remove]%s Removing entry(%p) due to IDLE timeout\n", prefix, it);
+			break;
+		case OF1X_FLOW_REMOVE_HARD_TIMEOUT:
+			ROFL_PIPELINE_DEBUG("[flowmod-remove]%s Removing entry(%p) due to HARD timeout\n", prefix, it);
+			break;
+		case OF1X_FLOW_REMOVE_GROUP_DELETE:
+			ROFL_PIPELINE_DEBUG("[flowmod-remove]%s Removing entry(%p) due to GROUP delete\n", prefix, it);
+			break;
+		default:
+			break;	
+	}
+
 }
 

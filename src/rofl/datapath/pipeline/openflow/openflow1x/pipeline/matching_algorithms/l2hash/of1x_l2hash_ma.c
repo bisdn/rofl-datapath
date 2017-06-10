@@ -15,7 +15,7 @@
 #include "../matching_algorithms.h"
 #include "../loop/of1x_loop_ma.h"
 
-#define L2HASH_DESCRIPTION "The l2hash algorithm searches the list of entries by its priority order. On the worst case the performance is o(N) with the number of entries"
+#define L2HASH_DESCRIPTION "The l2hash algorithm uses a simple hash table to perform the table lookup. It is O(1). Supports only ETH_DST, VLAN (optional) without masks" 
 
 
 //
@@ -181,8 +181,8 @@ void of1x_add_hook_l2hash(of1x_flow_entry_t *const entry){
 	if(vlan){
 		//VLAN
 		l2hash_vlan_key_t key;
-		key.vid = vlan->__tern->value.u16 & vlan->__tern->mask.u16;	
-		key.eth_dst = eth_dst->__tern->value.u64 & eth_dst->__tern->mask.u64;
+		key.vid = vlan->__tern.value.u16 & vlan->__tern.mask.u16;	
+		key.eth_dst = eth_dst->__tern.value.u64 & eth_dst->__tern.mask.u64;
 		//calculate hash	
 		hash = l2hash_ht_hash96((const char*)&key, sizeof(l2hash_vlan_key_t)); 		
 		//Fill in ps
@@ -200,7 +200,7 @@ void of1x_add_hook_l2hash(of1x_flow_entry_t *const entry){
 	}else{
 		//NO-VLAN
 		l2hash_novlan_key_t key;
-		key.eth_dst = eth_dst->__tern->value.u64 & eth_dst->__tern->mask.u64;
+		key.eth_dst = eth_dst->__tern.value.u64 & eth_dst->__tern.mask.u64;
 		//calculate hash	
 		hash = l2hash_ht_hash64((const char*)&key, sizeof(l2hash_novlan_key_t));
 
@@ -258,7 +258,7 @@ void of1x_remove_hook_l2hash(of1x_flow_entry_t *const entry){
 
 
 /* Conveniently wraps call with mutex.  */
-rofl_of1x_fm_result_t of1x_add_flow_entry_l2hash(of1x_flow_table_t *const table, of1x_flow_entry_t *const entry, bool check_overlap, bool reset_counts){
+rofl_of1x_fm_result_t of1x_add_flow_entry_l2hash(of1x_flow_table_t *const table, of1x_flow_entry_t *const entry, bool check_overlap, bool reset_counts, bool check_cookie){
 
 	//Check if the flowmod is not empty, and return
 	//Note that this cannot be checked by the fast validation bitmap
@@ -266,7 +266,7 @@ rofl_of1x_fm_result_t of1x_add_flow_entry_l2hash(of1x_flow_table_t *const table,
 		return ROFL_OF1X_FM_FAILURE;
 
 	//Call loop with the right hooks
-	return __of1x_add_flow_entry_loop(table, entry, check_overlap, reset_counts, of1x_add_hook_l2hash);
+	return __of1x_add_flow_entry_loop(table, entry, check_overlap, reset_counts, check_cookie, of1x_add_hook_l2hash);
 }
 
 rofl_of1x_fm_result_t of1x_modify_flow_entry_l2hash(of1x_flow_table_t *const table, of1x_flow_entry_t *const entry, const enum of1x_flow_removal_strictness strict, bool reset_counts){

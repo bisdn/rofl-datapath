@@ -439,7 +439,7 @@ rofl_result_t __of1x_destroy_table(of1x_flow_table_t* table){
 * Specific matchings may point them to their own routines, but they MUST always call
 * of1x_[whatever]_flow_entry_table_imp in order to update the main tables
 */
-rofl_of1x_fm_result_t of1x_add_flow_entry_table(of1x_pipeline_t *const pipeline, const unsigned int table_id, of1x_flow_entry_t **const entry, bool check_overlap, bool reset_counts){
+rofl_of1x_fm_result_t __of1x_add_flow_entry_table(of1x_pipeline_t *const pipeline, const unsigned int table_id, of1x_flow_entry_t **const entry, bool check_overlap, bool reset_counts, bool check_cookie){
 
 	rofl_of1x_fm_result_t result;
 	of1x_flow_table_t* table;
@@ -471,7 +471,7 @@ rofl_of1x_fm_result_t of1x_add_flow_entry_table(of1x_pipeline_t *const pipeline,
 
 
 	//Perform insertion (node that in 1.0 operation ADD must always reset counters on overlap)
-	result = of1x_matching_algorithms[table->matching_algorithm].add_flow_entry_hook(table, *entry, check_overlap, reset_counts || ( pipeline->sw->of_ver == OF_VERSION_10 ));
+	result = of1x_matching_algorithms[table->matching_algorithm].add_flow_entry_hook(table, *entry, check_overlap, reset_counts || ( pipeline->sw->of_ver == OF_VERSION_10 ), check_cookie);
 
 	if(result != ROFL_OF1X_FM_SUCCESS){
 		//Release rdlock
@@ -619,8 +619,14 @@ rofl_of1x_fm_result_t __of1x_remove_specific_flow_entry_table(of1x_pipeline_t *c
 void of1x_dump_table(of1x_flow_table_t* table, bool raw_nbo){
 	of1x_flow_entry_t* entry;
 	int i;	
-
 	__of1x_stats_table_tid_t c;
+
+	if(of1x_matching_algorithms[table->matching_algorithm].dump_hook){
+		//Take rd lock over the grouptable (avoid deletion of groups while flow entry insertion)
+		platform_rwlock_rdlock(table->rwlock);
+		of1x_matching_algorithms[table->matching_algorithm].dump_hook(table, raw_nbo);
+		goto DUMP_TABLE_END;
+	}
 
 	//Consolidate stats
 	__of1x_stats_table_consolidate(&table->stats, &c);
