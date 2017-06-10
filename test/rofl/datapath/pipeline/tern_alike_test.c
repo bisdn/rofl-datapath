@@ -462,7 +462,6 @@ void test_get_alike_128(){
 	utern_t common;
 	bool res;
 
-
 	uint128__t* tmp_u128;
 	uint128__t* tmp_mask_u128;
 
@@ -635,6 +634,146 @@ void test_get_alike_128(){
 
 }
 
+void test_get_alike_128_regression(){
+	uint8_t *tmp;
+	uint8_t val1[16], val2[16];
+	uint8_t mask1[16], mask2[16];
+
+	utern_t one, two;
+	utern_t common;
+
+	uint128__t* tmp_u128;
+	uint128__t* tmp_mask_u128;
+	bool res;
+
+	(void)two;
+	(void)tmp;
+	memset(mask1, 0x0, 16);
+	memset(mask2, 0x0, 16);
+
+	val1[0] = val2[0] = 0xFF;
+	val1[1] = val2[1] = 0xF0;
+
+	mask1[0] = mask2[0] = 0xFF;
+	mask1[1] = mask2[1] = 0xF0;
+
+	tmp_u128 = (uint128__t*)val1;
+	tmp_mask_u128 = (uint128__t*)mask1;
+	__init_utern128(&one, *tmp_u128, *tmp_mask_u128);
+
+	//Check itself(s)
+	res = __utern_get_alike(&one, &one, &common);
+	CU_ASSERT(res == true);
+	CU_ASSERT(__utern_equals(&one, &common) == true);
+
+	//Check 0s
+	memset(val1, 0x0, 16);
+	memset(val2, 0x0, 16);
+	memset(mask1, 0x0, 16);
+	memset(mask2, 0x0, 16);
+
+	tmp_u128 = (uint128__t*)val1;
+	tmp_mask_u128 = (uint128__t*)mask1;
+	__init_utern128(&one, *tmp_u128, *tmp_mask_u128);
+
+	tmp_u128 = (uint128__t*)val2;
+	tmp_mask_u128 = (uint128__t*)mask2;
+	__init_utern128(&two, *tmp_u128, *tmp_mask_u128);
+
+	res = __utern_get_alike(&one, &two, &common);
+	CU_ASSERT(res == true);
+	CU_ASSERT(__utern_equals(&one, &common) == true);
+
+	//Check partial on HIGH
+	//Common should be 0xFF...0x00 | 0xFF...0x00
+	val1[0] = val2[0] = 0xFF;
+	val1[1] = 0xF0;
+	val1[2] = 0x0F;
+
+	mask1[0] = mask2[0] = 0xFF;
+	mask1[1] = mask2[1] = 0xFF;
+	mask1[3] = mask2[3] = 0xFF;
+
+	tmp_u128 = (uint128__t*)val1;
+	tmp_mask_u128 = (uint128__t*)mask1;
+	__init_utern128(&one, *tmp_u128, *tmp_mask_u128);
+
+	tmp_u128 = (uint128__t*)val2;
+	tmp_mask_u128 = (uint128__t*)mask2;
+	__init_utern128(&two, *tmp_u128, *tmp_mask_u128);
+
+	res = __utern_get_alike(&one, &two, &common);
+	CU_ASSERT(res == true);
+
+	utern_t expec_common;
+	memset(val1, 0x0, 16);
+	memset(mask1, 0x0, 16);
+	val1[0] = 0xFF;
+	mask1[0] = 0xFF;
+	tmp_u128 = (uint128__t*)val1;
+	tmp_mask_u128 = (uint128__t*)mask1;
+	__init_utern128(&expec_common, *tmp_u128, *tmp_mask_u128);
+
+	CU_ASSERT(__utern_equals(&expec_common, &common) == true);
+
+	//Check on LOW
+	memset(val1, 0x0, 16);
+	memset(val2, 0x0, 16);
+	memset(mask1, 0xFF, 16);
+	memset(mask2, 0xFF, 16);
+
+	val1[0] = val2[0] = 0xFF;
+	val1[1] = val2[1] = 0xFF;
+	val1[2] = val2[2] = 0xFF;
+	val1[3] = val2[3] = 0xFF;
+	val1[4] = val2[4] = 0xFF;
+	val1[5] = val2[5] = 0xFF;
+	val1[6] = val2[6] = 0xFF;
+	val1[7] = val2[7] = 0xFF;
+	val1[8] = val2[8] = 0xFF;
+	val1[9] = 0xFF;
+	val2[9] = 0x0F;
+
+	tmp_u128 = (uint128__t*)val1;
+	tmp_mask_u128 = (uint128__t*)mask1;
+	__init_utern128(&one, *tmp_u128, *tmp_mask_u128);
+
+	tmp_u128 = (uint128__t*)val2;
+	tmp_mask_u128 = (uint128__t*)mask2;
+	__init_utern128(&two, *tmp_u128, *tmp_mask_u128);
+
+	res = __utern_get_alike(&one, &two, &common);
+	CU_ASSERT(res == true);
+
+	memset(val1, 0x0, 16);
+	memset(mask1, 0x0, 16);
+	val1[0] = 0xFF;
+	val1[1] = 0xFF;
+	val1[2] = 0xFF;
+	val1[3] = 0xFF;
+	val1[4] = 0xFF;
+	val1[5] = 0xFF;
+	val1[6] = 0xFF;
+	val1[7] = 0xFF;
+	val1[8] = 0xFF;
+
+	mask1[0] = 0xFF;
+	mask1[1] = 0xFF;
+	mask1[2] = 0xFF;
+	mask1[3] = 0xFF;
+	mask1[4] = 0xFF;
+	mask1[5] = 0xFF;
+	mask1[6] = 0xFF;
+	mask1[7] = 0xFF;
+	mask1[8] = 0xFF;
+
+	tmp_u128 = (uint128__t*)val1;
+	tmp_mask_u128 = (uint128__t*)mask1;
+	__init_utern128(&expec_common, *tmp_u128, *tmp_mask_u128);
+
+	CU_ASSERT(__utern_equals(&expec_common, &common) == true);
+}
+
 int main(int args, char** argv){
 
 	int return_code;
@@ -658,7 +797,8 @@ int main(int args, char** argv){
 		(NULL == CU_add_test(pSuite, "16 bit test", test_get_alike_16)) ||
 		(NULL == CU_add_test(pSuite, "32 bit test", test_get_alike_32)) ||
 		(NULL == CU_add_test(pSuite, "64 bit test", test_get_alike_64)) ||
-		(NULL == CU_add_test(pSuite, "128 bit test", test_get_alike_128)) //||
+		(NULL == CU_add_test(pSuite, "128 bit test", test_get_alike_128)) ||
+		(NULL == CU_add_test(pSuite, "128 bit test (regressions)", test_get_alike_128_regression)) //||
 		)
 	{
 		fprintf(stderr,"ERROR WHILE ADDING TEST\n");
