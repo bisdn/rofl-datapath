@@ -63,4 +63,10 @@
 /* pipeline lockless */
 @ROFL_PIPELINE_LOCKLESS@
 
+/* pipeline cache aligned */
+@ROFL_PIPELINE_CACHE_ALIGNED@
+
+/* pipeline cache line */
+@ROFL_PIPELINE_CACHE_LINE@
+
 #endif //__ROFL_DP_CONF_H__

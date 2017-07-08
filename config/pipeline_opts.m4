@@ -66,3 +66,20 @@ AS_IF([test "x$with_pipeline_lockless" == xyes],[
 AS_IF([test "x$with_pipeline_lockless" != xyes], [
 	AC_MSG_RESULT(no)
 ])
+
+#Cache aligned
+
+##TODO deduce cache line from /proc/sys
+AC_MSG_CHECKING(CPU cache line)
+AC_MSG_RESULT([64 (TODO)])
+AC_SUBST([ROFL_PIPELINE_CACHE_LINE], ["#define ROFL_PIPELINE_CACHE_LINE 64"] ) #TODO
+
+AC_ARG_WITH([pipeline-cache-aligned], AS_HELP_STRING([--with-pipeline-cache-aligned], [compiles ROFL-pipeline with cache-aligned structures [default=no]]))
+AC_MSG_CHECKING(whether to compile ROFL-pipeline structures cache aligned)
+AS_IF([test "x$with_pipeline_cache_aligned" == xyes],[
+	AC_SUBST([ROFL_PIPELINE_CACHE_ALIGNED], ["#define ROFL_PIPELINE_CACHE_ALIGNED 1"])
+	AC_MSG_RESULT(yes)
+])
+AS_IF([test "x$with_pipeline_cache_aligned" != xyes], [
+	AC_MSG_RESULT(no)
+])
