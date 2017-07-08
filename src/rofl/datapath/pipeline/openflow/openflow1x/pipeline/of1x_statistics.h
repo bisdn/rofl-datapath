@@ -11,6 +11,7 @@
 #include "rofl_datapath.h"
 #include "of1x_group_types.h"
 #include "../../../platform/lock.h"
+#include "../../../util/cpu_cache.h"
 
 #define OF1X_STATS_NS_IN_A_SEC 1000000000
 
@@ -47,14 +48,15 @@ struct of1x_pipeline;
 typedef struct __of1x_stats_flow_tid{
 	uint64_t packet_count;
 	uint64_t byte_count;
-}__of1x_stats_flow_tid_t;
+} __pipeline_cache_aligned __of1x_stats_flow_tid_t;
+
+ROFL_PIPELINE_CHECK_CACHE_ALIGNED(__of1x_stats_flow_tid_t);
 
 //Flow entry stats (internal entry state)
 typedef struct of1x_stats_flow{
-
-	union __of1x_stats_flow_tids{	
+	union __of1x_stats_flow_tids{
 		__of1x_stats_flow_tid_t counters;
-		
+
 		//array of counters per thread to be used internally
 		__of1x_stats_flow_tid_t __internal[ROFL_PIPELINE_MAX_TIDS];
 	}s;
@@ -63,7 +65,8 @@ typedef struct of1x_stats_flow{
 	struct timeval initial_time;
 
 	platform_mutex_t* mutex; //Mutual exclusion stats
-}of1x_stats_flow_t;
+}__pipeline_cache_aligned of1x_stats_flow_t;
+ROFL_PIPELINE_CHECK_CACHE_ALIGNED(of1x_stats_flow_t);
 
 /* Table */
 
@@ -71,21 +74,23 @@ typedef struct of1x_stats_flow{
 typedef struct __of1x_stats_table_tid{
 	uint64_t lookup_count; /* Number of packets looked up in table. */
 	uint64_t matched_count; /* Number of packets that hit table. */
-}__of1x_stats_table_tid_t;
+}__pipeline_cache_aligned __of1x_stats_table_tid_t;
+ROFL_PIPELINE_CHECK_CACHE_ALIGNED(__of1x_stats_table_tid_t);
 
 //Table stats (table state)
 typedef struct of1x_stats_table{
 
-	union __of1x_stats_table_tids{ 
+	union __of1x_stats_table_tids{
 		/* Flow table counters */
 		__of1x_stats_table_tid_t counters;
-	
+
 		//array of counters per thread to be used internally
-		__of1x_stats_table_tid_t __internal[ROFL_PIPELINE_MAX_TIDS];	
+		__of1x_stats_table_tid_t __internal[ROFL_PIPELINE_MAX_TIDS];
 	}s;
 
 	platform_mutex_t* mutex; //Mutual exclusion only for stats
-}of1x_stats_table_t;
+}__pipeline_cache_aligned of1x_stats_table_t;
+ROFL_PIPELINE_CHECK_CACHE_ALIGNED(of1x_stats_table_t);
 
 /* Groups */
 
@@ -93,43 +98,47 @@ typedef struct of1x_stats_table{
 typedef struct __of1x_stats_bucket_tid{
 	uint64_t packet_count;
 	uint64_t byte_count;
-}__of1x_stats_bucket_tid_t;
+}__pipeline_cache_aligned __of1x_stats_bucket_tid_t;
+ROFL_PIPELINE_CHECK_CACHE_ALIGNED(__of1x_stats_bucket_tid_t);
 
 typedef __of1x_stats_bucket_tid_t of1x_stats_bucket_t; //Used only for msgs
 
 typedef struct __of1x_stats_bucket{
-	union __of1x_stats_bucket_tids{ 
+	union __of1x_stats_bucket_tids{
 		/* Bucket counters */
 		__of1x_stats_bucket_tid_t counters;
-	
+
 		//array of counters per thread to be used internally
-		__of1x_stats_bucket_tid_t __internal[ROFL_PIPELINE_MAX_TIDS];	
+		__of1x_stats_bucket_tid_t __internal[ROFL_PIPELINE_MAX_TIDS];
 	}s;
 
 	platform_mutex_t* mutex;
-}__of1x_stats_bucket_t;
+}__pipeline_cache_aligned __of1x_stats_bucket_t;
+ROFL_PIPELINE_CHECK_CACHE_ALIGNED(__of1x_stats_bucket_t);
 
 //Per group table stats
 typedef struct __of1x_stats_group_tid{
 	uint64_t packet_count;
 	uint64_t byte_count;
-}__of1x_stats_group_tid_t;
+}__pipeline_cache_aligned __of1x_stats_group_tid_t;
+ROFL_PIPELINE_CHECK_CACHE_ALIGNED(__of1x_stats_group_tid_t);
 
 //Group stats
 typedef struct of1x_stats_group{
-	
+
 	uint32_t ref_count;
-	
-	union __of1x_stats_group_tids{ 
+
+	union __of1x_stats_group_tids{
 		/* Group counters */
 		__of1x_stats_group_tid_t counters;
-	
+
 		//array of counters per thread to be used internally
-		__of1x_stats_group_tid_t __internal[ROFL_PIPELINE_MAX_TIDS];	
+		__of1x_stats_group_tid_t __internal[ROFL_PIPELINE_MAX_TIDS];
 	}s;
 
 	platform_mutex_t* mutex;
-}of1x_stats_group_t;
+}__pipeline_cache_aligned of1x_stats_group_t;
+ROFL_PIPELINE_CHECK_CACHE_ALIGNED(of1x_stats_group_t);
 
 
 

@@ -20,7 +20,7 @@
 
 /**
 * @file of1x_flow_table.h
-* @author Marc Sune<marc.sune (at) bisdn.de>, Tobias Jungel<tobias.jungel (at) bisdn.de>  
+* @author Marc Sune<marc.sune (at) bisdn.de>, Tobias Jungel<tobias.jungel (at) bisdn.de>
 *
 * @brief OpenFlow v1.0, 1.2 and 1.3.2 flow table abstraction
 *
@@ -28,7 +28,7 @@
 * a flow entry table (or a flowmod table).
 *
 * The basic operations which one can perform over a table are:
-*  - Add a flow entry 
+*  - Add a flow entry
 *  - Update flow entries
 *  - Remove flow entries
 *
@@ -50,7 +50,7 @@
 struct of1x_timer_group;
 struct of1x_pipeline;
 
-//Agnostic auxiliary matching structures. 
+//Agnostic auxiliary matching structures.
 typedef void matching_auxiliary_t;
 
 /**
@@ -94,11 +94,11 @@ typedef struct of1x_flow_table{
 
 	//Table name
 	char name[OF1X_MAX_TABLE_NAME_LEN];
-	
+
 	/**
 	* This pointer may or may not be used depending
 	* on the matching algorithm. If used, it points
-	* to the first entry of the table 
+	* to the first entry of the table
 	*/
 	of1x_flow_entry_t* entries;
 	unsigned int num_of_entries;
@@ -109,14 +109,14 @@ typedef struct of1x_flow_table{
 	unsigned int current_timer_group; /*in case of static allocation indicates the timer group*/
 #endif
 	struct of1x_timer_group* timers;
-	
+
 	//Table config
-	of1x_flow_table_miss_config_t default_action; 
+	of1x_flow_table_miss_config_t default_action;
 	of1x_flow_table_config_t config;
 
 	//statistics
 	of1x_stats_table_t stats;
-	
+
 	/**
 	* Place-holder to allow matching algorithms
 	* keep its own state
@@ -125,7 +125,7 @@ typedef struct of1x_flow_table{
 
 #ifdef ROFL_PIPELINE_LOCKLESS
 	tid_presence_t tid_presence_mask;
-#endif 
+#endif
 
 	//Mutexes
 	platform_mutex_t* mutex; //Mutual exclusion among insertion/deletion threads
@@ -134,12 +134,13 @@ typedef struct of1x_flow_table{
 	//Reference back
 	struct of1x_pipeline* pipeline;
 
-	/* 
-	* Matching algorithm identifier 
+	/*
+	* Matching algorithm identifier
 	*/
 	enum of1x_matching_algorithm_available matching_algorithm;
 
-}of1x_flow_table_t;
+}__pipeline_cache_aligned of1x_flow_table_t;
+ROFL_PIPELINE_CHECK_CACHE_ALIGNED(of1x_flow_table_t);
 
 /**
 * Table snapshot
