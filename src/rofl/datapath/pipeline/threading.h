@@ -14,9 +14,11 @@
 
 #include <assert.h>
 #include <unistd.h>
+#include <string.h>
 #include <stdbool.h>
 #include "rofl_datapath.h"
-#include "platform/likely.h" 
+#include "platform/likely.h"
+#include "util/cpu_cache.h"
 
 #if !defined(__GNUC__) && !defined(__INTEL_COMPILER)
 	#error Unknown compiler; could not guess which compare-and-swap instructions to use
@@ -25,56 +27,35 @@
 	#define tid_memory_barrier __sync_synchronize
 #endif
 
-//Basic type
-typedef uint64_t tid_presence_t;
+//Present flag
+typedef struct{
+	uint64_t flag;
+}__pipeline_cache_aligned tid_presence_it_t;
+ROFL_PIPELINE_CHECK_CACHE_ALIGNED(tid_presence_it_t);
+
+//Presence flags
+typedef struct{
+	tid_presence_it_t flags[ROFL_PIPELINE_MAX_TIDS];
+}__pipeline_cache_aligned tid_presence_t;
+ROFL_PIPELINE_CHECK_CACHE_ALIGNED(tid_presence_t);
 
 static inline void tid_init_presence_mask(tid_presence_t* presence_mask){
-	*presence_mask = 0x0ULL;
+	memset(presence_mask, 0, sizeof(tid_presence_t));
 }
 
 /**
-* Set thread presence  
+* Set thread presence
 */
 static inline void tid_mark_as_present(unsigned int tid, volatile tid_presence_t* presence_mask){
-	tid_presence_t old_val, new_val;
-	
-	do{
-
-TID_MARK_AS_PRESENT_RETRY:
-		old_val = *presence_mask;
-	
-		//Check for other threads within  
-		if( unlikely(tid == ROFL_PIPELINE_LOCKED_TID ) && unlikely( ( old_val & ( 1<<tid ) ) > 0)){
-			//There some other thread in ROFL_PIPELINE_LOCKED_TID
-			usleep(0);
-			goto TID_MARK_AS_PRESENT_RETRY;
-		}
-
-		//Set our
-		new_val = old_val | ( 1<<tid );
-
-	}while( CAS(presence_mask, old_val, new_val) == false);
-
-	//Double check
-	assert( ( *presence_mask & (1<<tid) ) > 0);	
+	assert(tid < ROFL_PIPELINE_MAX_TIDS);
+	presence_mask->flags[tid].flag = 0x1UL;
 }
-	
+
 /**
-* Unset thread presence  
+* Unset thread presence
 */
 static inline void tid_mark_as_not_present(unsigned int tid, volatile tid_presence_t* presence_mask){
-	tid_presence_t old_val, new_val;
-	
-	do{
-		old_val = *presence_mask;
-
-		//Double check
-		assert( ( old_val & (1<<tid) ) > 0);	
-
-		//Set our
-		new_val = old_val & ~(1 << tid);
-
-	}while( CAS(presence_mask, old_val, new_val) == false);
+	presence_mask->flags[tid].flag = 0x0UL;
 }
 
 /**
@@ -82,29 +63,12 @@ static inline void tid_mark_as_not_present(unsigned int tid, volatile tid_presen
 */
 static inline void tid_wait_all_not_present(volatile tid_presence_t* presence_mask){
 	int i;
-	uint64_t tid;
-	tid_presence_t present;
-	tid_presence_t tmp; 
 
 	//Memory barrier first
-	tid_memory_barrier();	
+	tid_memory_barrier();
 
-	//Recover current present
-	present = *presence_mask;
-	
-	for(i=0;i<ROFL_PIPELINE_MAX_TIDS;i++){	
-		tid = 1 << i;
-
-		if( unlikely( ( present & tid) > 0 ) ){
-			//Wait until the core is out of the pipeline
-			do{
-				tmp = *presence_mask;
-				if( likely( ( tmp&tid ) == 0) )
-					break;
-				usleep(0);
-			}while(1);
-		}
-	}
+	for(i=0;i<ROFL_PIPELINE_MAX_TIDS;i++)
+		while(presence_mask->flags[i].flag == 0x1UL);
 }
 
 #endif //THREADING_PP
