@@ -6,7 +6,7 @@
 * @file threading_pp.h
 * @author Marc Sune<marc.sune (at) bisdn.de>
 *
-* @brief Threading Packet Processing API utils 
+* @brief Threading Packet Processing API utils
 */
 
 #ifndef __THREADING_PP_H__
@@ -46,7 +46,8 @@ static inline void tid_init_presence_mask(tid_presence_t* presence_mask){
 /**
 * Set thread presence
 */
-static inline void tid_mark_as_present(unsigned int tid, volatile tid_presence_t* presence_mask){
+static inline void tid_mark_as_present(unsigned int tid,
+						tid_presence_t* presence_mask){
 	assert(tid < ROFL_PIPELINE_MAX_TIDS);
 	presence_mask->flags[tid].flag = 0x1UL;
 }
@@ -54,14 +55,15 @@ static inline void tid_mark_as_present(unsigned int tid, volatile tid_presence_t
 /**
 * Unset thread presence
 */
-static inline void tid_mark_as_not_present(unsigned int tid, volatile tid_presence_t* presence_mask){
+static inline void tid_mark_as_not_present(unsigned int tid,
+						tid_presence_t* presence_mask){
 	presence_mask->flags[tid].flag = 0x0UL;
 }
 
 /**
 *
 */
-static inline void tid_wait_all_not_present(volatile tid_presence_t* presence_mask){
+static inline void tid_wait_all_not_present(tid_presence_t* presence_mask){
 	int i;
 
 	//Memory barrier first
