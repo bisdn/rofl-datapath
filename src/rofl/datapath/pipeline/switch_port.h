@@ -206,8 +206,8 @@ typedef struct switch_port{
 	platform_mutex_t* mutex;
 	
 	/* Opaque platform port specific extra state */
-	platform_port_state_t* platform_port_state; 
-}switch_port_t;
+	platform_port_state_t* platform_port_state;
+} __attribute__((__aligned__(64))) switch_port_t;
 
 /* Logical port abstraction (to be used by logical switches) */
 typedef enum logical_switch_port_attachment_state{
