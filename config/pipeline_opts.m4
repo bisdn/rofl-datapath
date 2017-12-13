@@ -29,7 +29,7 @@ AC_MSG_CHECKING(the maximum number of threads/cpus for ROFL-pipeline packet proc
 AC_ARG_WITH([pipeline-max-tids], AS_HELP_STRING([--with-pipeline-max-tids=num], [maximum number of threads/cpus that ROFL-pipeline packet processing API supports concurrently without locking. Supported values {2,4,8,16,32,64} [default=16]]), with_pipeline_max_tids=yes, [])
 
 #Default value	
-MAX_TIDS=16
+MAX_TIDS=64
 
 #TODO: There is probably a better way to do this and that is still portable
 if test "$with_pipeline_max_tids" = "yes"; then
