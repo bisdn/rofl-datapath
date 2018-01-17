@@ -121,7 +121,7 @@ dpid_list_t* hal_driver_get_all_lsi_dpids(void);
 * @brief   Instruct driver to create an OF logical switch 
 * @ingroup hal_driver
 */
-hal_result_t hal_driver_create_switch(char* name, uint64_t dpid, of_version_t of_version, unsigned int num_of_tables, int* ma_list);
+hal_result_t hal_driver_create_switch(char* name, uint64_t dpid, of_version_t of_version, sw_flavor_t flavor, unsigned int num_of_tables, int* ma_list);
 
 /**
  * 

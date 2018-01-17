@@ -44,6 +44,15 @@ enum of1x_capabilities {
 //Fwd declaration
 struct of1x_switch;
 
+typedef struct of1x_pipeline_ops{
+    rofl_of1x_fm_result_t (*pre_flow_add_hook)(struct of1x_pipeline *const pipeline, of1x_flow_table_t *table, of1x_flow_entry_t *entry, bool check_overlap, bool reset_counts);
+    rofl_of1x_fm_result_t (*pre_flow_modify_hook)(struct of1x_pipeline *const pipeline, of1x_flow_table_t *table, of1x_flow_entry_t *entry, const enum of1x_flow_removal_strictness strict, bool reset_counts);
+	rofl_of1x_fm_result_t (*pre_flow_delete_hook)(struct of1x_pipeline *const pipeline, of1x_flow_table_t *table, of1x_flow_entry_t* entry, const enum of1x_flow_removal_strictness strict, uint32_t out_port, uint32_t out_group);
+	rofl_of1x_gm_result_t (*pre_group_add_hook)(of1x_group_table_t *gt, of1x_group_type_t type, uint32_t id, of1x_bucket_list_t **buckets);
+	rofl_of1x_gm_result_t (*pre_group_modify_hook)(of1x_group_table_t *gt, of1x_group_type_t type, uint32_t id, of1x_bucket_list_t **buckets);
+	rofl_of1x_gm_result_t (*pre_group_delete_hook)( struct of1x_pipeline *pipeline, of1x_group_table_t *gt, uint32_t id);
+}of1x_pipeline_ops_t;
+
 /** 
 * OpenFlow v1.0, 1.2 and 1.3.2 pipeline abstraction data structure
 */
@@ -63,12 +72,18 @@ typedef struct of1x_pipeline{
 
 	//Array of tables; 
 	of1x_flow_table_t* tables;
+
+	//number of entry table into pipeline (= first non-NULL index in tables)
+	unsigned int first_table_index;
 	
 	//Group table
 	of1x_group_table_t* groups;
 
 	//Reference back
-	struct of1x_switch* sw;	
+	struct of1x_switch* sw;
+
+	//pipeline operations
+	of1x_pipeline_ops_t ops;
 }of1x_pipeline_t;
 
 //Snapshot 

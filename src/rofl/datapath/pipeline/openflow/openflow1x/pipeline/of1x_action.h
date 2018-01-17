@@ -219,6 +219,10 @@ typedef enum{
 	OF1X_AT_SET_FIELD_GRE_PROT_TYPE,	/* GRE protocol type */
 	OF1X_AT_SET_FIELD_GRE_KEY,			/* GRE key */
 
+	OF1X_AT_SET_FIELD_OFDPA_VRF,        /* OFDPA VRF */
+	OF1X_AT_SET_FIELD_OFDPA_OVID,       /* OFDPA OVID */
+	OF1X_AT_SET_FIELD_OFDPA_ALLOW_VLAN_TRANSLATION, /* OFDPA allow VLAN translation */
+
 	/* Add more set fields here... */
 
 	//Groups		
@@ -641,6 +645,8 @@ void __of1x_dump_action_group(of1x_action_group_t* action_group, bool raw_nbo);
 rofl_result_t __of1x_validate_action_group(bitmap128_t* supported, of1x_action_group_t *ag, struct of1x_group_table *gt, bool is_pkt_out_ag);
 rofl_result_t __of1x_validate_write_actions(bitmap128_t* supported, of1x_write_actions_t *wa, struct of1x_group_table *gt);
 
+//Copy (cloning) methods
+of1x_packet_action_t* __of1x_copy_packet_action(of1x_packet_action_t* action);
 
 //C++ extern C
 ROFL_END_DECLS

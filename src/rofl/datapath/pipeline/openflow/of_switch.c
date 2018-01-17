@@ -11,6 +11,9 @@
 //Version strings
 const char* of_version_str[__OF_VERSION_MAX] = {"INVALID", "1.0", "1.1", "1.2", "1.3"};
 
+//Flavor strings
+const char* sw_flavor_str[SW_FLAVOR_MAX] = {"generic", "ofdpa"};
+
 //Wrapping destroy 
 rofl_result_t of_destroy_switch(const of_switch_t* sw){
 	

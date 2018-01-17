@@ -14,7 +14,7 @@ int set_up(){
 	of1x_trie_matching_algorithm, of1x_trie_matching_algorithm};
 
 	//Create instance
-	sw = of1x_init_switch("Test switch", OF_VERSION_12, 0x0101,4,ma_list);
+	sw = of1x_init_switch("Test switch", OF_VERSION_12, SW_FLAVOR_GENERIC, 0x0101,4,ma_list);
 	table = &sw->pipeline.tables[0];
 	trie = (of1x_trie_t*)table->matching_aux[0];
 
@@ -33,7 +33,7 @@ int tear_down(){
 }
 
 static void clean_all(){
-	of1x_flow_entry_t *entry = of1x_init_flow_entry(false);
+	of1x_flow_entry_t *entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(entry != NULL);
 
 	CU_ASSERT(of1x_remove_flow_entry_table(&sw->pipeline, 0, entry, false, OF1X_PORT_ANY, OF1X_GROUP_ANY) == ROFL_OF1X_FM_SUCCESS);
@@ -43,7 +43,7 @@ void test_install_empty_flowmods(){
 
 	of1x_flow_entry_t *entry, *tmp;
 
-	entry = of1x_init_flow_entry(false);
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(entry != NULL);
 	entry->priority=100;
 	//Force entry to have invalid values in next and prev
@@ -61,7 +61,7 @@ void test_install_empty_flowmods(){
 	}
 
 	//Add a second entry with lower priority
-	entry = of1x_init_flow_entry(false);
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(entry != NULL);
 	entry->priority=100;
 	entry->next = entry->prev = (void*)0x1;
@@ -85,7 +85,7 @@ void test_install_empty_flowmods(){
 	}
 
 	//Add one with higher priority
-	entry = of1x_init_flow_entry(false);
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(entry != NULL);
 	entry->priority=110;
 	entry->next = entry->prev = (void*)0x1;
@@ -107,7 +107,7 @@ void test_install_empty_flowmods(){
 	}
 
 	//Add one in between
-	entry = of1x_init_flow_entry(false);
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(entry != NULL);
 	entry->priority=100;
 	entry->next = entry->prev = (void*)0x1;
@@ -136,7 +136,7 @@ void test_install_empty_flowmods(){
 	}
 
 	//Override priority == 99
-	entry = of1x_init_flow_entry(false);
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	tmp = entry; //hold pointer
 	CU_ASSERT(entry != NULL);
 	entry->priority=99;
@@ -158,7 +158,7 @@ void test_install_flowmods(){
 	/* ----- 1 ------ */
 
 	//Create a flowmod with a single match
-	entry = of1x_init_flow_entry(false);
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	entry->priority=999;
 	CU_ASSERT(entry != NULL);
 
@@ -194,7 +194,7 @@ void test_install_flowmods(){
 
 	//Add a flowmod that shares most of it (except two bits)
 	//Creates an intermediate leaf
-	entry = of1x_init_flow_entry(false);
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(entry != NULL);
 
 	//192.168.0.2
@@ -232,7 +232,7 @@ void test_install_flowmods(){
 	/* ----- 3 ------ */
 
 	//Try overlapping
-	entry = of1x_init_flow_entry(false);
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(entry != NULL);
 
 	//192.168.0.0/24
@@ -295,7 +295,7 @@ void test_install_flowmods(){
 	/* ----- 4 ------ */
 
 	//Try overlapping
-	entry = of1x_init_flow_entry(false);
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(entry != NULL);
 
 	//192.168.0.3
@@ -384,7 +384,7 @@ void test_install_flowmods(){
 
 	/* ----- 5 ------ */
 	//Try overlapping
-	entry = of1x_init_flow_entry(false);
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(entry != NULL);
 
 	//192.168.0.2/31
@@ -478,7 +478,7 @@ void test_install_flowmods(){
 
 	/* ----- 6 ------ */
 	//Try overlapping
-	entry = of1x_init_flow_entry(false);
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(entry != NULL);
 
 	//MAC_SRC
@@ -583,7 +583,7 @@ void test_install_flowmods(){
 	CU_ASSERT(trie->root->next->inner->entry->priority == 5999);
 
 	/* ----- 7 ------ */
-	entry = of1x_init_flow_entry(false);
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(entry != NULL);
 
 	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_eth_src_match(0xAABBCCDDEEFF, 0xFFF0FFFFFFFF)) == ROFL_SUCCESS);
@@ -746,7 +746,7 @@ void test_remove_flowmods(){
 	///
 	/// remove only one of the flowmods without matches
 	//
-	entry = of1x_init_flow_entry(false);
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(entry != NULL);
 
 	//First try with an invalid priority
@@ -806,7 +806,7 @@ void test_remove_flowmods(){
 	test_install_empty_flowmods();
 	test_install_flowmods();
 
-	entry = of1x_init_flow_entry(false);
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(entry != NULL);
 
 	of1x_full_dump_switch(sw, false);
@@ -842,7 +842,7 @@ void test_remove_flowmods(){
 	test_install_empty_flowmods();
 	test_install_flowmods();
 
-	entry = of1x_init_flow_entry(false);
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(entry != NULL);
 
 	of1x_full_dump_switch(sw, false);
@@ -869,7 +869,7 @@ void test_regressions(){
 
 	//First entry
 	clean_all();
-	entry = of1x_init_flow_entry(false);
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(entry != NULL);
 
 	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_eth_src_match(0xAABBCCDDEEFF, 0xFFF0FFFFFFFF)) == ROFL_SUCCESS);
@@ -881,7 +881,7 @@ void test_regressions(){
 	CU_ASSERT(table->num_of_entries == 1);
 
 	//Repeat; should overwrite it
-	entry = of1x_init_flow_entry(false);
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(entry != NULL);
 
 	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_eth_src_match(0xAABBCCDDEEFF, 0xFFF0FFFFFFFF)) == ROFL_SUCCESS);
@@ -893,7 +893,7 @@ void test_regressions(){
 	CU_ASSERT(table->num_of_entries == 1);
 
 	//Different priority; shall not overwrite it
-	entry = of1x_init_flow_entry(false);
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(entry != NULL);
 
 	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_eth_src_match(0xAABBCCDDEEFF, 0xFFF0FFFFFFFF)) == ROFL_SUCCESS);
@@ -915,7 +915,7 @@ void test_regressions(){
 
 	//First entry
 	clean_all();
-	entry = of1x_init_flow_entry(false);
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(entry != NULL);
 
 	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_eth_src_match(0xAABBCCDDEEFF, 0xFFF0FFFFFFFF)) == ROFL_SUCCESS);
@@ -928,7 +928,7 @@ void test_regressions(){
 	CU_ASSERT(table->num_of_entries == 1);
 
 	//Modify without reset_counters => pkt_count == 1
-	entry = of1x_init_flow_entry(false);
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(entry != NULL);
 
 	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_eth_src_match(0xAABBCCDDEEFF, 0xFFF0FFFFFFFF)) == ROFL_SUCCESS);
@@ -942,7 +942,7 @@ void test_regressions(){
 	CU_ASSERT(trie->root->inner->entry->stats.s.__internal[0].packet_count == 1);
 
 	//Add must clear stats
-	entry = of1x_init_flow_entry(false);
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(entry != NULL);
 
 	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_eth_src_match(0xAABBCCDDEEFF, 0xFFF0FFFFFFFF)) == ROFL_SUCCESS);
@@ -964,7 +964,7 @@ void test_regression1(){
 
 	//First entry
 	clean_all();
-	entry = of1x_init_flow_entry(false);
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(entry != NULL);
 
 	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_ip4_dst_match(0xC0A80000, 0xFFFFFF00)) == ROFL_SUCCESS);
@@ -975,7 +975,7 @@ void test_regression1(){
 	CU_ASSERT(table->num_of_entries == 1);
 
 	//Add one with the same + 1 match
-	entry = of1x_init_flow_entry(false);
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(entry != NULL);
 
 	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_ip4_dst_match(0xC0A80001, 0xFFFFFFFF)) == ROFL_SUCCESS);
@@ -986,13 +986,13 @@ void test_regression1(){
 	CU_ASSERT(table->num_of_entries == 2);
 
 	//Remove intermediate, intermediate should be pruned
-	entry = of1x_init_flow_entry(false);
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_ip4_dst_match(0xC0A80000, 0xFFFFFF00)) == ROFL_SUCCESS);
 	CU_ASSERT(of1x_remove_flow_entry_table(&sw->pipeline, 0, entry, false, OF1X_PORT_ANY, OF1X_GROUP_ANY) == ROFL_OF1X_FM_SUCCESS);
 	of1x_full_dump_switch(sw, false);
 	CU_ASSERT(table->num_of_entries == 1);
 
-	entry = of1x_init_flow_entry(false);
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(entry != NULL);
 	CU_ASSERT(of1x_remove_flow_entry_table(&sw->pipeline, 0, entry, false, OF1X_PORT_ANY, OF1X_GROUP_ANY) == ROFL_OF1X_FM_SUCCESS);
 
@@ -1006,7 +1006,7 @@ void test_regression2(){
 
 	//First entry
 	clean_all();
-	entry = of1x_init_flow_entry(false);
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(entry != NULL);
 
 	entry->priority=0;
@@ -1016,14 +1016,14 @@ void test_regression2(){
 	CU_ASSERT(table->num_of_entries == 1);
 
 	//Add PORT_IN p=64
-	entry = of1x_init_flow_entry(false);
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(entry != NULL);
 
 	entry->priority=64;
 	of1x_add_match_to_entry(entry,of1x_init_port_in_match(3));
 	CU_ASSERT(of1x_add_flow_entry_table(&sw->pipeline, 0, &entry, false,false) == ROFL_OF1X_FM_SUCCESS);
 
-	entry = of1x_init_flow_entry(false);
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(entry != NULL);
 
 	entry->priority=64;
@@ -1031,14 +1031,14 @@ void test_regression2(){
 	CU_ASSERT(of1x_add_flow_entry_table(&sw->pipeline, 0, &entry, false,false) == ROFL_OF1X_FM_SUCCESS);
 
 	//Add PORT_IN p=128
-	entry = of1x_init_flow_entry(false);
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(entry != NULL);
 
 	entry->priority=128;
 	of1x_add_match_to_entry(entry,of1x_init_port_in_match(1));
 	CU_ASSERT(of1x_add_flow_entry_table(&sw->pipeline, 0, &entry, false,false) == ROFL_OF1X_FM_SUCCESS);
 
-	entry = of1x_init_flow_entry(false);
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(entry != NULL);
 
 	entry->priority=128;
@@ -1046,7 +1046,7 @@ void test_regression2(){
 	CU_ASSERT(of1x_add_flow_entry_table(&sw->pipeline, 0, &entry, false,false) == ROFL_OF1X_FM_SUCCESS);
 
 	//Add PORT_IN + ETH TYPE p = 32768
-	entry = of1x_init_flow_entry(false);
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(entry != NULL);
 
 	entry->priority=32768;
@@ -1055,7 +1055,7 @@ void test_regression2(){
 
 	CU_ASSERT(of1x_add_flow_entry_table(&sw->pipeline, 0, &entry, false,false) == ROFL_OF1X_FM_SUCCESS);
 
-	entry = of1x_init_flow_entry(false);
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(entry != NULL);
 
 	entry->priority=32768;
@@ -1066,7 +1066,7 @@ void test_regression2(){
 
 
 	//Add PORT_IN + ETH TYPE + IP_PROTO + UDP_SRC + UDP_DST p = 32768
-	entry = of1x_init_flow_entry(false);
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(entry != NULL);
 
 	entry->priority=32768;
@@ -1092,7 +1092,7 @@ void test_many_entries(){
 
 	//First fill in all the entries
 	for(i=0;i<NUM_ENTRIES; i++){
-		entry = of1x_init_flow_entry(false); 
+		entry = of1x_init_flow_entry(false, /*builtin=*/false);
 		of1x_add_match_to_entry(entry,of1x_init_port_in_match(i));
 		CU_ASSERT(of1x_add_flow_entry_table(&sw->pipeline, 0, &entry, false,false) == ROFL_OF1X_FM_SUCCESS);
 	}

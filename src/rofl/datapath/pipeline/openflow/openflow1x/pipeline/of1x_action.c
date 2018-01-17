@@ -242,6 +242,16 @@ of1x_packet_action_t* of1x_init_packet_action(of1x_packet_action_type_t type, wr
 			action->__field.u16 = field.u16&OF1X_2_BYTE_MASK;
 			action->ver_req.min_ver = OF_VERSION_12;
 			break;
+		case OF1X_AT_SET_FIELD_OFDPA_VRF:
+			field.u16 = HTONB16(field.u16);
+			action->__field.u16 = field.u16&OF1X_2_BYTE_MASK;
+			action->ver_req.min_ver = OF_VERSION_13;
+			break;
+		case OF1X_AT_SET_FIELD_OFDPA_OVID:
+			field.u16 = HTONB16(field.u16);
+			action->__field.u16 = field.u16&OF1X_2_BYTE_MASK;
+			action->ver_req.min_ver = OF_VERSION_13;
+			break;
 		/* Extensions end */
 		/*case OF1X_AT_POP_VLAN: TODO: CHECK THIS*/
 		case OF1X_AT_POP_MPLS:
@@ -402,6 +412,9 @@ of1x_packet_action_t* of1x_init_packet_action(of1x_packet_action_type_t type, wr
 
 		//1 bit values
 		case OF1X_AT_SET_FIELD_MPLS_BOS:
+		/* Extensions */
+		case OF1X_AT_SET_FIELD_OFDPA_ALLOW_VLAN_TRANSLATION:
+		/* Extensions end */
 			action->__field.u8 =  field.u8&OF1X_BIT0_MASK; //id of the group
 			action->ver_req.min_ver = OF_VERSION_13;
 			break;
@@ -974,6 +987,13 @@ static void __of1x_dump_packet_action(of1x_packet_action_t* action, bool raw_nbo
 		case OF1X_AT_POP_GRE:ROFL_PIPELINE_INFO_NO_PREFIX("POP_GRE");
 			break;
 		case OF1X_AT_PUSH_GRE:ROFL_PIPELINE_INFO_NO_PREFIX("PUSH_GRE");
+			break;
+
+		case OF1X_AT_SET_FIELD_OFDPA_VRF:ROFL_PIPELINE_INFO_NO_PREFIX("SET_OFDPA_VRF: 0x%x", __of1x_get_packet_action_field16(action, raw_nbo));
+			break;
+		case OF1X_AT_SET_FIELD_OFDPA_OVID:ROFL_PIPELINE_INFO_NO_PREFIX("SET_OFDPA_OVID: 0x%x", __of1x_get_packet_action_field16(action, raw_nbo));
+			break;
+		case OF1X_AT_SET_FIELD_OFDPA_ALLOW_VLAN_TRANSLATION:ROFL_PIPELINE_INFO_NO_PREFIX("SET_OFDPA_ALLOW_VLAN_TRANSLATION: 0x%x", __of1x_get_packet_action_field8(action, raw_nbo));
 			break;
 
 		case OF1X_AT_GROUP:ROFL_PIPELINE_INFO_NO_PREFIX("GROUP:%u", __of1x_get_packet_action_field32(action, raw_nbo));

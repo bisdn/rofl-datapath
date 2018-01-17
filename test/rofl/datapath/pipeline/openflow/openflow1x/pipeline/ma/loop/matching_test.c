@@ -10,7 +10,7 @@ int set_up(){
 	of1x_loop_matching_algorithm, of1x_loop_matching_algorithm};
 
 	//Create instance	
-	sw = of1x_init_switch("Test switch", OF_VERSION_12, 0x0101,4,ma_list);
+	sw = of1x_init_switch("Test switch", OF_VERSION_12, SW_FLAVOR_GENERIC, 0x0101,4,ma_list);
 	
 	if(!sw)
 		return EXIT_FAILURE;
@@ -29,7 +29,7 @@ int tear_down(){
 void test_install_empty_flow_mod(){
 
 	//Create a simple flow_mod
-	of1x_flow_entry_t* entry = of1x_init_flow_entry(false); 
+	of1x_flow_entry_t* entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	
 	CU_ASSERT(entry != NULL);	
 
@@ -39,7 +39,7 @@ void test_install_empty_flow_mod(){
 
 
 	//New entry	
-	entry = of1x_init_flow_entry(false); 
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	
 	//Check real size of the table
 	CU_ASSERT(sw->pipeline.tables[0].num_of_entries == 1);
@@ -59,7 +59,7 @@ void test_install_overlapping_specific(){
 
 	//Install N flowmods which identical => should put only one
 	for(i=0;i<num_of_flows;i++){
-		entry = of1x_init_flow_entry(false); 
+		entry = of1x_init_flow_entry(false, /*builtin=*/false);
 		CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_port_in_match(1)) == ROFL_SUCCESS);
 	
 		CU_ASSERT(entry != NULL);
@@ -70,7 +70,7 @@ void test_install_overlapping_specific(){
 	CU_ASSERT(sw->pipeline.tables[0].num_of_entries == 1);
 	
 	//Uninstall all 
-	entry = of1x_init_flow_entry(false); 
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_port_in_match(1)) == ROFL_SUCCESS);
 	rofl_of1x_fm_result_t specific_remove_result = of1x_remove_flow_entry_table(&sw->pipeline, 0, entry, STRICT, OF1X_PORT_ANY, OF1X_GROUP_ANY);
 	CU_ASSERT( specific_remove_result == ROFL_OF1X_FM_SUCCESS ); //First must succeeed
@@ -78,7 +78,7 @@ void test_install_overlapping_specific(){
 	//Check real size of the table
 	CU_ASSERT(sw->pipeline.tables[0].num_of_entries == 0);	
 	
-	entry = of1x_init_flow_entry(false); 
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_port_in_match(1)) == ROFL_SUCCESS);
 	specific_remove_result = of1x_remove_flow_entry_table(&sw->pipeline, 0, entry, STRICT, OF1X_PORT_ANY, OF1X_GROUP_ANY);
 	CU_ASSERT( specific_remove_result == ROFL_OF1X_FM_SUCCESS ); //Second too according to spec (no entries)
@@ -94,7 +94,7 @@ static void test_uninstall_wildcard_add_flows(of1x_flow_entry_t** entries, unsig
 
 	//Install N flowmods with one identical match and the rest randomly generated
 	for(i=0;i<num_of_flows;i++){
-		entries[i] = of1x_init_flow_entry(false); 
+		entries[i] = of1x_init_flow_entry(false, /*builtin=*/false);
 	
 		//Add two match common
 		CU_ASSERT(of1x_add_match_to_entry(entries[i],of1x_init_port_in_match(1)) == ROFL_SUCCESS);
@@ -116,7 +116,7 @@ static void test_uninstall_wildcard_add_flows(of1x_flow_entry_t** entries, unsig
 
 static void clean_pipeline(of1x_switch_t* sw){
 	
-	of1x_flow_entry_t* deleting_entry = of1x_init_flow_entry(false); 
+	of1x_flow_entry_t* deleting_entry = of1x_init_flow_entry(false, /*builtin=*/false);
 
 	CU_ASSERT(deleting_entry != NULL);
 
@@ -142,7 +142,7 @@ void test_uninstall_wildcard(){
 	CU_ASSERT(sw->pipeline.tables[0].num_of_entries == num_of_flows);
 
 	//Do the deletion with the common match
-	deleting_entry = of1x_init_flow_entry(false); 
+	deleting_entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(deleting_entry != NULL);
 	CU_ASSERT(of1x_add_match_to_entry(deleting_entry,of1x_init_port_in_match(1)) == ROFL_SUCCESS);
 
@@ -159,7 +159,7 @@ void test_uninstall_wildcard(){
 	CU_ASSERT(sw->pipeline.tables[0].num_of_entries == num_of_flows);
 
 	//Do the deletion with the common match
-	deleting_entry = of1x_init_flow_entry(false); 
+	deleting_entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(deleting_entry != NULL);
 	CU_ASSERT(of1x_add_match_to_entry(deleting_entry,of1x_init_eth_src_match(0x012345678901, 0xFFFFFFFFFFFF)) == ROFL_SUCCESS);
 
@@ -176,7 +176,7 @@ void test_uninstall_wildcard(){
 	CU_ASSERT(sw->pipeline.tables[0].num_of_entries == num_of_flows);
 
 	//Do the deletion with the common match
-	deleting_entry = of1x_init_flow_entry(false); 
+	deleting_entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(deleting_entry != NULL);
 	CU_ASSERT(of1x_add_match_to_entry(deleting_entry,of1x_init_port_in_match(1)) == ROFL_SUCCESS);
 	CU_ASSERT(of1x_add_match_to_entry(deleting_entry,of1x_init_eth_src_match(0x999999999999, 0x000000000000)) == ROFL_SUCCESS);
@@ -196,7 +196,7 @@ void test_uninstall_wildcard(){
 
 #if 0 
 	//Do the deletion with no matches
-	deleting_entry = of1x_init_flow_entry(false); 
+	deleting_entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(deleting_entry != NULL);
 	
 	CU_ASSERT(of1x_remove_flow_entry_table(&sw->pipeline, 0, deleting_entry, NOT_STRICT, OF1X_PORT_ANY, OF1X_GROUP_ANY) == ROFL_OF1X_FM_SUCCESS);
@@ -218,14 +218,14 @@ void test_overlap(){
 */
 	/* 1 match - */
 	//Create two entries 1 match same matches != scope and add with overlap=1
-	entry = of1x_init_flow_entry(false); 
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 
 	//Add match
 	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_port_in_match(1)) == ROFL_SUCCESS);
 	CU_ASSERT(of1x_add_flow_entry_table(&sw->pipeline, 0, &entry, true,false) == ROFL_OF1X_FM_SUCCESS);
 	
 	//Add second entry
-	entry = of1x_init_flow_entry(false); 
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 
 	//Add match
 	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_port_in_match(2)) == ROFL_SUCCESS);
@@ -235,7 +235,7 @@ void test_overlap(){
 
 	/* 4 match -  */
 	//Create two entries with 4 match same matches != scope and add with overlap=1
-	entry = of1x_init_flow_entry(false); 
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(entry != NULL);
 	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_port_in_match(1)) == ROFL_SUCCESS);
 	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_eth_src_match(0x999999999999, 0xffffffffffff)) == ROFL_SUCCESS);
@@ -244,7 +244,7 @@ void test_overlap(){
 	
 	CU_ASSERT(of1x_add_flow_entry_table(&sw->pipeline, 0, &entry, true,false) == ROFL_OF1X_FM_SUCCESS);
 
-	entry = of1x_init_flow_entry(false); 
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(entry != NULL);
 	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_port_in_match(2)) == ROFL_SUCCESS);
 	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_eth_src_match(0x7777, 0xffffffffffff)) == ROFL_SUCCESS);
@@ -257,14 +257,14 @@ void test_overlap(){
 
 	/* 1 match - different types */
 	//Create two entries with 2 match with different types and add with overlap=1
-	entry = of1x_init_flow_entry(false); 
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 
 	//Add match
 	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_port_in_match(1)) == ROFL_SUCCESS);
 	CU_ASSERT(of1x_add_flow_entry_table(&sw->pipeline, 0, &entry, true,false) == ROFL_OF1X_FM_SUCCESS);
 	
 	//Add second entry
-	entry = of1x_init_flow_entry(false); 
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 
 	//Add match
 	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_eth_src_match(0x999999999999, 0xffffffffffff)) == ROFL_SUCCESS);
@@ -280,7 +280,7 @@ void test_overlap(){
 */
 	/* 4 match -  */
 	//Create two entries with 4 match same matches != scope except some and add with overlap=1
-	entry = of1x_init_flow_entry(false); 
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(entry != NULL);
 	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_port_in_match(1)) == ROFL_SUCCESS);
 	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_eth_src_match(0x999999999999, 0xffffffffffff)) == ROFL_SUCCESS);
@@ -289,7 +289,7 @@ void test_overlap(){
 	
 	CU_ASSERT(of1x_add_flow_entry_table(&sw->pipeline, 0, &entry, true,false) == ROFL_OF1X_FM_SUCCESS);
 
-	entry = of1x_init_flow_entry(false); 
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(entry != NULL);
 	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_port_in_match(1)) == ROFL_SUCCESS);
 	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_eth_src_match(0x999999999999, 0xffffffffffff)) == ROFL_SUCCESS);
@@ -302,13 +302,13 @@ void test_overlap(){
 
 	/* 2 match -  */
 	//Create two entries with 2 match same matches, one with different scope, and one that overlaps add with overlap=1
-	entry = of1x_init_flow_entry(false); 
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_ip4_dst_match(0x11111111, 0xfffffff)) == ROFL_SUCCESS);
 	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_ip4_src_match(0x22222233, 0xffffff0)) == ROFL_SUCCESS);
 	
 	CU_ASSERT(of1x_add_flow_entry_table(&sw->pipeline, 0, &entry, true,false) == ROFL_OF1X_FM_SUCCESS);
 
-	entry = of1x_init_flow_entry(false); 
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(entry != NULL);
 	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_ip4_dst_match(0x11111144, 0xfffff00)) == ROFL_SUCCESS);
 	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_ip4_src_match(0x22222233, 0xfffff00)) == ROFL_SUCCESS);
@@ -321,12 +321,12 @@ void test_overlap(){
 /* non overlapping matchies */
 	
 	//Create two entries 1 different matches 
-	entry = of1x_init_flow_entry(false); 
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_ip4_dst_match(0x11111111, 0xfffffff)) == ROFL_SUCCESS);
 	
 	CU_ASSERT(of1x_add_flow_entry_table(&sw->pipeline, 0, &entry, true,false) == ROFL_OF1X_FM_SUCCESS);
 
-	entry = of1x_init_flow_entry(false); 
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(entry != NULL);
 	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_ip4_src_match(0x22222233, 0xfffff00)) == ROFL_SUCCESS);
 
@@ -336,12 +336,12 @@ void test_overlap(){
 	clean_pipeline(sw);	
 
 	//Create two entries with same matches different scope 
-	entry = of1x_init_flow_entry(false); 
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_ip4_src_match(0x11111111, 0xfffffff)) == ROFL_SUCCESS);
 	
 	CU_ASSERT(of1x_add_flow_entry_table(&sw->pipeline, 0, &entry, true,false) == ROFL_OF1X_FM_SUCCESS);
 
-	entry = of1x_init_flow_entry(false); 
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(entry != NULL);
 	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_ip4_src_match(0x22222233, 0xfffff00)) == ROFL_SUCCESS);
 
@@ -357,7 +357,7 @@ void test_overlap2(){
 
 	//Create instance	
 	enum of1x_matching_algorithm_available ma_list2[1]={of1x_loop_matching_algorithm};
-	of1x_switch_t* sw10 = of1x_init_switch("Test switch2", OF_VERSION_10, 0x0102,1,ma_list2);
+	of1x_switch_t* sw10 = of1x_init_switch("Test switch2", OF_VERSION_10, SW_FLAVOR_GENERIC, 0x0102,1,ma_list2);
 	
 	of1x_flow_entry_t* entry;
 
@@ -368,7 +368,7 @@ void test_overlap2(){
 	*/
 
 	//Entry	
-	entry = of1x_init_flow_entry(false); 
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	entry->priority = 0xEFF5;
 	entry->cookie = 0x1;
 
@@ -381,7 +381,7 @@ void test_overlap2(){
 	CU_ASSERT(of1x_add_flow_entry_table(&sw10->pipeline, 0, &entry, true,false) == ROFL_OF1X_FM_SUCCESS);
 	
 	//Add second entry
-	entry = of1x_init_flow_entry(false); 
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	entry->priority = 0xEFF5;
 	entry->cookie = 0x2;
 
@@ -413,7 +413,7 @@ void test_flow_modify(){
 * Simple modify test with STRICT and NOT-STRICT 
 *
 */
-	entry1 = of1x_init_flow_entry(false); 
+	entry1 = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(entry1 != NULL);
 	
 	//Add one match
@@ -432,7 +432,7 @@ void test_flow_modify(){
 
 	/*****/
 
-	entry2 = of1x_init_flow_entry(false); 
+	entry2 = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(entry2 != NULL);
 
 	//Add one match

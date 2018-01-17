@@ -220,6 +220,8 @@ rofl_result_t __of1x_validate_instructions(of1x_instruction_group_t* inst_grp, o
 	of_version_t version = pipeline->sw->of_ver;
 	of1x_flow_table_t* table = &pipeline->tables[table_id];
 	of1x_instruction_t* inst;
+	unsigned int j;
+	uint8_t valid_table = 0;
 
 	//if there is a group action we should check that the group exists
 	for(i=0;i<OF1X_IT_MAX;i++){
@@ -256,7 +258,12 @@ rofl_result_t __of1x_validate_instructions(of1x_instruction_group_t* inst_grp, o
 				break;
 			
 			case OF1X_IT_GOTO_TABLE:
-				if(inst->go_to_table >= pipeline->num_of_tables)
+				for (j = 0; j < pipeline->num_of_tables; ++j) {
+					if (pipeline->tables[j].number == inst->go_to_table) {
+						valid_table = 1;
+					}
+				}
+				if (valid_table == 0)
 					return ROFL_FAILURE;
 				break;
 			case OF1X_IT_WRITE_METADATA:

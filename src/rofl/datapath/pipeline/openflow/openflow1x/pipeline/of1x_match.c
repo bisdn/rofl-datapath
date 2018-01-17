@@ -1505,6 +1505,97 @@ of1x_match_t* of1x_init_gre_key_match(uint32_t value){
 	return match;
 }
 
+//OFDPA
+of1x_match_t* of1x_init_ofdpa_vrf_match(uint16_t value, uint16_t mask){
+	of1x_match_t* match = (of1x_match_t*)platform_malloc_shared(sizeof(of1x_match_t));
+
+	if(unlikely(match == NULL))
+		return NULL;
+
+	// Align to pipeline convention (NBO, lower memory address)
+	value = HTONB16(value);
+	mask = HTONB16(mask);
+
+	match->type = OF1X_MATCH_OFDPA_VRF;
+	__init_utern16(&match->__tern, value, mask);
+
+	//Set fast validation flags
+	match->ver_req.min_ver = OF_VERSION_13;	//First supported in OF1.3 (extensions)
+	match->ver_req.max_ver = OF1X_MAX_VERSION;		//No limitation on max
+	if( mask != OF1X_2_BYTE_MASK )
+		match->has_wildcard = true;
+	else
+		match->has_wildcard = false;
+
+	//Initialize linked-list
+	match->prev=match->next=NULL;
+
+	return match;
+}
+of1x_match_t* of1x_init_ofdpa_ovid_match(uint16_t value){
+	of1x_match_t* match = (of1x_match_t*)platform_malloc_shared(sizeof(of1x_match_t));
+
+	if(unlikely(match == NULL))
+		return NULL;
+
+	// Align to pipeline convention (NBO, lower memory address)
+	value = HTONB16(value);
+
+	match->type = OF1X_MATCH_OFDPA_OVID;
+	__init_utern16(&match->__tern, value, OF1X_2_BYTE_MASK);
+
+	//Set fast validation flags
+	match->ver_req.min_ver = OF_VERSION_13;	//First supported in OF1.3 (extensions)
+	match->ver_req.max_ver = OF1X_MAX_VERSION;		//No limitation on max
+	match->has_wildcard = false;
+
+	//Initialize linked-list
+	match->prev=match->next=NULL;
+
+	return match;
+}
+of1x_match_t* of1x_init_ofdpa_allow_vlan_translation_match(uint8_t value){
+	of1x_match_t* match = (of1x_match_t*)platform_malloc_shared(sizeof(of1x_match_t));
+
+	if(unlikely(match == NULL))
+		return NULL;
+
+	match->type = OF1X_MATCH_OFDPA_ALLOW_VLAN_TRANSLATION;
+	__init_utern8(&match->__tern, value,OF1X_1_BYTE_MASK); //no wildcard
+
+	//Set fast validation flags
+	match->ver_req.min_ver = OF_VERSION_13;	//First supported in OF1.3 (extensions)
+	match->ver_req.max_ver = OF1X_MAX_VERSION;		//No limitation on max
+	match->has_wildcard = false;		//Not accepting wildcards
+
+	//Initialize linked-list
+	match->prev=match->next=NULL;
+
+	return match;
+}
+of1x_match_t* of1x_init_ofdpa_actset_output_match(uint32_t value){
+	of1x_match_t* match = (of1x_match_t*)platform_malloc_shared(sizeof(of1x_match_t));
+
+	if(unlikely(match == NULL))
+		return NULL;
+
+	// Align to pipeline convention (NBO, lower memory address)
+	value = HTONB32(value);
+
+	match->type = OF1X_MATCH_OFDPA_ACTSET_OUTPUT;
+	__init_utern32(&match->__tern, value, OF1X_4_BYTE_MASK);
+
+	//Set fast validation flags
+	match->ver_req.min_ver = OF_VERSION_13;	//First supported in OF1.3 (extensions)
+	match->ver_req.max_ver = OF1X_MAX_VERSION;		//No limitation on max
+	match->has_wildcard = false;
+
+	//Initialize linked-list
+	match->prev=match->next=NULL;
+
+	return match;
+}
+
 //Add more here...
 
 /* Instruction groups init and destroy */
@@ -1948,6 +2039,16 @@ void __of1x_dump_matches(of1x_match_t* matches, bool raw_nbo){
 			case OF1X_MATCH_GRE_PROT_TYPE:  ROFL_PIPELINE_INFO_NO_PREFIX("[GRE_PROT_TYPE:0x%x], ",__of1x_get_match_val16(it, false, raw_nbo));
 				break;
 			case OF1X_MATCH_GRE_KEY:  ROFL_PIPELINE_INFO_NO_PREFIX("[GRE_KEY:0x%x], ",__of1x_get_match_val32(it, false, raw_nbo));
+				break;
+
+			/* OFDPA related extensions */
+			case OF1X_MATCH_OFDPA_VRF:  ROFL_PIPELINE_INFO_NO_PREFIX("[OFDPA_VRF:0x%x|0x%x], ",__of1x_get_match_val16(it, false, raw_nbo),__of1x_get_match_val16(it, true, raw_nbo));
+				break;
+			case OF1X_MATCH_OFDPA_OVID:  ROFL_PIPELINE_INFO_NO_PREFIX("[OFDPA_OVID:0x%x], ",__of1x_get_match_val16(it, false, raw_nbo));
+				break;
+			case OF1X_MATCH_OFDPA_ALLOW_VLAN_TRANSLATION:  ROFL_PIPELINE_INFO_NO_PREFIX("[OFDPA_ALLOW_VLAN_TRANSLATION:0x%x], ",__of1x_get_match_val8(it, false, raw_nbo));
+				break;
+			case OF1X_MATCH_OFDPA_ACTSET_OUTPUT:  ROFL_PIPELINE_INFO_NO_PREFIX("[OFDPA_ACTSET_OUTPUT:0x%x], ",__of1x_get_match_val32(it, false, raw_nbo));
 				break;
 
 			case OF1X_MATCH_MAX: assert(0);

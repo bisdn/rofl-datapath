@@ -61,6 +61,21 @@ typedef struct datapacket{
 	//OpenFlow 1.3 cookie
 	uint64_t __cookie;
 
+	//OpenFlow 1.3 tunnel_id
+	uint64_t __tunnel_id;
+
+	//OFDPA VRF
+	uint16_t __vrf;
+
+	//OFDPA OVID
+	uint16_t __ovid;
+
+	//OFDPA ALlow VLAN Translation
+	uint8_t __allow_vlan_translation;
+
+	//OFDPA Action_Set_Output
+	uint32_t __action_set_output_egress_portno;
+
 	/**
 	* Flag indicating if it is a replica of the original packet
 	* (used for multi-output matches)
@@ -82,6 +97,11 @@ typedef struct datapacket{
 static inline void __init_packet_metadata(datapacket_t *const pkt){
 	pkt->__metadata = 0ULL;
 	pkt->__cookie = 0ULL;
+	pkt->__tunnel_id = 0ULL;
+	pkt->__vrf = 0;
+	pkt->__ovid = 0;
+	pkt->__allow_vlan_translation = 0;
+	pkt->__action_set_output_egress_portno = 0;
 };
 
 #endif //DATAPACKET

@@ -34,6 +34,16 @@ typedef enum{
 //String for nice dumping
 extern const char* of_version_str[__OF_VERSION_MAX];
 
+typedef enum{
+	SW_FLAVOR_GENERIC = 0,
+	SW_FLAVOR_OFDPA = 1,
+	//Add more here...
+	SW_FLAVOR_MAX
+}sw_flavor_t;
+
+//String for nice dumping
+extern const char* sw_flavor_str[SW_FLAVOR_MAX];
+
 #ifndef LOGICAL_SWITCH_MAX_LOG_PORTS
 	#define LOGICAL_SWITCH_MAX_LOG_PORTS 512 // 511, 0 slot NEVER used (has to be less than OF1X_PORT_MAX)
 #endif
@@ -54,16 +64,17 @@ struct of_switch;
 */
 typedef struct of_switch{
 
-	//Make sure ALL ofXX_switch_t contain this three fields
+	//Make sure ALL ofXX_switch_t contain this four fields
 	//at the VERY beginning 
 
 	/* This part is common and MUST be at the very beginning */ 
-	of_version_t of_ver; 
+	of_version_t of_ver;
+	sw_flavor_t sw_flavor;
 	uint64_t dpid;
 	char name[LOGICAL_SWITCH_MAX_LEN_NAME];
 	unsigned int max_ports;
 	unsigned int num_of_ports;
-	
+
 	//Switch logical ports 
 	logical_switch_port_t logical_ports[LOGICAL_SWITCH_MAX_LOG_PORTS];
  	

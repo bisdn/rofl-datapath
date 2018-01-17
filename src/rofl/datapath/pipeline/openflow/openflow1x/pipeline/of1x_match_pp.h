@@ -55,7 +55,7 @@ static inline bool __of1x_check_match(datapacket_t *const pkt, of1x_match_t* it)
 		case OF1X_MATCH_IN_PHY_PORT: if(!platform_packet_get_port_in(pkt)) return false; //According to spec
 					return __utern_compare32(&it->__tern, platform_packet_get_phy_port_in(pkt));
 		//Metadata
-	  	case OF1X_MATCH_METADATA: return __utern_compare64(&it->__tern, &pkt->__metadata); 
+	  	case OF1X_MATCH_METADATA: return __utern_compare64(&it->__tern, &pkt->__metadata);
 		
 		//802
    		case OF1X_MATCH_ETH_DST:  return __utern_compare64(&it->__tern, platform_packet_get_eth_dst(pkt));
@@ -65,7 +65,7 @@ static inline bool __of1x_check_match(datapacket_t *const pkt, of1x_match_t* it)
 		//802.1q
    		case OF1X_MATCH_VLAN_VID: if( it->vlan_present == OF1X_MATCH_VLAN_SPECIFIC )
 						return platform_packet_has_vlan(pkt) && __utern_compare16(&it->__tern, platform_packet_get_vlan_vid(pkt));
-					  else
+   		            else
 						return platform_packet_has_vlan(pkt) == it->vlan_present;
    		case OF1X_MATCH_VLAN_PCP: return platform_packet_has_vlan(pkt) &&  __utern_compare8(&it->__tern, platform_packet_get_vlan_pcp(pkt));
 
@@ -397,8 +397,9 @@ static inline bool __of1x_check_match(datapacket_t *const pkt, of1x_match_t* it)
 					if( !ptr_ether_type || !(*ptr_ether_type == ETH_TYPE_PBB)) return false;
 					return __utern_compare32(&it->__tern, platform_packet_get_pbb_isid(pkt));
 		}
+
 	 	//TUNNEL id
-   		case OF1X_MATCH_TUNNEL_ID: return __utern_compare64(&it->__tern, platform_packet_get_tunnel_id(pkt));
+   		case OF1X_MATCH_TUNNEL_ID: return __utern_compare64(&it->__tern, &pkt->__tunnel_id);
 
 #ifdef ROFL_EXPERIMENTAL
 		//PPPoE related extensions
@@ -507,6 +508,21 @@ static inline bool __of1x_check_match(datapacket_t *const pkt, of1x_match_t* it)
 			if (!ptr_ip_proto || !(*ptr_ip_proto == IP_PROTO_GRE)) return false;
    					return __utern_compare32(&it->__tern, platform_packet_get_gre_key(pkt));
 		}
+
+		//OFDPA
+	  	case OF1X_MATCH_OFDPA_VRF:{
+	  		return __utern_compare16(&it->__tern, &pkt->__vrf);
+	  	}
+		case OF1X_MATCH_OFDPA_OVID:{
+		  	return __utern_compare16(&it->__tern, &pkt->__ovid);
+		}
+	  	case OF1X_MATCH_OFDPA_ALLOW_VLAN_TRANSLATION:{
+            return __utern_compare8(&it->__tern, &pkt->__allow_vlan_translation);
+	  	}
+	  	case OF1X_MATCH_OFDPA_ACTSET_OUTPUT:{
+            return __utern_compare32(&it->__tern, &pkt->__action_set_output_egress_portno); //FIXME: nbo?
+	  	}
+
 #else
    		case OF1X_MATCH_PPPOE_CODE:
    		case OF1X_MATCH_PPPOE_TYPE:
@@ -527,6 +543,10 @@ static inline bool __of1x_check_match(datapacket_t *const pkt, of1x_match_t* it)
    		case OF1X_MATCH_GRE_VERSION:
    		case OF1X_MATCH_GRE_PROT_TYPE:
    		case OF1X_MATCH_GRE_KEY:
+   		case OF1X_MATCH_OFDPA_VRF:
+   		case OF1X_MATCH_OFDPA_OVID:
+   		case OF1X_MATCH_OFDPA_ALLOW_VLAN_TRANSLATION:
+   		case OF1X_MATCH_OFDPA_ACTSET_OUTPUT:
    			break;
 
 #endif

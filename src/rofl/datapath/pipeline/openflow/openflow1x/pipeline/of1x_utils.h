@@ -29,6 +29,7 @@ typedef enum rofl_of1x_fm_result{
 	ROFL_OF1X_FM_VALIDATION,
 	ROFL_OF1X_FM_INVALID_TABLE_ID,
 	ROFL_OF1X_FM_OVERLAP,
+	ROFL_OF1X_FM_BUILTIN,
 }rofl_of1x_fm_result_t;
 
 

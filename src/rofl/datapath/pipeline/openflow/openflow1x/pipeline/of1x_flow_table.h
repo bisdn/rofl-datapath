@@ -73,7 +73,8 @@ extern const char* __of1x_flow_table_miss_config_str[__OF1X_TABLE_MISS_MAX];
 */
 typedef struct{
 	//Configuration stuff
-	bitmap128_t match;		 	/* Bitmap of (1 << OF1X_MATCH_*) that indicate the fields the table can match on. */
+	bitmap256_t goto_tables;       /* Bitmap of valid table_ids for OFPIT_GOTO_INSTRUCTION */
+	bitmap128_t match;		 	    /* Bitmap of (1 << OF1X_MATCH_*) that indicate the fields the table can match on. */
 	bitmap128_t wildcards;			/* Bitmap of (1 << OF1X_MATCH_*) wildcards that are supported by the table. */
 	bitmap128_t write_actions;		/* Bitmap of (1 << OF1X_AT_* that are supported by the table with OFPIT_WRITE_ACTIONS. */
 	bitmap128_t apply_actions;		/* Bitmap of (1 << OF1X_AT_* that are supported by the table with OFPIT_APPLY_ACTIONS. */
@@ -88,6 +89,12 @@ typedef struct{
  * OpenFlow v1.0, 1.2 and 1.3.2 flow table abstraction
  */
 typedef struct of1x_flow_table{
+
+	//Table index (index of this table inside pipeline->tables)
+	unsigned int table_index;
+
+	//Table index (index of successor table inside pipeline->tables)
+	unsigned int table_index_next;
 
 	//Table number
 	unsigned int number;
@@ -158,7 +165,7 @@ ROFL_BEGIN_DECLS
 /*
 * Table init and destroy
 */
-rofl_result_t __of1x_init_table(struct of1x_pipeline* pipeline, of1x_flow_table_t* table, const unsigned int table_index, const enum of1x_matching_algorithm_available algorithm);
+rofl_result_t __of1x_init_table(struct of1x_pipeline* pipeline, of1x_flow_table_t* table, const unsigned int table_number, const unsigned int table_index, const unsigned int table_index_next, const bitmap256_t goto_tables, const enum of1x_matching_algorithm_available algorithm);
 
 //Set defaults for OF1.0, 1.2 and 1.3
 void __of10_set_table_defaults(of1x_flow_table_t* table);
@@ -192,7 +199,7 @@ rofl_result_t __of1x_destroy_table(of1x_flow_table_t* table);
 * @warning Some HW platforms may not support it in some/all tables.
 * @warning Out of OpenFlow spec.
 */
-rofl_of1x_fm_result_t __of1x_add_flow_entry_table(struct of1x_pipeline *const pipeline, const unsigned int table_id, of1x_flow_entry_t **const entry, bool check_overlap, bool reset_counts, bool check_cookie);
+rofl_of1x_fm_result_t __of1x_add_flow_entry_table(struct of1x_pipeline *const pipeline, const unsigned int table_id, of1x_flow_entry_t **entry, bool check_overlap, bool reset_counts, bool check_cookie);
 
 /**
 * @ingroup core_of1x 
@@ -219,7 +226,7 @@ rofl_of1x_fm_result_t __of1x_add_flow_entry_table(struct of1x_pipeline *const pi
 * @warning On success (ROFL_FM_SUCCESS), the entry pointer (*entry) will be set to NULL. 
 * or freed from outside the library.
 */
-static inline rofl_of1x_fm_result_t of1x_add_flow_entry_table(struct of1x_pipeline *const pipeline, const unsigned int table_id, of1x_flow_entry_t **const entry, bool check_overlap, bool reset_counts){
+static inline rofl_of1x_fm_result_t of1x_add_flow_entry_table(struct of1x_pipeline *const pipeline, const unsigned int table_id, of1x_flow_entry_t **entry, bool check_overlap, bool reset_counts){
 	return __of1x_add_flow_entry_table(pipeline, table_id, entry, check_overlap, reset_counts, false);
 }
 
@@ -245,7 +252,7 @@ static inline rofl_of1x_fm_result_t of1x_add_flow_entry_table(struct of1x_pipeli
 * @warning On success (ROFL_FM_SUCCESS), the entry pointer (*entry) will be set to NULL. 
 * or freed from outside the library.
 */
-rofl_of1x_fm_result_t of1x_modify_flow_entry_table(struct of1x_pipeline *const pipeline, const unsigned int table_id, of1x_flow_entry_t **const entry, const enum of1x_flow_removal_strictness strict, bool reset_counts);
+rofl_of1x_fm_result_t of1x_modify_flow_entry_table(struct of1x_pipeline *const pipeline, const unsigned int table_id, of1x_flow_entry_t **entry, const enum of1x_flow_removal_strictness strict, bool reset_counts);
 	
 /**
 * @ingroup core_of1x 

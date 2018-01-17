@@ -39,7 +39,7 @@ typedef struct packet_matches{
 	
 	//Associated metadata
 	uint64_t __metadata;		/* Metadata passed between tables. */
- 
+
 	//802
 	uint64_t __eth_dst;		/* Ethernet destination address. */
 	uint64_t __eth_src;		/* Ethernet source address. */
@@ -142,6 +142,12 @@ typedef struct packet_matches{
 	uint16_t __gre_version;		/* GRE version */
 	uint16_t __gre_prot_type;	/* GRE protocol type */
 	uint32_t __gre_key;			/* GRE key */
+
+	//OFDPA related extensions
+	uint16_t __ofdpa_vrf;       /* OFDPA vrf */
+	uint16_t __ofdpa_ovid;      /* OFDPA ovid */
+	uint8_t  __ofdpa_allow_vlan_translation; /* OFDPA allow_vlan_translation */
+	uint32_t __ofdpa_action_set_output_egress_portno; /* OFDPA action set output egress portno */
 }packet_matches_t;
 
 
@@ -694,6 +700,40 @@ uint16_t packet_matches_get_gre_prot_type_value(packet_matches_t *const pkt_matc
 static inline
 uint32_t packet_matches_get_gre_key_value(packet_matches_t *const pkt_matches){
 	return NTOHB32(pkt_matches->__gre_key);
+};
+
+//OFDPA
+/**
+* @brief Get the packet match OFDPA_VRF value in HOST BYTE ORDER
+* @ingroup core_of1x
+*/
+static inline
+uint16_t packet_matches_get_ofdpa_vrf_value(packet_matches_t *const pkt_matches){
+	return NTOHB16(pkt_matches->__ofdpa_vrf);
+};
+/**
+* @brief Get the packet match OFDPA_OVID value in HOST BYTE ORDER
+* @ingroup core_of1x
+*/
+static inline
+uint16_t packet_matches_get_ofdpa_ovid_value(packet_matches_t *const pkt_matches){
+	return NTOHB16(pkt_matches->__ofdpa_ovid);
+};
+/**
+* @brief Get the packet match OFDPA_ALLOW_VLAN_TRANSLATION value in HOST BYTE ORDER
+* @ingroup core_of1x
+*/
+static inline
+uint8_t packet_matches_get_ofdpa_allow_vlan_translation_value(packet_matches_t *const pkt_matches){
+	return pkt_matches->__ofdpa_allow_vlan_translation;
+};
+/**
+* @brief Get the packet match OFDPA_ACTION_SET_OUTPUT_EGRESS_PORTNO value in HOST BYTE ORDER
+* @ingroup core_of1x
+*/
+static inline
+uint32_t packet_matches_get_ofdpa_action_set_output_egress_portno_value(packet_matches_t *const pkt_matches){
+	return NTOHB32(pkt_matches->__ofdpa_action_set_output_egress_portno);
 };
 
 //C++ extern C

@@ -11,6 +11,9 @@ Change log
 v0.6.6
 
 [O] Increased MAX_TIDS default value (64)
+[+] pipeline flavors (generic, ofdpa)
+    ofdpa is work in progress
+[+] added bitmap256_t data type
 
 v0.6.5
 

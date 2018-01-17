@@ -89,7 +89,7 @@ void __of12_set_group_table_defaults(of1x_group_table_t *gt){
 	bitmap128_set(&gt->config.supported_actions, OF1X_AT_SET_FIELD_GRE_VERSION);
 	bitmap128_set(&gt->config.supported_actions, OF1X_AT_SET_FIELD_GRE_PROT_TYPE);
 	bitmap128_set(&gt->config.supported_actions, OF1X_AT_SET_FIELD_GRE_KEY);
-	//bitmap128_set(&gt->config.supported_actions, OF1X_AT_GROUP); //WE DON'T SUPPORT INDIRECT GROUP reference	
+	//bitmap128_set(&gt->config.supported_actions, OF1X_AT_GROUP); //WE DON'T SUPPORT INDIRECT GROUP reference
 	
 	bitmap128_set(&gt->config.supported_actions, OF1X_AT_OUTPUT);
 }
@@ -169,8 +169,15 @@ rofl_of1x_gm_result_t __of1x_validate_group(of1x_group_table_t* gt, of1x_action_
 	of1x_packet_action_t *it;
 	
 	for(it=actions->head; it; it=it->next){
-		if(it->type == OF1X_AT_GROUP)
+		if(it->type == OF1X_AT_GROUP){
+#if 1
+			if (!(gt->pipeline && gt->pipeline->sw && gt->pipeline->sw->sw_flavor == SW_FLAVOR_OFDPA)){
+				return ROFL_OF1X_GM_CHAIN;
+			}
+#else
 			return ROFL_OF1X_GM_CHAIN;
+#endif
+		}
 		if(it->type == OF1X_AT_OUTPUT && it->__field.u64 == OF1X_PORT_TABLE)
 			return ROFL_OF1X_GM_INVAL;
 	}
@@ -289,10 +296,15 @@ rofl_of1x_gm_result_t of1x_group_add(of1x_group_table_t *gt, of1x_group_type_t t
 	rofl_of1x_gm_result_t ret_val;
 	ROFL_PIPELINE_INFO("[groupmod-add(%p)] Starting operation at switch %s(%p), group id: %u\n", *buckets, gt->pipeline->sw->name, gt->pipeline->sw, id);
 
+	if ((gt->pipeline->ops.pre_group_add_hook) && (ret_val=gt->pipeline->ops.pre_group_add_hook(gt, type, id, buckets))!=ROFL_OF1X_GM_SUCCESS){
+		ROFL_PIPELINE_ERR("[groupmod-add(%p)] pipeline groupmod-add pre-check failed, group id: %u\n", *buckets, id);
+		return ret_val;
+	}
+
 	//serialize mgmt actions
 	platform_mutex_lock(gt->mutex);
 	
-	//check wether onither entry with this ID already exists
+	//check whether another entry with this ID already exists
 	if(__of1x_group_search(gt,id)!=NULL){
 		platform_mutex_unlock(gt->mutex);
 		ROFL_PIPELINE_INFO("[groupmod-add(%p)] FAILED validation. Group exists...\n", *buckets);
@@ -367,6 +379,12 @@ rofl_of1x_gm_result_t of1x_group_delete(of1x_pipeline_t *pipeline, of1x_group_ta
 	int i;
 	of1x_flow_entry_t* entry;
 	of1x_group_t *ge, *next;
+	rofl_of1x_gm_result_t ret_val;
+
+	if ((gt->pipeline->ops.pre_group_delete_hook) && (ret_val=gt->pipeline->ops.pre_group_delete_hook(pipeline, gt, id))!=ROFL_OF1X_GM_SUCCESS){
+		ROFL_PIPELINE_ERR("[groupmod-delete(%p)] pipeline groupmod-delete pre-check failed, group id: %u\n", id);
+		return ret_val;
+	}
 	
 	//serialize mgmt actions
 	platform_mutex_lock(gt->mutex);
@@ -427,6 +445,11 @@ rofl_of1x_gm_result_t of1x_group_delete(of1x_pipeline_t *pipeline, of1x_group_ta
  */
 rofl_of1x_gm_result_t of1x_group_modify(of1x_group_table_t *gt, of1x_group_type_t type, uint32_t id, of1x_bucket_list_t **buckets){
 	rofl_of1x_gm_result_t ret_val;
+
+	if ((gt->pipeline->ops.pre_group_modify_hook) && (ret_val=gt->pipeline->ops.pre_group_modify_hook(gt, type, id, buckets))!=ROFL_OF1X_GM_SUCCESS){
+		ROFL_PIPELINE_ERR("[groupmod-modify(%p)] pipeline groupmod-modify pre-check failed, group id: %u\n", id);
+		return ret_val;
+	}
 	
 	if((ret_val=__of1x_check_group_parameters(gt,type,id,*buckets))!=ROFL_OF1X_GM_SUCCESS)
 		return ret_val;

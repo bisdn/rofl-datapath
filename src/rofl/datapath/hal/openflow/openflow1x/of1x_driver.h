@@ -31,7 +31,8 @@ typedef enum hal_fm_result {
 	HAL_FM_TABLE_FULL_FAILURE,
 	HAL_FM_VALIDATION_FAILURE,
 	HAL_FM_INVALID_TABLE_ID_FAILURE,
-	HAL_FM_OVERLAP_FAILURE
+	HAL_FM_OVERLAP_FAILURE,
+	HAL_FM_BUILTIN
 }hal_fm_result_t;
 
 /**
@@ -76,6 +77,7 @@ hal_fm_result_t hal_fm_map_pipeline_retcode(rofl_of1x_fm_result_t code){
 		case ROFL_OF1X_FM_VALIDATION: return HAL_FM_VALIDATION_FAILURE;
 		case ROFL_OF1X_FM_INVALID_TABLE_ID: return HAL_FM_INVALID_TABLE_ID_FAILURE;
 		case ROFL_OF1X_FM_OVERLAP: return HAL_FM_OVERLAP_FAILURE;
+		case ROFL_OF1X_FM_BUILTIN: return HAL_FM_BUILTIN;
 		/*Do NOT add a default case*/
 	}
 
