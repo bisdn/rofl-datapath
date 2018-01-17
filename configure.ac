@@ -68,6 +68,7 @@ AC_CONFIG_FILES([
 	src/rofl/datapath/pipeline/openflow/Makefile
 	src/rofl/datapath/pipeline/openflow/openflow1x/Makefile
 	src/rofl/datapath/pipeline/openflow/openflow1x/pipeline/Makefile
+	src/rofl/datapath/pipeline/openflow/openflow1x/pipeline/flavors/Makefile
 	src/rofl/datapath/pipeline/openflow/openflow1x/pipeline/matching_algorithms/Makefile
 	src/rofl/datapath/pipeline/util/Makefile
 

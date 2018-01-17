@@ -19,7 +19,7 @@
 * Intializer and destructor
 */
 
-of1x_flow_entry_t* of1x_init_flow_entry(bool notify_removal){
+of1x_flow_entry_t* of1x_init_flow_entry(bool notify_removal, bool builtin){
 
 	of1x_flow_entry_t* entry = (of1x_flow_entry_t*)platform_malloc_shared(sizeof(of1x_flow_entry_t));
 	
@@ -46,6 +46,7 @@ of1x_flow_entry_t* of1x_init_flow_entry(bool notify_removal){
 
 	//Flags
 	entry->notify_removal = notify_removal;
+	entry->builtin = builtin;
 	
 	return entry;	
 
@@ -111,7 +112,6 @@ rofl_result_t of1x_add_match_to_entry(of1x_flow_entry_t* entry, of1x_match_t* ma
 }
 
 rofl_result_t __of1x_update_flow_entry(of1x_flow_entry_t* entry_to_update, of1x_flow_entry_t* mod, bool reset_counts){
-
 
 	// let the platform do the necessary updates
 	platform_of1x_modify_entry_hook(entry_to_update, mod, reset_counts);
@@ -295,7 +295,7 @@ void of1x_dump_flow_entry(of1x_flow_entry_t* entry, bool raw_nbo){
 	//Consolidate stats so that users of the pipeline can use counters
 	__of1x_stats_flow_consolidate(&entry->stats, &c);
 
-	ROFL_PIPELINE_INFO_NO_PREFIX("Entry (%p), prior. %u, cookie 0x%"PRIx64", pkts.matched %u. Matches:{",entry, entry->priority, entry->cookie, c.packet_count, entry->matches.num_elements);
+	ROFL_PIPELINE_INFO_NO_PREFIX("Entry (%p), built-in: %s, prior. %u, cookie 0x%"PRIx64", pkts.matched %u. Matches:{",entry, entry->builtin ? "yes" : "no", entry->priority, entry->cookie, c.packet_count, entry->matches.num_elements);
 	
 	//print matches(all)
 	__of1x_dump_matches(entry->matches.head, raw_nbo);

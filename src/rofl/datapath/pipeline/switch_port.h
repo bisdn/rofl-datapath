@@ -185,7 +185,10 @@ typedef struct switch_port{
 	//Queues
 	unsigned int max_queues; //This must be <= SWITCH_PORT_MAX_QUEUES
 	port_queue_t queues[SWITCH_PORT_MAX_QUEUES];
-		
+
+	//tunnel id
+	uint64_t tunnel_id;
+
 	/* 
 	* OF related stuff
 	*/
@@ -256,7 +259,7 @@ ROFL_BEGIN_DECLS
 * @brief Init a switch_port structure
 * @ingroup  mgmt
 */
-switch_port_t* switch_port_init(char* name, bool up, port_type_t type, port_state_t state);
+switch_port_t* switch_port_init(char* name, bool up, port_type_t type, port_state_t state, uint64_t tunnel_id);
 
 /**
 * @brief Destroy a switch_port structure

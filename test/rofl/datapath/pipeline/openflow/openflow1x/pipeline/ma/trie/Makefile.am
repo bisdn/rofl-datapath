@@ -23,6 +23,8 @@ SHARED_SRC= pipeline/physical_switch.c \
 	pipeline/openflow/openflow1x/pipeline/of1x_flow_entry.c \
 	pipeline/openflow/openflow1x/pipeline/of1x_flow_table.c \
 	pipeline/openflow/openflow1x/pipeline/of1x_pipeline.c \
+	pipeline/openflow/openflow1x/pipeline/flavors/of1x_pipeline_generic.c \
+	pipeline/openflow/openflow1x/pipeline/flavors/of1x_pipeline_ofdpa.c \
 	pipeline/openflow/openflow1x/pipeline/of1x_timers.c \
 	pipeline/openflow/openflow1x/pipeline/of1x_statistics.c \
 	pipeline/openflow/openflow1x/pipeline/of1x_group_table.c \

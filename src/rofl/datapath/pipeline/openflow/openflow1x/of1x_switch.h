@@ -30,7 +30,8 @@ typedef struct of1x_switch{
 	//General switch instance information
 	
 	/* This part is common and MUST be at the very beginning */ 
-	of_version_t of_ver; 
+	of_version_t of_ver;
+	sw_flavor_t sw_flavor;
 	uint64_t dpid;
 	char name[LOGICAL_SWITCH_MAX_LEN_NAME];
 	unsigned int max_ports;
@@ -70,7 +71,7 @@ ROFL_BEGIN_DECLS
 * @param ma_list An array with num_of_tables, with the matching algorithm that should
 * be used in each table (0..num_of_tables-1) 
 */
-of1x_switch_t* of1x_init_switch(const char* name, of_version_t version, uint64_t dpid, unsigned int num_of_tables, enum of1x_matching_algorithm_available* ma_list);
+of1x_switch_t* of1x_init_switch(const char* name, of_version_t version, sw_flavor_t flavor, uint64_t dpid, unsigned int num_of_tables, enum of1x_matching_algorithm_available* ma_list);
 
 /* Reconfigures the pipeline to behave as an OF specific version pipeline. Warning: this function may DELETE all the entries in the tables, timers and group entries of the switch */
 rofl_result_t __of1x_reconfigure_switch(of1x_switch_t* sw, of_version_t version);

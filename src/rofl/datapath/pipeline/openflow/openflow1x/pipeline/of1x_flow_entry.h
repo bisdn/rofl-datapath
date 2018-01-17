@@ -70,6 +70,9 @@ typedef void of1x_flow_entry_platform_state_t;
 */
 typedef struct of1x_flow_entry{
 	
+	//Entry is builtin, i.e., cannot be removed or overwritten by controller
+	bool builtin;
+
 	//Entry priority(lowest 16 bit is the OF priority)
 	//17th bit is only set to 1/0 for OF1.0 (is wildcarded or not) 
 	uint32_t priority;
@@ -122,7 +125,7 @@ ROFL_BEGIN_DECLS
 * @brief Create an empty flow entry 
 * @ingroup core_of1x 
 */
-of1x_flow_entry_t* of1x_init_flow_entry(bool notify_removal);
+of1x_flow_entry_t* of1x_init_flow_entry(bool notify_removal, bool builtin);
 
 //This should never be used from outside the library
 rofl_result_t __of1x_destroy_flow_entry_with_reason(of1x_flow_entry_t* entry, of1x_flow_remove_reason_t reason); 

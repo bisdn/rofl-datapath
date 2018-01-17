@@ -1,6 +1,6 @@
 MAINTAINERCLEANFILES = Makefile.in
 
-SUBDIRS = matching_algorithms
+SUBDIRS = matching_algorithms flavors
 
 noinst_LTLIBRARIES = librofl_pipeline_openflow1x_pipeline.la
 
@@ -22,7 +22,8 @@ librofl_pipeline_openflow1x_pipeline_la_HEADERS = of1x_action.h \
 	of1x_timers.h \
 	of1x_statistics.h\
 	of1x_statistics_pp.h\
-	of1x_utils.h
+	of1x_utils.h \
+	of1x_ofdpa_datatypes.h
 
 librofl_pipeline_openflow1x_pipeline_la_SOURCES = of1x_action.h \
 	of1x_flow_entry.h \
@@ -42,4 +43,6 @@ librofl_pipeline_openflow1x_pipeline_la_SOURCES = of1x_action.h \
 	of1x_timers.c \
 	of1x_statistics.c
 
-librofl_pipeline_openflow1x_pipeline_la_LIBADD = matching_algorithms/librofl_pipeline_openflow1x_pipeline_matching_algorithms.la
+librofl_pipeline_openflow1x_pipeline_la_LIBADD = \
+	matching_algorithms/librofl_pipeline_openflow1x_pipeline_matching_algorithms.la \
+	flavors/librofl_pipeline_openflow1x_pipeline_flavors.la

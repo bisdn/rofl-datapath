@@ -65,7 +65,7 @@ static inline void __of1x_init_packet_write_actions(of1x_write_actions_t* pkt_wr
 }
 
 //Update pkt write actions
-static inline void __of1x_update_packet_write_actions(of1x_write_actions_t* packet_write_actions, const of1x_write_actions_t* entry_write_actions){
+static inline void __of1x_update_packet_write_actions(of1x_write_actions_t* packet_write_actions, const of1x_write_actions_t* entry_write_actions, datapacket_t *pkt){
 	
 	unsigned int i,j;
 
@@ -75,6 +75,11 @@ static inline void __of1x_update_packet_write_actions(of1x_write_actions_t* pack
 		packet_write_actions->actions[j].__field = entry_write_actions->actions[j].__field;
 		packet_write_actions->actions[j].group = entry_write_actions->actions[j].group;
 		packet_write_actions->actions[j].type = entry_write_actions->actions[j].type;
+
+		//OFDPA ACTSET_OUTPUT: store egress portno from OUTPUT action
+		if(entry_write_actions->actions[j].type == OF1X_AT_OUTPUT){
+			pkt->__action_set_output_egress_portno = entry_write_actions->actions[j].__field.u32;
+		}
 		
 		if(!bitmap128_is_bit_set(&packet_write_actions->bitmap,j)){
 			packet_write_actions->num_of_actions++;
@@ -122,8 +127,10 @@ static inline void __of1x_process_group_actions(const unsigned int tid, const st
 				__of1x_process_apply_actions(tid, sw, table_id, pkt_replica, it_bk->actions, it_bk->actions->num_of_output_actions > 1, NULL); //No replica
 				__of1x_stats_bucket_update(tid, &it_bk->stats, platform_packet_get_size_bytes(pkt));
 				
-				if(it_bk->actions->num_of_output_actions > 1)
+				if(it_bk->actions->num_of_output_actions > 1){
+					ROFL_PIPELINE_DEBUG("Packet[%p] dropped. bucket num_of_output_actions=%u, which is > 1\n", pkt_replica, it_bk->actions->num_of_output_actions);
 					platform_packet_drop(pkt_replica);
+				}
 			}
 			break;
 		case OF1X_GROUP_TYPE_SELECT:
@@ -163,6 +170,11 @@ static inline void __of1x_process_packet_action(const unsigned int tid, const st
 
 		//POP
 		case OF1X_AT_POP_VLAN: 
+			//OFDPA OVID extension
+			if (platform_packet_has_vlan(pkt)){
+				uint16_t *vid = platform_packet_get_vlan_vid(pkt);
+				pkt->__ovid = *vid;
+			}
 			//Call platform
 			platform_packet_pop_vlan(pkt);
 			break;
@@ -573,6 +585,17 @@ static inline void __of1x_process_packet_action(const unsigned int tid, const st
 			platform_packet_push_gre(pkt, action->__field.u16);
 			break;
 
+		//OFDPA
+		case OF1X_AT_SET_FIELD_OFDPA_VRF:
+			pkt->__vrf = action->__field.u16;
+			break;
+		case OF1X_AT_SET_FIELD_OFDPA_OVID:
+			pkt->__ovid = action->__field.u16;
+			break;
+		case OF1X_AT_SET_FIELD_OFDPA_ALLOW_VLAN_TRANSLATION:
+			pkt->__allow_vlan_translation = action->__field.u8;
+			break;
+
 #else
 		case OF1X_AT_POP_PPPOE:
 		case OF1X_AT_PUSH_PPPOE:
@@ -603,6 +626,9 @@ static inline void __of1x_process_packet_action(const unsigned int tid, const st
 		case OF1X_AT_SET_FIELD_GRE_KEY:
 		case OF1X_AT_POP_GRE:
 		case OF1X_AT_PUSH_GRE:
+		case OF1X_AT_SET_FIELD_OFDPA_VRF:
+		case OF1X_AT_SET_FIELD_OFDPA_OVID:
+		case OF1X_AT_SET_FIELD_OFDPA_ALLOW_VLAN_TRANSLATION:
 			break;
 #endif
 		//PBB
@@ -622,7 +648,8 @@ static inline void __of1x_process_packet_action(const unsigned int tid, const st
 		//TUNNEL ID
 		case OF1X_AT_SET_FIELD_TUNNEL_ID:
 			//Call platform
-			platform_packet_set_tunnel_id(pkt, action->__field.u64);
+			pkt->__tunnel_id = action->__field.u64;
+			//platform_packet_set_tunnel_id(pkt, action->__field.u64);
 			break;
 
 		case OF1X_AT_GROUP:

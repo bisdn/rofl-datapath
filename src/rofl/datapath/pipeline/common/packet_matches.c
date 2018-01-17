@@ -29,8 +29,8 @@ void fill_packet_matches(datapacket_t *const pkt, packet_matches_t* m){
 	m->__phy_port_in = ( (ptr32=platform_packet_get_phy_port_in(pkt))==NULL ? 0 : *ptr32);
 	
 	//Associated metadata
-	m->__metadata = pkt->__metadata; 
- 
+	m->__metadata = pkt->__metadata;
+
 	//802
 	m->__eth_dst = ( (ptr64=platform_packet_get_eth_dst(pkt))==NULL ? 0 : *ptr64);
 	m->__eth_src = ( (ptr64=platform_packet_get_eth_src(pkt))==NULL ? 0 : *ptr64);
@@ -97,7 +97,7 @@ void fill_packet_matches(datapacket_t *const pkt, packet_matches_t* m){
 	m->__pbb_isid = ( (ptr32=platform_packet_get_pbb_isid(pkt))==NULL ? 0 : *ptr32);
 	
 	//Tunnel id
-	m->__tunnel_id = ( (ptr64=platform_packet_get_tunnel_id(pkt))==NULL ? 0 : *ptr64);
+	m->__tunnel_id = pkt->__tunnel_id;
 
 #ifdef ROFL_EXPERIMENTAL
 	/*	
@@ -134,6 +134,12 @@ void fill_packet_matches(datapacket_t *const pkt, packet_matches_t* m){
 	m->__gre_version = ( (ptr16=platform_packet_get_gre_version(pkt))==NULL ? 0 : *ptr16);
 	m->__gre_prot_type = ( (ptr16=platform_packet_get_gre_prot_type(pkt))==NULL ? 0 : *ptr16);
 	m->__gre_key = ( (ptr32=platform_packet_get_gre_key(pkt))==NULL ? 0 : *ptr32);
+
+	//OFDPA related extensions
+	m->__ofdpa_vrf = pkt->__vrf;
+	m->__ofdpa_ovid = pkt->__ovid;
+	m->__ofdpa_allow_vlan_translation = pkt->__allow_vlan_translation;
+	m->__ofdpa_action_set_output_egress_portno = pkt->__action_set_output_egress_portno;
 #endif
 }
 
@@ -159,7 +165,7 @@ void dump_packet_matches(datapacket_t *const pkt, bool raw_nbo){
 	//Metadata
 	if(m->__metadata)
 		ROFL_PIPELINE_INFO_NO_PREFIX("METADATA: 0x%" PRIx64 ", ",m->__metadata);
-	
+
 	//802	
 	if(m->__eth_src){
 		uint64_t tmp = m->__eth_src;
@@ -321,7 +327,7 @@ void dump_packet_matches(datapacket_t *const pkt, bool raw_nbo){
 		ROFL_PIPELINE_INFO_NO_PREFIX("PBB_ISID:0x%x,", OF1X_PBB_ISID_VALUE(COND_NTOHB32(raw_nbo,m->__pbb_isid)));
 	//Tunnel id
 	if(m->__tunnel_id)
-		ROFL_PIPELINE_INFO_NO_PREFIX("TUNNEL ID:0x%"PRIx64", ", COND_NTOHB64(raw_nbo,m->__tunnel_id));
+		ROFL_PIPELINE_INFO_NO_PREFIX("TUNNEL_ID: 0x%" PRIx64 ", ",m->__tunnel_id);
 
 #ifdef ROFL_EXPERIMENTAL
 	//PPPoE
@@ -375,6 +381,16 @@ void dump_packet_matches(datapacket_t *const pkt, bool raw_nbo){
 	if(m->__ip_proto == IP_PROTO_GRE){
 		ROFL_PIPELINE_INFO_NO_PREFIX("GRE_VERSION:0x%x, GRE_PROT_TYPE:0x%x, GRE_KEY:0x%x, ",COND_NTOHB16(raw_nbo, m->__gre_version), COND_NTOHB16(raw_nbo, m->__gre_prot_type), COND_NTOHB32(raw_nbo, m->__gre_key));
 	}
+
+	//OFDPA
+	if (m->__ofdpa_vrf)
+		ROFL_PIPELINE_INFO_NO_PREFIX("OFDPA_VRF:0x%x,", COND_NTOHB16(raw_nbo, m->__ofdpa_vrf));
+	if (m->__ofdpa_ovid)
+		ROFL_PIPELINE_INFO_NO_PREFIX("OFDPA_OVID:0x%x,", COND_NTOHB16(raw_nbo, m->__ofdpa_ovid));
+	if (m->__ofdpa_allow_vlan_translation)
+		ROFL_PIPELINE_INFO_NO_PREFIX("OFDPA_ALLOW_VLAN_TRANSLATION:%u,", m->__ofdpa_allow_vlan_translation);
+	if (m->__ofdpa_action_set_output_egress_portno)
+		ROFL_PIPELINE_INFO_NO_PREFIX("OFDPA_OVID:0x%x,", COND_NTOHB32(raw_nbo, m->__ofdpa_action_set_output_egress_portno));
 #endif
 	
 	ROFL_PIPELINE_INFO_NO_PREFIX("}\n");	

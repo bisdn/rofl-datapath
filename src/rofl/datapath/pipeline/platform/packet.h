@@ -273,22 +273,6 @@ void platform_packet_pop_mpls(datapacket_t* pkt, uint16_t ether_type);
 void platform_packet_push_mpls(datapacket_t* pkt, uint16_t ether_type);
 
 
-////////////////
-// Tunnel ID //
-//////////////
-/**
-* @ingroup platform_packet
-* Get Tunnel ID
-* @warning Return value comes in HBO endianness
-*/
-uint64_t* platform_packet_get_tunnel_id(datapacket_t *const pkt);
-/**
-* @ingroup platform_packet
-* Set Tunnel ID
-* @warning tunnel_id must be in HBO endianness
-*/
-void platform_packet_set_tunnel_id(datapacket_t*pkt, uint64_t tunnel_id);
-
 //////////
 // PBB //
 ////////

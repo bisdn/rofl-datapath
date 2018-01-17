@@ -13,10 +13,10 @@ int set_up(){
 	physical_switch_init();
 
 	//Create instances	
-	sw = of1x_init_switch("Test switch", OF_VERSION_12, 0x0101,4,ma_list);
-	sw10 = of1x_init_switch("Test switch10", OF_VERSION_10, 0x0101,4,ma_list);
-	sw12 = of1x_init_switch("Test switch12", OF_VERSION_12, 0x0101,4,ma_list);
-	sw13 = of1x_init_switch("Test switch13", OF_VERSION_13, 0x0101,4,ma_list);
+	sw = of1x_init_switch("Test switch", OF_VERSION_12, SW_FLAVOR_GENERIC, 0x0101,4,ma_list);
+	sw10 = of1x_init_switch("Test switch10", OF_VERSION_10, SW_FLAVOR_GENERIC, 0x0101,4,ma_list);
+	sw12 = of1x_init_switch("Test switch12", OF_VERSION_12, SW_FLAVOR_GENERIC, 0x0101,4,ma_list);
+	sw13 = of1x_init_switch("Test switch13", OF_VERSION_13, SW_FLAVOR_GENERIC, 0x0101,4,ma_list);
 	
 	if(!sw || !sw10 || !sw12 || !sw13)
 		return EXIT_FAILURE;
@@ -45,7 +45,7 @@ void test_purge(){
 
 	//Install a flow in each table
 	for(i=0;i<4;i++){
-		entry = of1x_init_flow_entry(false); 
+		entry = of1x_init_flow_entry(false, /*builtin=*/false);
 		CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_port_in_match(1)) == ROFL_SUCCESS);
 	
 		CU_ASSERT(entry != NULL);
@@ -70,7 +70,7 @@ void test_purge(){
 
 static void reset_sw(of_version_t version){
 	CU_ASSERT(__of1x_destroy_switch(sw) == ROFL_SUCCESS);
-	sw = of1x_init_switch("Test switch", version, 0x0101,4,ma_list);
+	sw = of1x_init_switch("Test switch", version, SW_FLAVOR_GENERIC, 0x0101,4,ma_list);
 	CU_ASSERT(sw != NULL);
 }
 

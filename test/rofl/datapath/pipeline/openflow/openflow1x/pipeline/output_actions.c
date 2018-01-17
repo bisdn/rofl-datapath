@@ -15,10 +15,10 @@ int oa_set_up(void){
 	physical_switch_init();	
 
 	enum of1x_matching_algorithm_available ma_list=of1x_loop_matching_algorithm;
-	sw = of1x_init_switch("Test switch", OF_VERSION_12, 0x0101,1,&ma_list);
+	sw = of1x_init_switch("Test switch", OF_VERSION_12, SW_FLAVOR_GENERIC, 0x0101,1,&ma_list);
 	fprintf(stderr,"<%s:%d>sw %p\n",__func__,__LINE__,sw);
 	
-	entry = of1x_init_flow_entry(false);
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	apply_actions = of1x_init_action_group(0);
 	write_actions = of1x_init_write_actions();
 	assert (sw && entry && write_actions && apply_actions); //NOTE CU_ASSERT(sw!=0);

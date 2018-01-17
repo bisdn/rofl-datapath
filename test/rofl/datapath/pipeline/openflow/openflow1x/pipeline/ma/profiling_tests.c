@@ -27,20 +27,20 @@ int set_up(){
 		of1x_loop_matching_algorithm, of1x_loop_matching_algorithm};
 
 		//Create instance
-		sw = of1x_init_switch("Test switch", OF_VERSION_12, 0x0101,4,ma_list);
+		sw = of1x_init_switch("Test switch", OF_VERSION_12, SW_FLAVOR_GENERIC, 0x0101,4,ma_list);
 	}else{
 		enum of1x_matching_algorithm_available ma_list[4]={of1x_trie_matching_algorithm, of1x_trie_matching_algorithm,
 		of1x_trie_matching_algorithm, of1x_trie_matching_algorithm};
 
 		//Create instance
-		sw = of1x_init_switch("Test switch", OF_VERSION_12, 0x0101,4,ma_list);
+		sw = of1x_init_switch("Test switch", OF_VERSION_12, SW_FLAVOR_GENERIC, 0x0101,4,ma_list);
 	}
 
 	if(!sw)
 		return EXIT_FAILURE;
 
 	//Set PORT_IN_MATCH
-	entry = of1x_init_flow_entry(false);
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	of1x_add_match_to_entry(entry,of1x_init_port_in_match(port_in));
 	of1x_add_flow_entry_table(&sw->pipeline, 0, &entry, false,false);
 
@@ -170,7 +170,7 @@ void __profile_match_n_entries(int num_entries){
 
 	//First fill in all the entries
 	for(i=0, accumulated_time=0;i<num_entries; i++){
-		entry = of1x_init_flow_entry(false);
+		entry = of1x_init_flow_entry(false, /*builtin=*/false);
 		of1x_add_match_to_entry(entry,of1x_init_port_in_match(i));
 		CU_ASSERT(of1x_add_flow_entry_table(&sw->pipeline, 0, &entry, false,false) == ROFL_OF1X_FM_SUCCESS);
 	}
@@ -207,7 +207,7 @@ void __profile_match_n_entries(int num_entries){
 
 void clean_pipeline(){
 
-	of1x_flow_entry_t* deleting_entry = of1x_init_flow_entry(false);
+	of1x_flow_entry_t* deleting_entry = of1x_init_flow_entry(false, /*builtin=*/false);
 
 	CU_ASSERT(deleting_entry != NULL);
 

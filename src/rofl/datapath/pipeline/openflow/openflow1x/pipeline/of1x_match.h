@@ -138,6 +138,12 @@ typedef enum{
 	OF1X_MATCH_GRE_PROT_TYPE,	/* GRE protocol types */
 	OF1X_MATCH_GRE_KEY,			/* GRE key */
 
+	/* OFDPA related extensions */
+	OF1X_MATCH_OFDPA_VRF,       /* OFDPA VRF */
+	OF1X_MATCH_OFDPA_OVID,      /* OFDPA OVID */
+	OF1X_MATCH_OFDPA_ALLOW_VLAN_TRANSLATION, /* OFDPA Allow VLAN translation */
+	OF1X_MATCH_OFDPA_ACTSET_OUTPUT, /* OFDPA ACTSET OUTPUT */
+
 	/* max value */
 	OF1X_MATCH_MAX,
 }of1x_match_type_t;
@@ -637,6 +643,32 @@ of1x_match_t* of1x_init_pbb_isid_match(uint32_t value, uint32_t mask);
  */
 of1x_match_t* of1x_init_tunnel_id_match(uint64_t value, uint64_t mask);
 
+//OFDPA
+/**
+* @brief Create a OFDPA VRF match
+* @ingroup core_of1x
+* @warning parameter value must be in Host Byte Order
+*/
+of1x_match_t* of1x_init_ofdpa_vrf_match(uint16_t value, uint16_t mask);
+/**
+* @brief Create a OFDPA OVID match
+* @ingroup core_of1x
+* @warning parameter value must be in Host Byte Order
+*/
+of1x_match_t* of1x_init_ofdpa_ovid_match(uint16_t value);
+/**
+* @brief Create a OFDPA Allow VLAN translation match
+* @ingroup core_of1x
+* @warning parameter value must be in Host Byte Order
+*/
+of1x_match_t* of1x_init_ofdpa_allow_vlan_translation_match(uint8_t value);
+/**
+* @brief Create a OFDPA ACTSET OUTPUT match
+* @ingroup core_of1x
+* @warning parameter value must be in Host Byte Order
+*/
+of1x_match_t* of1x_init_ofdpa_actset_output_match(uint32_t value);
+
 //TODO
 //Add more here...
 
@@ -680,6 +712,7 @@ uint8_t __of1x_get_match_val8(const of1x_match_t* match, bool get_mask, bool raw
 		case OF1X_MATCH_PPPOE_TYPE:
 		case OF1X_MATCH_PPPOE_CODE:
 		case OF1X_MATCH_GTP_MSG_TYPE:
+		case OF1X_MATCH_OFDPA_ALLOW_VLAN_TRANSLATION:
 			return wrap->u8;
 		case OF1X_MATCH_IP_DSCP:
 			return OF1X_IP_DSCP_VALUE(wrap->u8);
@@ -735,6 +768,8 @@ uint16_t __of1x_get_match_val16(const of1x_match_t* match, bool get_mask, bool r
 		case OF1X_MATCH_IPV6_EXTHDR:
 		case OF1X_MATCH_GRE_VERSION:
 		case OF1X_MATCH_GRE_PROT_TYPE:
+		case OF1X_MATCH_OFDPA_VRF:
+		case OF1X_MATCH_OFDPA_OVID:
 			return NTOHB16(wrap->u16);
 		default:{
 			//ROFL_PIPELINE_ERR("%s: Match type %u not found\n",__func__,match->type);
@@ -783,6 +818,7 @@ uint32_t __of1x_get_match_val32(const of1x_match_t* match, bool get_mask, bool r
 		case OF1X_MATCH_IPV4_DST:
 		case OF1X_MATCH_GTP_TEID:
 		case OF1X_MATCH_GRE_KEY:
+		case OF1X_MATCH_OFDPA_ACTSET_OUTPUT:
 			return NTOHB32(wrap->u32);
 		case OF1X_MATCH_IPV6_FLABEL:
 			return OF1X_IP6_FLABEL_VALUE(NTOHB32(wrap->u32));

@@ -33,7 +33,7 @@ void __of10_set_table_defaults(of1x_flow_table_t* table){
 	//XXX: Original of10 was not not handling more than one table, why does
 	//the spec now have it? 
 	table->default_action = OF1X_TABLE_MISS_CONTROLLER;
-	
+
 	/* Setting up basic characteristics of the table */
 	table->config.table_miss_config = 0x0; //No meaning in OF1.0
 
@@ -116,7 +116,6 @@ void __of10_set_table_defaults(of1x_flow_table_t* table){
 
 	//Instructions
 	table->config.instructions = 0x0; //Not supported in OF10 
-
 }
 
 void __of12_set_table_defaults(of1x_flow_table_t* table){
@@ -322,7 +321,7 @@ void __of13_set_table_defaults(of1x_flow_table_t* table){
 
 
 /* Initalizer. Table struct has been allocated by pipeline initializer. */
-rofl_result_t __of1x_init_table(struct of1x_pipeline* pipeline, of1x_flow_table_t* table, const unsigned int table_index, const enum of1x_matching_algorithm_available algorithm){
+rofl_result_t __of1x_init_table(struct of1x_pipeline* pipeline, of1x_flow_table_t* table, const unsigned int table_number, const unsigned int table_index, const unsigned int table_index_next, const bitmap256_t goto_tables, const enum of1x_matching_algorithm_available algorithm){
 
 	//Safety checks
 	if( unlikely(pipeline==NULL) || unlikely(table==NULL) )
@@ -341,10 +340,13 @@ rofl_result_t __of1x_init_table(struct of1x_pipeline* pipeline, of1x_flow_table_
 #endif
 	
 	table->pipeline = pipeline;
-	table->number = table_index;
+	table->table_index = table_index;
+	table->table_index_next = table_index_next;
+	table->number = table_number;
 	table->entries = NULL;
 	table->num_of_entries = 0;
 	table->max_entries = OF1X_MAX_NUMBER_OF_TABLE_ENTRIES;
+	table->config.goto_tables = goto_tables;
 
 	//Set name
 	snprintf(table->name, OF1X_MAX_TABLE_NAME_LEN, "table%u", table_index);
@@ -439,10 +441,11 @@ rofl_result_t __of1x_destroy_table(of1x_flow_table_t* table){
 * Specific matchings may point them to their own routines, but they MUST always call
 * of1x_[whatever]_flow_entry_table_imp in order to update the main tables
 */
-rofl_of1x_fm_result_t __of1x_add_flow_entry_table(of1x_pipeline_t *const pipeline, const unsigned int table_id, of1x_flow_entry_t **const entry, bool check_overlap, bool reset_counts, bool check_cookie){
+rofl_of1x_fm_result_t __of1x_add_flow_entry_table(of1x_pipeline_t *const pipeline, const unsigned int table_id, of1x_flow_entry_t **entry, bool check_overlap, bool reset_counts, bool check_cookie){
 
 	rofl_of1x_fm_result_t result;
 	of1x_flow_table_t* table;
+	unsigned int i;
 
 #ifdef DEBUG
 	//Dump entry	
@@ -450,19 +453,31 @@ rofl_of1x_fm_result_t __of1x_add_flow_entry_table(of1x_pipeline_t *const pipelin
 	ROFL_PIPELINE_INFO(""); 
 	of1x_dump_flow_entry(*entry, false);
 #endif
+
+	table = NULL;
+	for (i = 0; i < pipeline->num_of_tables; ++i) {
+		if (pipeline->tables[i].number == table_id) {
+			table = &pipeline->tables[i];
+			break;
+		}
+	}
 	//Verify table_id
-	if(unlikely(table_id >= pipeline->num_of_tables)){
-		ROFL_PIPELINE_ERR("[flowmod-add(%p)] ERROR: invalid table id %u > switch max table id: %u\n", *entry, table_id, pipeline->num_of_tables-1);
+	if(unlikely(table == NULL)){
+		ROFL_PIPELINE_ERR("[flowmod-add(%p)] ERROR: invalid table id %u, table not found\n", *entry, table_id);
 		return ROFL_OF1X_FM_INVALID_TABLE_ID;
 	}
 
-	table = &pipeline->tables[table_id];
+	//Call pipeline for final pre-check
+	if ((pipeline->ops.pre_flow_add_hook) && (result=pipeline->ops.pre_flow_add_hook(pipeline, table, *entry, check_overlap, reset_counts))!=ROFL_OF1X_FM_SUCCESS){
+		ROFL_PIPELINE_ERR("[flowmod-add(%p)] pipeline flowmod-add pre-check failed\n", *entry);
+		return result;
+	}
 
 	//Take rd lock over the grouptable (avoid deletion of groups while flow entry insertion)
 	platform_rwlock_rdlock(pipeline->groups->rwlock);
 
 	//Verify entry
-	if(unlikely(__of1x_validate_flow_entry(*entry, pipeline, table_id) != ROFL_SUCCESS)){
+	if(unlikely(__of1x_validate_flow_entry(*entry, pipeline, table->table_index/*table_id*/) != ROFL_SUCCESS)){
 		//Release rdlock
 		platform_rwlock_rdunlock(pipeline->groups->rwlock);
 		ROFL_PIPELINE_INFO("[flowmod-add(%p)] FAILED validation. Ignoring...\n", *entry);
@@ -497,9 +512,10 @@ rofl_of1x_fm_result_t __of1x_add_flow_entry_table(of1x_pipeline_t *const pipelin
 }
 
 
-rofl_of1x_fm_result_t of1x_modify_flow_entry_table(of1x_pipeline_t *const pipeline, const unsigned int table_id, of1x_flow_entry_t **const entry, const enum of1x_flow_removal_strictness strict, bool reset_counts){
+rofl_of1x_fm_result_t of1x_modify_flow_entry_table(of1x_pipeline_t *const pipeline, const unsigned int table_id, of1x_flow_entry_t **entry, const enum of1x_flow_removal_strictness strict, bool reset_counts){
 	rofl_of1x_fm_result_t result;
 	of1x_flow_table_t* table;
+	unsigned int i;
 
 #ifdef DEBUG
 	//Dump entry	
@@ -508,19 +524,30 @@ rofl_of1x_fm_result_t of1x_modify_flow_entry_table(of1x_pipeline_t *const pipeli
 	of1x_dump_flow_entry(*entry, false);
 #endif
 
+	table = NULL;
+	for (i = 0; i < pipeline->num_of_tables; ++i) {
+		if (pipeline->tables[i].number == table_id) {
+			table = &pipeline->tables[i];
+			break;
+		}
+	}
 	//Verify table_id
-	if(table_id >= pipeline->num_of_tables){
-		ROFL_PIPELINE_ERR("[flowmod-modify(%p)] ERROR: invalid table id %u > switch max table id: %u\n", *entry, table_id, pipeline->num_of_tables-1);
+	if(unlikely(table == NULL)){
+		ROFL_PIPELINE_ERR("[flowmod-modify(%p)] ERROR: invalid table id %u, table not found\n", *entry, table_id);
 		return ROFL_OF1X_FM_INVALID_TABLE_ID;
 	}
 
-	table = &pipeline->tables[table_id];
+	//Call pipeline for final pre-check
+	if ((pipeline->ops.pre_flow_modify_hook) && (result=pipeline->ops.pre_flow_modify_hook(pipeline, table, *entry, strict, reset_counts))!=ROFL_OF1X_FM_SUCCESS){
+		ROFL_PIPELINE_ERR("[flowmod-modify(%p)] pipeline flowmod-modify pre-check failed\n", *entry);
+		return result;
+	}
 
 	//Take rd lock over the grouptable (avoid deletion of groups while flow entry insertion)
 	platform_rwlock_rdlock(pipeline->groups->rwlock);
 
 	//Verify entry
-	if(__of1x_validate_flow_entry(*entry, pipeline, table_id) != ROFL_SUCCESS){
+	if(__of1x_validate_flow_entry(*entry, pipeline, table->table_index/*table_id*/) != ROFL_SUCCESS){
 		//Release rdlock
 		platform_rwlock_rdunlock(pipeline->groups->rwlock);
 		ROFL_PIPELINE_INFO("[flowmod-modify(%p)] FAILED validation. Ignoring...\n", *entry);
@@ -554,6 +581,7 @@ rofl_of1x_fm_result_t of1x_remove_flow_entry_table(of1x_pipeline_t *const pipeli
 	
 	of1x_flow_table_t* table;
 	rofl_of1x_fm_result_t result;
+	unsigned int i;
 
 #ifdef DEBUG
 	//Dump entry	
@@ -574,20 +602,30 @@ rofl_of1x_fm_result_t of1x_remove_flow_entry_table(of1x_pipeline_t *const pipeli
 	of1x_dump_flow_entry(entry, false);
 #endif
 
+	table = NULL;
+	for (i = 0; i < pipeline->num_of_tables; ++i) {
+		if (pipeline->tables[i].number == table_id) {
+			table = &pipeline->tables[i];
+			break;
+		}
+	}
 	//Verify table_id
-	if(table_id >= pipeline->num_of_tables){
-		ROFL_PIPELINE_ERR("[flowmod-remove(%p)] ERROR: invalid table id %u > switch max table id: %u\n", entry, table_id, pipeline->num_of_tables-1);
+	if(unlikely(table == NULL)){
+		ROFL_PIPELINE_ERR("[flowmod-remove(%p)] ERROR: invalid table id %u, table not found\n", *entry, table_id);
 		return ROFL_OF1X_FM_INVALID_TABLE_ID;
 	}
 
+	//Call pipeline for final pre-check
+	if ((pipeline->ops.pre_flow_delete_hook) && (result=pipeline->ops.pre_flow_delete_hook(pipeline, table, entry, strict, out_port, out_group))!=ROFL_OF1X_FM_SUCCESS){
+		ROFL_PIPELINE_ERR("[flowmod-remove(%p)] pipeline flowmod-delete pre-check failed\n", entry);
+		return result;
+	}
+
 	//Verify entry
-	if(__of1x_validate_flow_entry(entry, pipeline, table_id) != ROFL_SUCCESS){
+	if(__of1x_validate_flow_entry(entry, pipeline, table->table_index/*table_id*/) != ROFL_SUCCESS){
 		ROFL_PIPELINE_INFO("[flowmod-remove(%p)] FAILED validation. Ignoring...\n", entry);
 		return ROFL_OF1X_FM_VALIDATION;
 	}
-
-	//Recover table pointer
-	table = &pipeline->tables[table_id];
 	
 	result = of1x_matching_algorithms[table->matching_algorithm].remove_flow_entry_hook(table, entry, NULL, strict,  out_port, out_group, OF1X_FLOW_REMOVE_DELETE, MUTEX_NOT_ACQUIRED);
 	
@@ -604,13 +642,19 @@ rofl_of1x_fm_result_t of1x_remove_flow_entry_table(of1x_pipeline_t *const pipeli
 //This API call should NOT be called from outside pipeline library
 rofl_of1x_fm_result_t __of1x_remove_specific_flow_entry_table(of1x_pipeline_t *const pipeline, const unsigned int table_id, of1x_flow_entry_t *const specific_entry, of1x_flow_remove_reason_t reason, of1x_mutex_acquisition_required_t mutex_acquired){
 	of1x_flow_table_t* table;
+	unsigned int i;
 
+	table = NULL;
+	for (i = 0; i < pipeline->num_of_tables; ++i) {
+		if (pipeline->tables[i].number == table_id) {
+			table = &pipeline->tables[i];
+			break;
+		}
+	}
 	//Verify table_id
-	if(table_id >= pipeline->num_of_tables)
+	if(unlikely(table == NULL)){
 		return ROFL_OF1X_FM_FAILURE;
-
-	//Recover table pointer
-	table = &pipeline->tables[table_id];
+	}
 
 	return of1x_matching_algorithms[table->matching_algorithm].remove_flow_entry_hook(table, NULL, specific_entry, STRICT, OF1X_PORT_ANY, OF1X_GROUP_ANY, reason, mutex_acquired);
 }
@@ -632,7 +676,7 @@ void of1x_dump_table(of1x_flow_table_t* table, bool raw_nbo){
 	__of1x_stats_table_consolidate(&table->stats, &c);
 
 	ROFL_PIPELINE_INFO("\n"); //This is done in purpose 
-	ROFL_PIPELINE_INFO("Dumping table # %u (%p). Default action: %s, num. of entries: %d, ma: %u statistics {looked up: %u, matched: %u}\n", table->number, table, __of1x_flow_table_miss_config_str[table->default_action],table->num_of_entries, table->matching_algorithm,  c.lookup_count, c.matched_count);
+	ROFL_PIPELINE_INFO("Dumping table # %u (%p). Default action: %s, table-id: %u, next table-id: %u, num. of entries: %d, ma: %u statistics {looked up: %u, matched: %u}\n", table->number, table, __of1x_flow_table_miss_config_str[table->default_action], table->table_index, table->table_index_next, table->num_of_entries, table->matching_algorithm,  c.lookup_count, c.matched_count);
 
 	//Take rd lock over the grouptable (avoid deletion of groups while flow entry insertion)
 	platform_rwlock_rdlock(table->rwlock);

@@ -8,7 +8,7 @@
 /*
 * Inits a port structure including statistics 
 */
-switch_port_t* switch_port_init(char* name, bool up, port_type_t type, port_state_t state){
+switch_port_t* switch_port_init(char* name, bool up, port_type_t type, port_state_t state, uint64_t tunnel_id){
 
 	switch_port_t* port;
 
@@ -43,6 +43,7 @@ switch_port_t* switch_port_init(char* name, bool up, port_type_t type, port_stat
 	port->type = type;
 	port->up = up;
 	port->state = state;
+	port->tunnel_id = tunnel_id;
 
 	//Copy name	
 	strncpy(port->name, name, SWITCH_PORT_MAX_LEN_NAME);

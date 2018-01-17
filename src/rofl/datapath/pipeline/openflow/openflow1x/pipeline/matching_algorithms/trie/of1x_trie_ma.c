@@ -1361,8 +1361,7 @@ void of1x_dump_trie(struct of1x_flow_table *const table, bool raw_nbo){
 	__of1x_stats_table_consolidate(&table->stats, &c);
 
 	ROFL_PIPELINE_INFO("[trie]\n");
-	ROFL_PIPELINE_INFO("[trie] Dumping table # %u (%p). Default action: %s, num. of entries: %d, ma: %u statistics {looked up: %u, matched: %u}\n", table->number, table, __of1x_flow_table_miss_config_str[table->default_action],table->num_of_entries, table->matching_algorithm,  c.lookup_count, c.matched_count);
-
+	ROFL_PIPELINE_INFO("[trie] Dumping table # %u (%p). Default action: %s, table-id: %u, next table-id: %u, num. of entries: %d, ma: %u statistics {looked up: %u, matched: %u}\n", table->number, table, __of1x_flow_table_miss_config_str[table->default_action], table->table_index, table->table_index_next, table->num_of_entries, table->matching_algorithm,  c.lookup_count, c.matched_count);
 	ROFL_PIPELINE_INFO("[trie]\n");
 	ROFL_PIPELINE_INFO("[trie] No matches:\n");
 

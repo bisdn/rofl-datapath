@@ -166,8 +166,12 @@ rofl_of1x_fm_result_t of1x_add_flow_entry_table_imp(of1x_flow_table_t *const tab
 		existing = of1x_flow_table_loop_check_identical(table->entries, entry, OF1X_PORT_ANY, OF1X_GROUP_ANY, check_cookie); //According to spec do NOT check cookie
 
 	if(existing){
+		if (existing->builtin){
+			ROFL_PIPELINE_DEBUG("[flowmod-add(%p)] Builtin entry(%p) is blocking entry (%p)\n", entry, existing, entry);
+			return ROFL_OF1X_FM_BUILTIN;
+		}
 		ROFL_PIPELINE_DEBUG("[flowmod-add(%p)] Existing entry(%p) will be replaced by (%p)\n", entry, existing, entry);
-		
+
 		//There was already an entry. Update it..
 		if(!reset_counts){
 			ROFL_PIPELINE_DEBUG("[flowmod-add(%p)] Getting counters from (%p)\n", entry, existing);
@@ -362,7 +366,13 @@ static inline rofl_of1x_fm_result_t of1x_remove_flow_entry_table_imp(of1x_flow_t
 
 	if( unlikely( (entry&&specific_entry) ) || unlikely( (!entry && !specific_entry) ) )
 		return ROFL_OF1X_FM_FAILURE;
- 
+
+	//Skip builtin flow entries
+	if(specific_entry && specific_entry->builtin){
+		ROFL_PIPELINE_DEBUG("[flowmod-remove(%p)] Builtin entry(%p) not removing\n", specific_entry, entry);
+		return ROFL_OF1X_FM_SUCCESS;
+	}
+
 	if(entry)
 		return of1x_remove_flow_entry_table_non_specific_imp(table, entry, strict, out_port, out_group, reason, ma_hook_ptr);
 	else
@@ -403,6 +413,12 @@ rofl_of1x_fm_result_t __of1x_modify_flow_entry_loop(of1x_flow_table_t *const tab
 			//Strict make sure they are equal
 			if( __of1x_flow_entry_check_equal(it, entry, OF1X_PORT_ANY, OF1X_GROUP_ANY, true) ){
 
+				//Skip builtin flow entries
+				if(entry->builtin){
+					ROFL_PIPELINE_DEBUG("[flowmod-modify(%p)] Builtin entry(%p) not updating with entry (%p)\n", entry, it, entry);
+					break;
+				}
+
 				//Modify hook	
 				if(ma_modify_hook_ptr)
 					(*ma_modify_hook_ptr)(entry);
@@ -419,7 +435,13 @@ rofl_of1x_fm_result_t __of1x_modify_flow_entry_loop(of1x_flow_table_t *const tab
 			}
 		}else{
 			if( __of1x_flow_entry_check_contained(it, entry, strict, true, OF1X_PORT_ANY, OF1X_GROUP_ANY,false) ){
-	
+
+				//Skip builtin flow entries
+				if(entry->builtin){
+					ROFL_PIPELINE_DEBUG("[flowmod-modify(%p)] Builtin entry(%p) not updating with entry (%p)\n", entry, it, entry);
+					break;
+				}
+
 				//Modify hook	
 				if(ma_modify_hook_ptr)
 					(*ma_modify_hook_ptr)(entry);

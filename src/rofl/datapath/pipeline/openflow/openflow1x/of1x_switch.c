@@ -9,7 +9,7 @@
 #include "of1x_async_events_hooks.h"
 
 /* Initializer and destructor */
-of1x_switch_t* of1x_init_switch(const char* name, of_version_t version, uint64_t dpid, unsigned int num_of_tables, enum of1x_matching_algorithm_available* list){
+of1x_switch_t* of1x_init_switch(const char* name, of_version_t version, sw_flavor_t flavor, uint64_t dpid, unsigned int num_of_tables, enum of1x_matching_algorithm_available* ma_list){
 
 	of1x_switch_t* sw;
 	sw = (of1x_switch_t*)platform_malloc_shared(sizeof(of1x_switch_t));
@@ -18,6 +18,7 @@ of1x_switch_t* of1x_init_switch(const char* name, of_version_t version, uint64_t
 
 	//Filling in values
 	sw->of_ver = version;
+	sw->sw_flavor = flavor;
 	sw->dpid = dpid;
 	strncpy(sw->name,name,LOGICAL_SWITCH_MAX_LEN_NAME);
 
@@ -36,7 +37,7 @@ of1x_switch_t* of1x_init_switch(const char* name, of_version_t version, uint64_t
 	}
 	
 	//Setup pipeline	
-	if(__of1x_init_pipeline(sw, num_of_tables, list) != ROFL_SUCCESS){
+	if(__of1x_init_pipeline(sw, num_of_tables, ma_list) != ROFL_SUCCESS){
 		platform_free_shared(sw);
 		return NULL;
 	}
@@ -248,6 +249,7 @@ void of1x_dump_switch(of1x_switch_t* sw, bool nbo){
 	ROFL_PIPELINE_INFO("OpenFlow switch instance (%p)\n",sw);
 	ROFL_PIPELINE_INFO("========================\n");
 	ROFL_PIPELINE_INFO("Name: %s\n",sw->name);
+	ROFL_PIPELINE_INFO("Switch flavor: %s\n", sw_flavor_str[sw->sw_flavor]);
 	ROFL_PIPELINE_INFO("OpenFlow version: %s\n", of_version_str[sw->of_ver]);
 	ROFL_PIPELINE_INFO("OpenFlow datapathid: 0x%" PRIx64 "\n",sw->dpid);
 }

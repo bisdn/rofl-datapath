@@ -17,7 +17,7 @@ int ipv6_set_up(void){
 	of1x_loop_matching_algorithm, of1x_loop_matching_algorithm};
 
 	//Create instance	
-	sw = of1x_init_switch("Test switch", OF_VERSION_13, 0x0101, 4, ma_list);
+	sw = of1x_init_switch("Test switch", OF_VERSION_13, SW_FLAVOR_GENERIC, 0x0101, 4, ma_list);
 	
 	if(!sw)
 		return EXIT_FAILURE;
@@ -86,7 +86,7 @@ void ipv6_install_flow_mod(void){
 	uint128__t mask;  UINT128__T_HI(mask) = 0xffffffffffffffff; UINT128__T_LO(mask) = 0xffffffffffff0000;
 
 	//Create a simple flow_mod
-	of1x_flow_entry_t* entry = of1x_init_flow_entry(false); 
+	of1x_flow_entry_t* entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	CU_ASSERT(entry != NULL);	
 	entry->cookie_mask = 0x1;
 	
@@ -101,7 +101,7 @@ void ipv6_install_flow_mod(void){
 	CU_ASSERT(sw->pipeline.tables[0].num_of_entries == 1);
 	
 	//New entry	
-	entry = of1x_init_flow_entry(false); 
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	entry->cookie_mask = 0x1;
 	//add IPv6 match
 	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_ip6_src_match(value,mask)) == ROFL_SUCCESS);
@@ -122,7 +122,7 @@ void ipv6_install_flow_mod_complete(void){
 	uint64_t value64 = 0xffffffffffff1234, mask64 = 0xffffffffffff0000;
 	
 	//Create a simple flow_mod
-	of1x_flow_entry_t* entry = of1x_init_flow_entry(false); 
+	of1x_flow_entry_t* entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	
 	CU_ASSERT(entry != NULL);	
 	
@@ -145,7 +145,7 @@ void ipv6_install_flow_mod_complete(void){
 	CU_ASSERT(sw->pipeline.tables[0].num_of_entries == 1);
 	
 	//New entry	
-	entry = of1x_init_flow_entry(false); 
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	entry->cookie_mask = 0x1;
 	//add IPv6 match
 	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_ip6_src_match(value128,mask128)) == ROFL_SUCCESS);
@@ -171,7 +171,7 @@ void icmpv6_install_flow_mod_complete(void){
 	uint64_t value64 = 0xffffffffffff1234;
 	
 	//Create a simple flow_mod
-	of1x_flow_entry_t* entry = of1x_init_flow_entry(false); 
+	of1x_flow_entry_t* entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	
 	CU_ASSERT(entry != NULL);	
 	
@@ -189,7 +189,7 @@ void icmpv6_install_flow_mod_complete(void){
 	CU_ASSERT(sw->pipeline.tables[0].num_of_entries == 1);
 	
 	//New entry	
-	entry = of1x_init_flow_entry(false); 
+	entry = of1x_init_flow_entry(false, /*builtin=*/false);
 	
 	//add IPv6 match
 	CU_ASSERT(of1x_add_match_to_entry(entry,of1x_init_icmpv6_type_match(value64)) == ROFL_SUCCESS);
